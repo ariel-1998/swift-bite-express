@@ -1,6 +1,7 @@
-// Extend the SessionData interface with the user property
-export declare module "express-session" {
-  interface SessionData {
-    user?: number; // Adjust the type according to your needs
+import { User } from "./src/models/User";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: User; // Assuming User is the type you want
   }
 }

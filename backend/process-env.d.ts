@@ -8,6 +8,8 @@ export declare global {
       DB_PASSWORD: string;
       DB_NAME: string;
       COOKIE_SECRET: string;
+      GOOGLE_CLIENT_ID: string;
+      GOOGLE_CLIENT_SECRET: string;
       // ENV: "test" | "dev" | "prod";
     }
   }

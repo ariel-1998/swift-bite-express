@@ -8,6 +8,7 @@ export const sessionOptions: SessionOptions = {
   saveUninitialized: false,
   rolling: true,
   name: "session_id",
+  // store: new SQLiteStore({ db: 'sessions.db', dir: './var/db' })
   cookie: {
     httpOnly: true,
     sameSite: false,

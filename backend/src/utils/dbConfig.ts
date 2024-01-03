@@ -9,6 +9,13 @@ const config: PoolOptions = {
 
 export const pool = mysql.createPool(config);
 
-export function execute<T>(query: string, params?: string[]) {
+type MixedArray = (string | number | null)[];
+
+export function execute<T>(query: string, params?: MixedArray) {
   return pool.execute<T & RowDataPacket[]>(query, params);
 }
+
+export const SQL_TABLES = {
+  authProvider: "auth-provider",
+  users: "users",
+};
