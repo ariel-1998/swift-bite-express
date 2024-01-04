@@ -16,6 +16,10 @@ export function execute<T>(query: string, params?: MixedArray) {
 }
 
 export const SQL_TABLES = {
-  authProvider: "auth-provider",
+  authProvider: "auth_provider",
   users: "users",
-};
+  addresses: "addresses",
+  menuItems: "menu_items",
+  restaurants: "restaurants",
+  restaurantsUsersAddresses: "restaurant_owner_address",
+} as const;

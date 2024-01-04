@@ -1,36 +1,38 @@
-import { Profile } from "passport";
 import { AuthProvider } from "../models/AuthProvider";
 import { execute, SQL_TABLES } from "./dbConfig";
 import { ResultSetHeader } from "mysql2";
-import { User } from "../models/User";
+import { IsOwner, User } from "../models/User";
+import { Profile } from "passport-google-oauth20";
 
 // check if providerUserId exsit in auth-provider db (if user was saved before)
-const queryProviderData = async (profile: Profile) => {
+const queryProviderData = async (
+  profile: Profile
+): Promise<AuthProvider | null> => {
   const query = `SELECT * FROM ${SQL_TABLES.authProvider} WHERE provider = ? AND providerUserId = ?`;
-  const providerData = await execute<AuthProvider>(query, [
+  const [providerData] = await execute<AuthProvider[]>(query, [
     profile.provider,
     profile.id,
   ]);
-  return providerData;
+  return providerData[0];
 };
-
 // get the user based on auth-provider row id
-const getUserByAuthProviderId = async (authProviderId: number) => {
+const getUserByAuthProviderId = async (
+  authProviderId: number
+): Promise<User | null> => {
   const query = `SELECT * FROM ${SQL_TABLES.users} WHERE authProviderId = ?`;
-  const user = await execute<User>(query, [authProviderId]);
-  return user;
+  const [user] = await execute<User[]>(query, [authProviderId]);
+  return user[0];
 };
 
 // checking and retriving user | null based on strategy profile
 export const getUserByProfile = async (
   profile: Profile
 ): Promise<User | null> => {
-  const arrayData = await queryProviderData(profile);
-  if (!arrayData.length) return null;
-  const providerData = arrayData[0];
-  const userArray = await getUserByAuthProviderId(providerData.id);
-  if (!userArray.length) return null;
-  return userArray[0];
+  const providerData = await queryProviderData(profile);
+  if (!providerData) return null;
+  const userData = await getUserByAuthProviderId(providerData.id);
+  if (!userData) return null;
+  return userData;
 };
 
 // add provider data to auth-provider DB
@@ -39,8 +41,7 @@ const addProviderDataToDB = async (profile: Profile) => {
     provider: profile.provider as "google",
     providerUserId: profile.id,
   };
-  const query = `INSERT INTO ${SQL_TABLES.authProvider} (provider, providerUserId)
-    VALUES (?, ?)`;
+  const query = `INSERT INTO ${SQL_TABLES.authProvider} (provider, providerUserId) VALUES (?, ?)`;
   const [results] = await execute<ResultSetHeader>(query, [
     provider.provider,
     provider.providerUserId,
@@ -53,21 +54,25 @@ const addUserDataToDB = async (
   profile: Profile,
   providerRowId: number
 ): Promise<User> => {
+  const { _json: jsonData } = profile;
+
   const newUser: Omit<User, "id"> = {
     fullName: profile.displayName,
     authProviderId: providerRowId,
     primaryAddressId: null,
-    restaurantId: null,
     password: null,
+    isRestaurantOwner: IsOwner.false,
+    email: jsonData.email!,
   };
-  const query = `INSERT INTO ${SQL_TABLES.users} (authProviderId, primaryAddressId, restaurantId, fullName)
-    VALUES (?, ?, ?, ?)`;
+  const query = `INSERT INTO ${SQL_TABLES.users} (authProviderId, primaryAddressId,  fullName, isRestaurantOwner, email)
+    VALUES (?, ?, ?, ?, ?)`;
 
   const [results] = await execute<ResultSetHeader>(query, [
     newUser.authProviderId,
     newUser.primaryAddressId,
-    newUser.restaurantId,
     newUser.fullName,
+    newUser.isRestaurantOwner,
+    newUser.email,
   ]);
 
   return { ...newUser, id: results.insertId };

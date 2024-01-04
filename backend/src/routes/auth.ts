@@ -6,8 +6,9 @@ export const authRouter = Router();
 //google strategy
 authRouter.get(
   "/google",
-  passport.authenticate("google", { scope: ["profile"] })
+  passport.authenticate("google", { scope: ["profile", "email"] })
 );
+
 authRouter.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),

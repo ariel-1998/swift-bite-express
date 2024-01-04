@@ -3,5 +3,7 @@ export type Address = {
   country: string;
   street: string;
   building: number;
-  apartment: number;
+  entrance?: string;
+  apartment?: number;
 };
+//no foreign keys

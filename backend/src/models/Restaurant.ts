@@ -1,6 +1,13 @@
+import { Address } from "./Address";
+
 export type Restaurant = {
   id: number;
-  adressId: number;
+  address: Address;
   name: string;
-  imgUrl: string;
+  imgUrl?: string;
 };
+
+/**
+ * a table for addressId, restaurantId and userId was created
+ * for many to many relationship
+ */

@@ -19,7 +19,7 @@ passport.use(
       try {
         //look for user in database in
         const user = await getUserByProfile(profile);
-
+        console.log(user);
         //if user exist return the user and exit the function
         if (user) return done(null, user);
 
@@ -28,8 +28,10 @@ passport.use(
         const newUser = await createNewUserAndProvider(profile);
         done(null, newUser);
       } catch (error) {
-        //return error
-        done(error as Error);
+        //if it failed that means that the email provided in profile already exist in DB(email is unique)
+        console.log(error);
+        const errMsg = "You might have signed in a different way";
+        done({ message: errMsg, name: "providerError" });
       }
     }
   )

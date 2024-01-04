@@ -1,6 +1,7 @@
 export type MenuItem = {
   id: number;
-  restaurantId: number;
+  restaurantId: number; //foreign key
   name: string;
-  imgUrl: string;
+  description: string;
+  imgUrl?: string;
 };
