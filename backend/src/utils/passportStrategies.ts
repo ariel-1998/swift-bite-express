@@ -1,6 +1,6 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { Strategy as LocalStrategy } from "passport-local";
+// import { Strategy as LocalStrategy } from "passport-local";
 
 import { User } from "../models/User";
 import {
@@ -35,34 +35,34 @@ passport.use(
   )
 );
 
-passport.use(
-  "local-signup",
-  new LocalStrategy(
-    {
-      usernameField: "email",
-      passwordField: "password",
-      // passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
-    },
-    (email, password, done) => {
-      //if user exist return error
-    }
-  )
-);
+// passport.use(
+//   "local-signup",
+//   new LocalStrategy(
+//     {
+//       usernameField: "email",
+//       passwordField: "password",
+//       // passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
+//     },
+//     (email, password, done) => {
+//       //if user exist return error
+//     }
+//   )
+// );
 
-passport.use(
-  "local-signin",
-  new LocalStrategy(
-    {
-      usernameField: "email",
-      passwordField: "password",
-      // passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
-    },
-    (email, password, done) => {
-      //if user exist return user
-      //if user does NOT exist return error
-    }
-  )
-);
+// passport.use(
+//   "local-signin",
+//   new LocalStrategy(
+//     {
+//       usernameField: "email",
+//       passwordField: "password",
+//       // passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
+//     },
+//     (email, password, done) => {
+//       //if user exist return user
+//       //if user does NOT exist return error
+//     }
+//   )
+// );
 
 //need to check if works
 passport.serializeUser((user, cb) => {
