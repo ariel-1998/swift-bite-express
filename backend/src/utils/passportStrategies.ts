@@ -1,12 +1,10 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 // import { Strategy as LocalStrategy } from "passport-local";
-
 import { User } from "../models/User";
-import {
-  createNewUserAndProvider,
-  getUserByProfile,
-} from "./stragiesFunctions";
+import { authProviderStrategies } from "./authProvidersStrategies";
+import { pool } from "./dbConfig";
+import { PoolConnection } from "mysql2/promise";
 
 passport.use(
   new GoogleStrategy(
@@ -16,22 +14,35 @@ passport.use(
       callbackURL: "/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
+      let connection: PoolConnection | undefined = undefined;
       try {
         //look for user in database in
-        const user = await getUserByProfile(profile);
-        console.log(user);
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const user = await authProviderStrategies.getUserByProfile(
+          connection,
+          profile
+        );
         //if user exist return the user and exit the function
         if (user) return done(null, user);
 
         //add provider to auth-provider DB
-        //add user to user DB
-        const newUser = await createNewUserAndProvider(profile);
+        const newUser = await authProviderStrategies.createNewUserAndProvider(
+          connection,
+          profile
+        );
+        await connection.commit();
+        // const newUser = await createNewUserAndProvider(profile);
         done(null, newUser);
       } catch (error) {
         //if it failed that means that the email provided in profile already exist in DB(email is unique)
         console.log(error);
+        if (connection) await connection.rollback();
         const errMsg = "You might have signed in a different way";
         done({ message: errMsg, name: "providerError" });
+      } finally {
+        if (connection) connection.release();
       }
     }
   )
