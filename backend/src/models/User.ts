@@ -15,4 +15,14 @@ export const userSchema = z.object({
   email: z.string().email(),
 });
 
+export const userCredentialsSchema = z.object({
+  email: z.string().email(),
+  password: z
+    .string()
+    .trim()
+    .min(6, "Password to short (min 6 chars)")
+    .max(10, "Password to long (max 10 chars)"),
+});
+
 export type User = z.infer<typeof userSchema>;
+export type Credentials = z.infer<typeof userCredentialsSchema>;

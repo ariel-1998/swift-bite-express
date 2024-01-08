@@ -1,7 +1,6 @@
 import React from "react";
 import Button from "../Customs/Button";
-
-type Provider = "Google" | "Facebook";
+import { Provider, authService } from "../../services/authService";
 
 type AuthProviderBtnProps = {
   provider: Provider;
@@ -9,10 +8,7 @@ type AuthProviderBtnProps = {
 
 const AuthProviderBtn: React.FC<AuthProviderBtnProps> = ({ provider }) => {
   const providerSignup = async () => {
-    window.open(
-      `http://localhost:3000/auth/${provider.toLowerCase()}`,
-      "_blank"
-    );
+    window.open(authService.providerAuth(provider), "_blank");
   };
   return (
     <Button size={"formBtn"} onClick={providerSignup}>

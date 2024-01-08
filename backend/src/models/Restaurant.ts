@@ -1,8 +1,5 @@
-import { Address } from "./Address";
-
 export type Restaurant = {
   id: number;
-  address: Address;
   name: string;
   imgUrl?: string;
 };

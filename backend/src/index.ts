@@ -6,7 +6,7 @@ import cors from "cors";
 import { corsOptions } from "./utils/corsOptions";
 import { authRouter } from "./routes/auth";
 import passport from "passport";
-import "./utils/passportStrategies";
+// import "./utils/strategies/passportStrategies";
 
 const app = express();
 
@@ -19,7 +19,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //routes
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`listening on port ${PORT}`));

@@ -4,13 +4,54 @@ import Button from "../Customs/Button";
 import Input from "../Customs/Input";
 import { Link } from "react-router-dom";
 import AuthProviderBtn from "./AuthProviderBtn";
+import { authService } from "../../services/authService";
+import {
+  UserCredentials,
+  UserRegisterForm,
+  userRegisterFormSchema,
+} from "../../models/User";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
 const Register: React.FC = () => {
+  const {
+    register,
+    formState: { errors },
+    handleSubmit,
+  } = useForm<UserRegisterForm>({
+    resolver: zodResolver(userRegisterFormSchema),
+  });
+
+  const submitRegistration = async ({ email, password }: UserCredentials) => {
+    await authService.localRegistration({
+      email,
+      password,
+    });
+  };
+
   return (
-    <AuthForm title="Sign Up">
-      <Input placeholder="Email..." />
-      <Input placeholder="Password..." />
-      <Input placeholder="Confirm Password..." />
+    <AuthForm title="Sign Up" onSubmit={handleSubmit(submitRegistration)}>
+      <Input
+        label="Email:"
+        errMessage={errors.email?.message}
+        type={"text"}
+        placeholder="Email..."
+        {...register("email")}
+      />
+      <Input
+        label="Password:"
+        errMessage={errors.password?.message}
+        type={"password"}
+        placeholder="Password..."
+        {...register("password")}
+      />
+      <Input
+        label="Confirm Password:"
+        errMessage={errors.confirmPassword?.message}
+        type={"password"}
+        placeholder="Confirm Password..."
+        {...register("confirmPassword")}
+      />
       <Button size={"formBtn"} variant={"primary"}>
         Sign Up
       </Button>

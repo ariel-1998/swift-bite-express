@@ -27,18 +27,42 @@ const inputStyles = cva(
   }
 );
 
-type InputProps = VariantProps<typeof inputStyles> & ComponentProps<"input">;
+type InputProps = {
+  errMessage?: string;
+  label?: string;
+} & VariantProps<typeof inputStyles> &
+  ComponentProps<"input">;
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ variant, className, ...rest }, ref) => {
+  ({ variant, label, errMessage, className, ...rest }, ref) => {
     return (
-      <input
-        {...rest}
-        ref={ref}
-        className={twMerge(inputStyles({ variant }), className)}
-      />
+      <div>
+        <InputLabel label={label} />
+        <input
+          {...rest}
+          ref={ref}
+          className={twMerge(inputStyles({ variant }), className)}
+        />
+        <InputError error={errMessage} />
+      </div>
     );
   }
 );
 
 export default Input;
+
+type InputErrorProps = {
+  error?: string;
+};
+
+function InputError({ error }: InputErrorProps) {
+  return error ? <div className="text-error">{error}</div> : null;
+}
+
+type InputLabelProps = {
+  label?: string;
+};
+
+function InputLabel({ label }: InputLabelProps) {
+  return label ? <label>{label}</label> : null;
+}

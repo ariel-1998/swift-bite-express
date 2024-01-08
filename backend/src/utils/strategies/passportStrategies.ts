@@ -1,18 +1,20 @@
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import { pool } from "../DB/dbConfig";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
-import { AuthProvider, ProviderLiterals } from "../models/AuthProvider";
-// import { ResultSetHeader } from "mysql2";
-// import { IsOwner, User } from "../models/User";
-import { IsOwner, User } from "../models/User";
+import { AuthProvider, ProviderLiterals } from "../../models/AuthProvider";
+import { IsOwner, User } from "../../models/User";
 import { Profile } from "passport-google-oauth20";
-import { SQL_TABLES, executeQuery } from "./dbConfig";
+import { executeQuery } from "../DB/dbConfig";
+import { DB } from "../DB/tables";
 
-class AuthProviderStrategies {
+class ExternalAuthProvider {
   // check if providerUserId exsit in auth-provider db (if user was saved before)
   private queryProviderData = async (
     connection: PoolConnection,
     profile: Profile
   ): Promise<AuthProvider | null> => {
-    const query = `SELECT * FROM ${SQL_TABLES.authProvider} WHERE provider = ? AND providerUserId = ?`;
+    const query = `SELECT * FROM ${DB.tables.auth_provider.tableName} WHERE provider = ? AND providerUserId = ?`;
     const params = [profile.provider, profile.id];
     const [providerData] = await executeQuery<AuthProvider[]>(connection, {
       query,
@@ -26,7 +28,7 @@ class AuthProviderStrategies {
     connection: PoolConnection,
     authProviderId: string
   ): Promise<User | null> => {
-    const query = `SELECT * FROM ${SQL_TABLES.users} WHERE authProviderId = ?`;
+    const query = `SELECT * FROM ${DB.tables.users.tableName} WHERE authProviderId = ?`;
     const params = [authProviderId];
     const [user] = await executeQuery<User[]>(connection, { query, params });
     return user[0];
@@ -56,7 +58,7 @@ class AuthProviderStrategies {
       provider: profile.provider as ProviderLiterals,
       providerUserId: profile.id,
     };
-    const query = `INSERT INTO ${SQL_TABLES.authProvider} (id, provider, providerUserId) VALUES (?, ?, ?)`;
+    const query = `INSERT INTO ${DB.tables.auth_provider.tableName} (id, provider, providerUserId) VALUES (?, ?, ?)`;
     const params = [provider.id, provider.provider, provider.providerUserId];
 
     await executeQuery(connection, { query, params });
@@ -78,7 +80,7 @@ class AuthProviderStrategies {
       isRestaurantOwner: IsOwner.false,
       email: jsonData.email!,
     };
-    const query = `INSERT INTO ${SQL_TABLES.users} (authProviderId, primaryAddressId,  fullName, isRestaurantOwner, email) VALUES (?, ?, ?, ?, ?)`;
+    const query = `INSERT INTO ${DB.tables.users.tableName} (authProviderId, primaryAddressId,  fullName, isRestaurantOwner, email) VALUES (?, ?, ?, ?, ?)`;
     const params = [
       newUser.authProviderId,
       newUser.primaryAddressId,
@@ -107,5 +109,46 @@ class AuthProviderStrategies {
     return `${profile.provider}-${profile.id}`;
   }
 }
+const externalAuthProvider = new ExternalAuthProvider();
 
-export const authProviderStrategies = new AuthProviderStrategies();
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/api/auth/google/callback",
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      let connection: PoolConnection | undefined = undefined;
+      try {
+        //look for user in database in
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const user = await externalAuthProvider.getUserByProfile(
+          connection,
+          profile
+        );
+        //if user exist return the user and exit the function
+        if (user) return done(null, user);
+
+        //add provider to auth-provider DB
+        const newUser = await externalAuthProvider.createNewUserAndProvider(
+          connection,
+          profile
+        );
+        await connection.commit();
+        // const newUser = await createNewUserAndProvider(profile);
+        done(null, newUser);
+      } catch (error) {
+        //if it failed that means that the email provided in profile already exist in DB(email is unique)
+        console.log(error);
+        if (connection) await connection.rollback();
+        const errMsg = "You might have signed in a different way";
+        done({ message: errMsg, name: "providerError" });
+      } finally {
+        if (connection) connection.release();
+      }
+    }
+  )
+);

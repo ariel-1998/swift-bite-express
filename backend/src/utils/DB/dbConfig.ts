@@ -18,18 +18,9 @@ export const pool = mysql.createPool(config);
 
 type MixedArray = (string | number | null)[];
 
-export function execute<T>(query: string, params?: MixedArray) {
-  return pool.execute<T & RowDataPacket[]>(query, params);
-}
-
-export const SQL_TABLES = {
-  authProvider: "auth_provider",
-  users: "users",
-  addresses: "addresses",
-  menuItems: "menu_items",
-  restaurants: "restaurants",
-  restaurantsUsersAddresses: "restaurant_owner_address",
-} as const;
+// export function execute<T>(query: string, params?: MixedArray) {
+//   return pool.execute<T & RowDataPacket[]>(query, params);
+// }
 
 type TransactionQuery = {
   query: string;
@@ -45,3 +36,19 @@ export async function executeQuery<T>(
   );
   return data;
 }
+
+// type SqlTable = {
+//   tableName: TableNames;
+//   columns: SqlColumns;
+// };
+
+// const usersTable =
+
+// export const SQL_TABLES = {
+//   authProvider: "auth_provider",
+//   users: "users",
+//   addresses: "addresses",
+//   menuItems: "menu_items",
+//   restaurants: "restaurants",
+//   restaurantsUsersAddresses: "restaurant_owner_address",
+// } as const;
