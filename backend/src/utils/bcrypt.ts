@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import { FunctionError } from "../models/Errors/ErrorConstructor";
 const saltRounds = 10;
 
 export async function hashPassword(password: string) {
@@ -6,15 +7,17 @@ export async function hashPassword(password: string) {
     const hash = await bcrypt.hash(password, saltRounds);
     return hash;
   } catch (error) {
-    throw new Error("Error hashing password");
+    throw new FunctionError("Error hashing password", 500);
   }
 }
 
-export async function verifyPassword(passwoed: string, hashedPassword: string) {
+export async function verifyPassword(password: string, hashedPassword: string) {
   try {
-    const result = await bcrypt.compare(passwoed, hashedPassword);
-    return result;
+    const result = await bcrypt.compare(password, hashedPassword);
+    if (!result) {
+      throw new FunctionError("Password or Email are Incorrect", 401);
+    }
   } catch (error) {
-    throw new Error("Error comparing passwords");
+    throw new FunctionError("Error comparing passwords", 500);
   }
 }

@@ -35,6 +35,11 @@ export const userLoginFormSchema = z.object({
 export const userRegisterFormSchema = userLoginFormSchema
   .extend({
     confirmPassword: z.string(),
+    fullName: z
+      .string()
+      .trim()
+      .min(2, "Full Name to short (min 2 chars)")
+      .max(20, "Full Name to long (max 20 chars)"),
   })
   .refine(
     ({ password, confirmPassword }) => {

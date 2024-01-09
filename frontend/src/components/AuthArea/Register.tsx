@@ -5,11 +5,7 @@ import Input from "../Customs/Input";
 import { Link } from "react-router-dom";
 import AuthProviderBtn from "./AuthProviderBtn";
 import { authService } from "../../services/authService";
-import {
-  UserCredentials,
-  UserRegisterForm,
-  userRegisterFormSchema,
-} from "../../models/User";
+import { UserRegisterForm, userRegisterFormSchema } from "../../models/User";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -22,11 +18,13 @@ const Register: React.FC = () => {
     resolver: zodResolver(userRegisterFormSchema),
   });
 
-  const submitRegistration = async ({ email, password }: UserCredentials) => {
-    await authService.localRegistration({
-      email,
-      password,
-    });
+  const submitRegistration = async ({
+    email,
+    password,
+    fullName,
+  }: UserRegisterForm) => {
+    console.log(fullName);
+    await authService.localRegistration({ email, fullName, password });
   };
 
   return (
@@ -37,6 +35,13 @@ const Register: React.FC = () => {
         type={"text"}
         placeholder="Email..."
         {...register("email")}
+      />
+      <Input
+        label="Full Name:"
+        errMessage={errors.fullName?.message}
+        type={"text"}
+        placeholder="Full Name..."
+        {...register("fullName")}
       />
       <Input
         label="Password:"

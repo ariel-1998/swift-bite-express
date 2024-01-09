@@ -1,4 +1,4 @@
-import { UserCredentials } from "../models/User";
+import { UserCredentials, UserRegisterForm } from "../models/User";
 import { defaultAxios } from "../utils/axiosConfig";
 import { CONSTANTS } from "../utils/constants";
 
@@ -14,8 +14,10 @@ class AuthService {
     await defaultAxios.post("/auth/local/login", credentials);
   };
 
-  localRegistration = async (credentials: UserCredentials) => {
-    await defaultAxios.post("/auth/local/register", credentials);
+  localRegistration = async (
+    registratioData: Omit<UserRegisterForm, "confirmPassword">
+  ) => {
+    await defaultAxios.post("/auth/local/register", registratioData);
   };
 
   //   getLogin = () => {};

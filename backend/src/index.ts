@@ -6,7 +6,7 @@ import cors from "cors";
 import { corsOptions } from "./utils/corsOptions";
 import { authRouter } from "./routes/auth";
 import passport from "passport";
-// import "./utils/strategies/passportStrategies";
+import "./utils/strategies/passportConfig";
 
 const app = express();
 

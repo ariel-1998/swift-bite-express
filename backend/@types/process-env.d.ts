@@ -1,3 +1,4 @@
+// import { User as UserModel } from "../src/models/user";
 //need to change tsconfig options to remove export
 export declare global {
   namespace NodeJS {
