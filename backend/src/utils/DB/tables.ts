@@ -72,11 +72,13 @@ DB.addTable("users", {
 
 DB.addTable("addresses", {
   id: "id",
+  state: "state",
   country: "country",
   street: "street",
   building: "building",
   apartment: "apartment",
   entrance: "entrance",
+  coordinates: "coordinates",
 });
 DB.addTable("menu_items", {
   id: "id",

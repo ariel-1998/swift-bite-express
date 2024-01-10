@@ -60,8 +60,6 @@ passport.use(
       passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
     },
     async (req, email, password, done) => {
-      console.log("req", req.body);
-
       let connection: PoolConnection | null = null;
       const userInfo: RegistrationData = {
         email,
@@ -101,8 +99,6 @@ passport.use(
       // passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
     },
     async (email, password, done) => {
-      console.log("local login");
-
       let connection: PoolConnection | null = null;
       try {
         connection = await pool.getConnection();
@@ -110,6 +106,7 @@ passport.use(
           email,
           password,
         });
+
         done(null, user);
       } catch (error) {
         console.log(error);
@@ -128,13 +125,15 @@ const getUserById = async (userId: string): Promise<User | null> => {
     tableName,
     columns: { id },
   } = DB.tables.users;
+
   const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
   const params = [userId];
   const connection = await pool.getConnection();
   const [rows] = await executeQuery<User[]>(connection, { query, params });
+  connection.release();
   return rows[0];
 };
-//need to check if works
+
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

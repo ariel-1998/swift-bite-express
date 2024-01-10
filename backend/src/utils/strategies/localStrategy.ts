@@ -34,7 +34,7 @@ class LocalProvider {
     { email, password }: Credentials
   ): Promise<User | undefined> => {
     const user = await this.getUserByEmail(connection, email);
-    if (!user) return;
+    if (!user) return; //need to check if error is needed to be thrown for 401 unAuthorized
     if (!user.password) {
       throw new FunctionError("You registered with a different method", 1001);
     }
