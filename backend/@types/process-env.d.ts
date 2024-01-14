@@ -11,6 +11,8 @@ export declare global {
       COOKIE_SECRET: string;
       GOOGLE_CLIENT_ID: string;
       GOOGLE_CLIENT_SECRET: string;
+      // GOOGLE_API_KEY: string;
+      // GOOGLE_GEOCODEING_BASE_URL: string;
       // ENV: "test" | "dev" | "prod";
     }
   }

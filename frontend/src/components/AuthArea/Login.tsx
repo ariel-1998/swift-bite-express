@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { UserCredentials, userLoginFormSchema } from "../../models/User";
 import { authService } from "../../services/authService";
+import ProviderParamError from "./ProviderParamError";
 
 const Login: React.FC = () => {
   const {
@@ -23,6 +24,7 @@ const Login: React.FC = () => {
 
   return (
     <AuthForm onSubmit={handleSubmit(submitLogin)} title="Sign In">
+      <ProviderParamError />
       <Input
         label="Email:"
         errMessage={errors.email?.message}
@@ -42,8 +44,8 @@ const Login: React.FC = () => {
       </Button>
       <hr />
       <div className="flex flex-col gap-1">
-        <AuthProviderBtn provider="Google" />
-        <AuthProviderBtn provider="Facebook" />
+        <AuthProviderBtn provider="Google" auth="login" />
+        <AuthProviderBtn provider="Facebook" auth="login" />
       </div>
       <div className="flex flex-col items-center">
         Don't have an account?

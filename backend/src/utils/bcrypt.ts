@@ -15,9 +15,10 @@ export async function verifyPassword(password: string, hashedPassword: string) {
   try {
     const result = await bcrypt.compare(password, hashedPassword);
     if (!result) {
-      throw new FunctionError("Password or Email are Incorrect", 401);
+      throw new FunctionError("Email or Password are Incorrect", 401);
     }
   } catch (error) {
+    if (error instanceof FunctionError) throw error;
     throw new FunctionError("Error comparing passwords", 500);
   }
 }

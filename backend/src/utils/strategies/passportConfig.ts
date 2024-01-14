@@ -8,6 +8,8 @@ import { externalAuthProvider } from "./externalStrategies";
 import { PoolConnection } from "mysql2/promise";
 import { Strategy as LocalStrategy } from "passport-local";
 import { localProvider } from "./localStrategy";
+import { handleErrorTypes } from "../../middleware/errorHandler";
+import { Request } from "express";
 
 passport.use(
   new GoogleStrategy(
@@ -17,13 +19,12 @@ passport.use(
       callbackURL: "/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log("google");
-      let connection: PoolConnection | null = null;
+      let connection: PoolConnection | undefined = undefined;
       try {
         //look for user in database in
         connection = await pool.getConnection();
         await connection.beginTransaction();
-        ///////////////////////////////only server errors ca accure///////////////////
+        ///////////////////////////////only server errors can accure///////////////////
         const user = await externalAuthProvider.getUserByProfile(
           connection,
           profile
@@ -40,10 +41,9 @@ passport.use(
         done(null, newUser);
       } catch (error) {
         //if it failed that means that the email provided in profile already exist in DB(email is unique)
-        console.log(error);
         await connection?.rollback();
-        if (error instanceof FunctionError) done(error);
-        done(new FunctionError("Server Error", 500));
+        const handledError = handleErrorTypes(error);
+        done(handledError as Error);
       } finally {
         connection?.release();
       }
@@ -59,12 +59,17 @@ passport.use(
       passwordField: "password",
       passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
     },
-    async (req, email, password, done) => {
-      let connection: PoolConnection | null = null;
+    async (
+      req: Request<unknown, unknown, RegistrationData>,
+      email,
+      password,
+      done
+    ) => {
+      let connection: PoolConnection | undefined = undefined;
       const userInfo: RegistrationData = {
         email,
         password,
-        fullName: (req.body as RegistrationData).fullName,
+        fullName: req.body.fullName,
       };
       try {
         connection = await pool.getConnection();
@@ -78,11 +83,9 @@ passport.use(
 
         done(null, user);
       } catch (error) {
-        console.log(error);
-
         connection?.rollback();
-        if (error instanceof FunctionError) done(error);
-        else done(new FunctionError("Server Error.", 500));
+        const handledError = handleErrorTypes(error);
+        done(handledError as Error);
       } finally {
         connection?.release();
       }
@@ -99,7 +102,7 @@ passport.use(
       // passReqToCallback: true, // If true, the request object is passed as the first argument to the verify callback (default is false)
     },
     async (email, password, done) => {
-      let connection: PoolConnection | null = null;
+      let connection: PoolConnection | undefined = undefined;
       try {
         connection = await pool.getConnection();
         const user = await localProvider.userLoginHandler(connection, {
@@ -109,10 +112,9 @@ passport.use(
 
         done(null, user);
       } catch (error) {
-        console.log(error);
         connection?.rollback();
-        if (error instanceof FunctionError) done(error);
-        else done(new FunctionError("Server Error.", 500));
+        const handledError = handleErrorTypes(error);
+        done(handledError as Error);
       } finally {
         connection?.release();
       }
@@ -121,17 +123,20 @@ passport.use(
 );
 
 const getUserById = async (userId: string): Promise<User | null> => {
-  const {
-    tableName,
-    columns: { id },
-  } = DB.tables.users;
-
-  const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
-  const params = [userId];
-  const connection = await pool.getConnection();
-  const [rows] = await executeQuery<User[]>(connection, { query, params });
-  connection.release();
-  return rows[0];
+  try {
+    const {
+      tableName,
+      columns: { id },
+    } = DB.tables.users;
+    const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
+    const params = [userId];
+    const connection = await pool.getConnection();
+    const [rows] = await executeQuery<User[]>(connection, { query, params });
+    connection?.release();
+    return rows[0];
+  } catch (error) {
+    throw new FunctionError("Server Error.", 500);
+  }
 };
 
 passport.serializeUser((user, done) => {
@@ -143,6 +148,6 @@ passport.deserializeUser(async (id: string, done) => {
     const user = await getUserById(id);
     done(null, user);
   } catch (error) {
-    done(new FunctionError("Server Error.", 500));
+    done(error);
   }
 });

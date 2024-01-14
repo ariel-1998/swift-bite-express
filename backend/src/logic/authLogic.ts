@@ -1,27 +1,44 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/User";
 import passport from "passport";
+import { FunctionError } from "../models/Errors/ErrorConstructor";
 
 //need to change url on deployment
-const SUCCSESS_AUTH_REDIRECT = "http://localhost:5173/";
+const SUCCSESS_AUTH_REDIRECT = "http://localhost:5173";
 
-export const handleGoogleAuth = passport.authenticate("google", {
-  scope: ["profile", "email"],
-});
+type Auth = "register" | "login";
+export const handleGoogleAuth =
+  (source: Auth) => (req: Request, res: Response) =>
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      state: source, // Include the source parameter in the Google authentication request
+    })(req, res);
+
 export const handleLocalAuth = (method: "signup" | "login") =>
   passport.authenticate(`local-${method}`);
 
-export const handleProviderCB = passport.authenticate("google", {
-  failureRedirect: "/login",
-  successRedirect: SUCCSESS_AUTH_REDIRECT,
-});
+type State = { state: Auth };
+export const handleProviderCBRedirect = (
+  req: Request<unknown, unknown, unknown, State>,
+  res: Response
+) => {
+  passport.authenticate("google", (err: Error) => {
+    let redirectUrl = SUCCSESS_AUTH_REDIRECT;
+
+    const { state } = req.query;
+    if (err) redirectUrl += `/auth/${state}?error=${err.message}`;
+
+    return res.redirect(redirectUrl);
+  })(req, res);
+};
 
 export const userInfoResponse = (
   req: Request,
-  res: Response<Omit<User, "password"> | string>
+  res: Response<Omit<User, "password"> | string>,
+  next: NextFunction
 ) => {
   const user = req.user;
-  if (!user) return res.status(401).json("unAutorized!");
+  if (!user) return next(new FunctionError("UnAutorized!", 401));
   const userInfo: Omit<User, "password"> = {
     authProviderId: user.authProviderId,
     email: user.email,
@@ -36,6 +53,6 @@ export const userInfoResponse = (
 export const logout = (req: Request, res: Response, next: NextFunction) => {
   req.logout((err) => {
     if (err) return next(err);
-    res.redirect("/login");
+    res.sendStatus(200);
   });
 };

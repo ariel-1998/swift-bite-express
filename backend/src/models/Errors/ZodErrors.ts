@@ -1,18 +1,26 @@
-// import { FunctionError } from "./ErrorConstructor";
+import { ZodError, ZodSchema } from "zod";
+import { CustomError } from "./ErrorConstructor";
+import { handleErrorTypes } from "../../middleware/errorHandler";
 
-// export function handleZodError(err: ZodError, schemaName: string) {
-//   const firstError = err.errors[0];
-
-//   switch (firstError.path) {
-//     case "username":
-//       throw new FunctionError(`${schemaName} - ${firstError.message}`, 1001);
-//     case "password":
-//       throw new FunctionError(`${schemaName} - ${firstError.message}`, 1002);
-//     default:
-//       throw new FunctionError(`${schemaName} - Validation failed`, 1000);
-//   }
+// interface ZodIssuesModel {
+//   issues: { message: string }[];
 // }
 
-// //   class ZodErrorHandlers {
-// //     private throw
-// //   }
+export class ZodErrors extends CustomError {
+  constructor(error: ZodError, code: number = 401) {
+    const messageArray = error.issues.map((e) => e.message);
+    super(messageArray, code, "ZodError");
+  }
+}
+
+export function parseSchemaThrowZodErrors<T>(
+  schema: ZodSchema<T>,
+  data: T
+): void {
+  try {
+    schema.parse(data);
+  } catch (error) {
+    const handledError = handleErrorTypes(error);
+    throw handledError;
+  }
+}

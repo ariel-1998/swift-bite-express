@@ -2,14 +2,19 @@ import React from "react";
 import AuthForm from "./AuthForm";
 import Button from "../Customs/Button";
 import Input from "../Customs/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthProviderBtn from "./AuthProviderBtn";
 import { authService } from "../../services/authService";
 import { UserRegisterForm, userRegisterFormSchema } from "../../models/User";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import useUserInfo from "../../hooks/useUserInfo";
+import ProviderParamError from "./ProviderParamError";
 
 const Register: React.FC = () => {
+  const { setUser } = useUserInfo();
+  const navigate = useNavigate();
+
   const {
     register,
     formState: { errors },
@@ -23,12 +28,22 @@ const Register: React.FC = () => {
     password,
     fullName,
   }: UserRegisterForm) => {
-    console.log(fullName);
-    await authService.localRegistration({ email, fullName, password });
+    try {
+      const user = await authService.localRegistration({
+        email,
+        fullName,
+        password,
+      });
+      setUser(user);
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <AuthForm title="Sign Up" onSubmit={handleSubmit(submitRegistration)}>
+      <ProviderParamError />
       <Input
         label="Email:"
         errMessage={errors.email?.message}
@@ -62,8 +77,8 @@ const Register: React.FC = () => {
       </Button>
       <hr />
       <div className="flex flex-col gap-1">
-        <AuthProviderBtn provider="Google" />
-        <AuthProviderBtn provider="Facebook" />
+        <AuthProviderBtn provider="Google" auth="register" />
+        <AuthProviderBtn provider="Facebook" auth="register" />
       </div>
       <div className="flex flex-col items-center">
         Already have an account?

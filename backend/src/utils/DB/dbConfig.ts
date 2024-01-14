@@ -4,6 +4,7 @@ import mysql, {
   PoolConnection,
   Pool,
 } from "mysql2/promise";
+import { FunctionError } from "../../models/Errors/ErrorConstructor";
 
 export const config: PoolOptions = {
   host: process.env.DB_HOST,
@@ -16,11 +17,7 @@ export const config: PoolOptions = {
 };
 
 export const pool: Pool = mysql.createPool(config);
-type MixedArray = (string | number | null)[];
-
-// export function execute<T>(query: string, params?: MixedArray) {
-//   return pool.execute<T & RowDataPacket[]>(query, params);
-// }
+export type MixedArray = (string | number | null)[];
 
 type TransactionQuery = {
   query: string;
@@ -35,4 +32,23 @@ export async function executeQuery<T>(
     query.params
   );
   return data;
+}
+
+export async function executeSingleQuery<T>(query: string, params: MixedArray) {
+  let connection: PoolConnection | undefined = undefined;
+  try {
+    connection = await pool.getConnection();
+  } catch (error) {
+    connection?.release();
+    throw new FunctionError("Server Error", 500);
+  }
+
+  try {
+    const data = await executeQuery<T>(connection, { query, params });
+    connection.release();
+    return data;
+  } catch (error) {
+    connection.release();
+    throw error;
+  }
 }

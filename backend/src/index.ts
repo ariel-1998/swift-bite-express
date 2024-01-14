@@ -3,15 +3,16 @@ import express, { json } from "express";
 import session from "express-session";
 import { sessionOptions } from "./utils/sessionOptions";
 import cors from "cors";
-// import { corsOptions } from "./utils/corsOptions";
+import { corsOptions } from "./utils/corsOptions";
 import { authRouter } from "./routes/authRouter";
 import passport from "passport";
 import "./utils/strategies/passportConfig";
+import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
 
-app.use(cors());
-// app.use(cors(corsOptions));
+// app.use(cors());
+app.use(cors(corsOptions));
 app.use(json());
 app.use(session(sessionOptions));
 
@@ -21,6 +22,9 @@ app.use(passport.session());
 
 //routes
 app.use("/api/auth", authRouter);
+app.use(errorHandler);
 
 const PORT = process.env.PORT;
-app.listen(PORT, () => console.log(`listening on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`listening on port ${PORT}`);
+});

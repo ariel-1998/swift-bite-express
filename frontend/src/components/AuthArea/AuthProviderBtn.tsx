@@ -1,17 +1,21 @@
 import React from "react";
 import Button from "../Customs/Button";
-import { Provider, authService } from "../../services/authService";
+import { Auth, Provider, authService } from "../../services/authService";
 
 type AuthProviderBtnProps = {
   provider: Provider;
+  auth: Auth;
 };
 
-const AuthProviderBtn: React.FC<AuthProviderBtnProps> = ({ provider }) => {
+const AuthProviderBtn: React.FC<AuthProviderBtnProps> = ({
+  provider,
+  auth,
+}) => {
   const providerSignup = async () => {
-    window.open(authService.providerAuth(provider), "_blank");
+    window.open(authService.providerAuth(provider, auth), "_self");
   };
   return (
-    <Button size={"formBtn"} onClick={providerSignup}>
+    <Button type="button" size={"formBtn"} onClick={providerSignup}>
       Sign In with {provider}
     </Button>
   );

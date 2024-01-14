@@ -10,6 +10,7 @@ import {
 } from "../../models/User";
 import { hashPassword, verifyPassword } from "../bcrypt";
 import { FunctionError } from "../../models/Errors/ErrorConstructor";
+import { handleErrorTypes } from "../../middleware/errorHandler";
 
 class LocalProvider {
   private getUserByEmail = async (
@@ -34,7 +35,7 @@ class LocalProvider {
     { email, password }: Credentials
   ): Promise<User | undefined> => {
     const user = await this.getUserByEmail(connection, email);
-    if (!user) return; //need to check if error is needed to be thrown for 401 unAuthorized
+    if (!user) throw new FunctionError("Email or Password are incorrect", 401); //need to check if error is needed to be thrown for 401 unAuthorized
     if (!user.password) {
       throw new FunctionError("You registered with a different method", 1001);
     }
@@ -55,6 +56,7 @@ class LocalProvider {
       primaryAddressId: null,
     };
   };
+
   userRegistrationHandler = async (
     connection: PoolConnection,
     userInfo: RegistrationData
@@ -81,6 +83,8 @@ class LocalProvider {
       //check errors to see how to respond////////
       userRegistrationSchema.parse(userInfo);
     } catch (error) {
+      const e = handleErrorTypes(error);
+      throw e;
       //check errors to see how to respond////////
       // console.log(error);
     }
@@ -93,7 +97,6 @@ class LocalProvider {
       });
       return { ...newUser, id: results.insertId };
     } catch (error) {
-      console.log("error", error, "endError");
       throw new FunctionError("Email already exist.", 409);
     }
   };

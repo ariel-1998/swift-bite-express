@@ -2,17 +2,21 @@ import { Router } from "express";
 import {
   handleGoogleAuth,
   handleLocalAuth,
-  handleProviderCB,
+  handleProviderCBRedirect,
   logout,
   userInfoResponse,
 } from "../logic/authLogic";
 
 export const authRouter = Router();
 
+//get login with cookie
+authRouter.get("/login", userInfoResponse);
+
 //google strategy
-authRouter.get("/google", handleGoogleAuth);
-authRouter.get("/google/callback", handleProviderCB);
-authRouter.get("/login/success", userInfoResponse);
+authRouter.get("/register/google", handleGoogleAuth("register"));
+authRouter.get("/login/google", handleGoogleAuth("login"));
+authRouter.get("/google/callback", handleProviderCBRedirect);
+
 //local strategy register
 authRouter.post("/local/register", handleLocalAuth("signup"), userInfoResponse);
 authRouter.post("/local/login", handleLocalAuth("login"), userInfoResponse);
