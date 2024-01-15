@@ -44,3 +44,5 @@ export const userRegistrationSchema = z.object({
 // export type User = z.infer<typeof userSchema>;
 // export type Credentials = z.infer<typeof userCredentialsSchema>;
 export type RegistrationData = z.infer<typeof userRegistrationSchema>;
+
+export type AssertUserInReq<T extends { user?: User }> = T & { user: User };

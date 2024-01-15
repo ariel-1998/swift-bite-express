@@ -19,7 +19,7 @@ export const config: PoolOptions = {
 export const pool: Pool = mysql.createPool(config);
 export type MixedArray = (string | number | null)[];
 
-type TransactionQuery = {
+export type TransactionQuery = {
   query: string;
   params: MixedArray;
 };

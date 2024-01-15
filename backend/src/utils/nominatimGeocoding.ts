@@ -1,35 +1,37 @@
 import { Address } from "../models/Address";
-import axios from "axios";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
+import NodeGeocoder from "node-geocoder";
 
-type AddressToConvert = Pick<
-  Address,
-  "country" | "state" | "street" | "building"
->;
-class NominatimGeocoding {
-  private url = (address: string) =>
-    `https://nominatim.openstreetmap.org/search?q=${address}&format=json`;
+const nodeGeocoder = NodeGeocoder({
+  provider: "openstreetmap",
+});
 
+type AddressToConvert = Partial<Address>;
+class Geocoder {
   private convertAddressObjToQuery = (address: AddressToConvert) => {
-    const { country, state, street, building } = address;
-    const addressArray = [country, state, street, building];
-    const addressString = addressArray.filter(Boolean).map((value) => {
-      if (typeof value === "string") return value.replace(/ /g, "+");
-      return value;
-    });
-    return addressString.toString();
+    const filteredAddress = Object.fromEntries(
+      Object.entries(address).filter(([_, value]) => Boolean(value))
+    );
+    return filteredAddress;
   };
 
-  convertAddressToCoords = async (address: AddressToConvert) => {
+  private formatCoords = (longitude: number, latitude: number) => {
+    return `${latitude}, ${longitude}`;
+  };
+
+  geocode = async (address: AddressToConvert) => {
     try {
-      const addressString = this.convertAddressObjToQuery(address);
-      const queryUrl = this.url(addressString);
-      const { data } = await axios.get<string>(queryUrl);
-      return data;
+      const filteredAddress = this.convertAddressObjToQuery(address);
+      const data = await nodeGeocoder.geocode(filteredAddress);
+      if (!data.length) throw Error();
+      const { longitude, latitude } = data[0];
+      if (!longitude || !latitude) throw Error();
+      const coords = this.formatCoords(longitude, latitude);
+      return coords;
     } catch (error) {
-      throw new FunctionError("Address NOT found.", 404);
+      throw new FunctionError("No accurate address found.", 404);
     }
   };
 }
 
-export const nominatimGeocoding = new NominatimGeocoding();
+export const geocoder = new Geocoder();

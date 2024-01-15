@@ -1,17 +1,25 @@
 import { NextFunction, Request, Response } from "express";
 import { DB } from "../utils/DB/tables";
-import { executeQuery, executeSingleQuery, pool } from "../utils/DB/dbConfig";
+import {
+  TransactionQuery,
+  executeQuery,
+  executeSingleQuery,
+  pool,
+} from "../utils/DB/dbConfig";
 import { Address, addressSchema } from "../models/Address";
-import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { nominatimGeocoding } from "../utils/nominatimGeocoding";
+// import { FunctionError } from "../models/Errors/ErrorConstructor";
+import { geocoder } from "../utils/nominatimGeocoding";
 import { parseSchemaThrowZodErrors } from "../models/Errors/ZodErrors";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
+import { AssertUserInReq } from "../models/User";
+import { verifyUser } from "../middleware/verifyAuth";
+import { handleErrorTypes } from "../middleware/errorHandler";
 
 type GetAddressByIdParams = {
   addressId: string;
 };
 
-export const getAddressById = async (
+export const getAddressByIdLogic = async (
   req: Request<GetAddressByIdParams>,
   res: Response<Address>,
   next: NextFunction
@@ -26,61 +34,132 @@ export const getAddressById = async (
     if (!address) res.sendStatus(404);
     res.status(200).json(address);
   } catch (error) {
-    if (error instanceof FunctionError) return next(error);
-    next(new FunctionError("Server Error", 500));
+    next(handleErrorTypes(error));
   }
 };
 
 type AddAddressReqBody = Omit<Address, "id" | "coordinates">;
-
-export const addAddress = async (
-  req: Request<unknown, unknown, AddAddressReqBody>
-  //   res: Response<Address>,
-  //   next: NextFunction
+//default update is for user,if params have restaurantId then we update the restaurants address
+type AddAddressReq = Request<unknown, Address, AddAddressReqBody>;
+export const addAddressLogic = async (
+  req: AddAddressReq,
+  res: Response<Address>,
+  next: NextFunction
 ) => {
-  // need to check how to validate type with typescript so ne error after schema validation
-  addressSchema.parse(req.body);
-  const { building, country, state, street, apartment, entrance } = req.body;
-  const coordinates = await nominatimGeocoding.convertAddressToCoords({
-    building,
-    country,
-    state,
-    street,
-  });
-
-  parseSchemaThrowZodErrors(addressSchema, {
-    ...req.body,
-    coordinates,
-  });
-
-  const { columns, tableName } = DB.tables.addresses;
-  const addressParams = [building, country, state, street, apartment, entrance];
-  const addressQuery = `INSERT INTO ${tableName} 
-    (${columns.building}, ${columns.country}, ${columns.state}, ${columns.street}, ${columns.apartment}, ${columns.entrance},)
-    `;
   //create transaction, add address, after that add addressId to user/restaurant
-
   let connection: PoolConnection | undefined = undefined;
-
   try {
+    verifyUser(req);
+    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    const addressParams = await getCoordsAndAddressQuery(addressWithoutId);
+
     connection = await pool.getConnection();
     await connection.beginTransaction();
     //add address
-    const [rows] = await executeQuery<ResultSetHeader>(connection, {
-      //need to fix address params undefined to null
-      params: addressParams,
-      query: addressQuery,
-    });
-
+    const [addressRes] = await executeQuery<ResultSetHeader>(
+      connection,
+      addressParams
+    );
+    const addressId = addressRes.insertId;
     //need to check if the update is for restaurant or a user
-    const updateUserQuery = `UPDATE `;
-    //if user then update the req.user.id user to have this primaryAddressId as this insertId
+    const updateParams = updateUserAddressIdQuery(req, addressId);
+    await executeQuery<ResultSetHeader>(connection, updateParams);
 
-    //if restaurant then check if user is the owner of this restaurant and update if he is
-    const updateUserAddress = await connection.commit();
+    await connection.commit();
+    //need to return address;
+    res.status(204).json({ ...addressWithoutId, id: addressId });
   } catch (error) {
+    console.log(error);
     await connection?.rollback();
+    next(handleErrorTypes(error));
   } finally {
     connection?.release();
   }
 };
+
+async function getCoordsAndturnUndefinedToNull(req: AddAddressReq) {
+  const addressObj = turnUndefinedToNull(
+    req.body,
+    "state",
+    "entrance",
+    "apartment"
+  );
+  const coordinates = await geocoder.geocode(req.body);
+  console.log(coordinates);
+  parseSchemaThrowZodErrors(addressSchema, {
+    ...addressObj,
+    coordinates,
+  });
+  return { ...addressObj, coordinates };
+}
+
+async function getCoordsAndAddressQuery(
+  addressObj: Awaited<ReturnType<typeof getCoordsAndturnUndefinedToNull>>
+) {
+  const { columns, tableName } = DB.tables.addresses;
+  const params = [
+    addressObj.building,
+    addressObj.country,
+    addressObj.state,
+    addressObj.street,
+    addressObj.city,
+    addressObj.apartment,
+    addressObj.entrance,
+    addressObj.coordinates,
+  ];
+  const query = `INSERT INTO ${tableName} 
+  (${columns.building}, ${columns.country}, ${columns.state}, ${columns.street}, ${columns.city}, ${columns.apartment}, ${columns.entrance}, ${columns.coordinates})
+  VALUES(?,?,?,?,?,?,?,?)`;
+  return { params, query };
+}
+
+function updateUserAddressIdQuery(
+  req: AssertUserInReq<AddAddressReq>,
+  addressId: number
+): TransactionQuery {
+  const { columns, tableName } = DB.tables.users;
+  const { id } = req.user;
+  const query = `UPDATE ${tableName}
+  SET ${columns.primaryAddressId} = ?
+  WHERE ${columns.id} = ?`;
+  const params = [addressId, id];
+  return { params, query };
+}
+
+// function updateRestaurantAddressIdQuery(
+//   req: AssertUserInReq<AddAddressReq>,
+//   addressId: number
+// ): TransactionQuery {
+//   const { restaurantId } = req.query;
+//   const { user } = req;
+//   if (!restaurantId) throw new FunctionError("RestaurantId is required", 400);
+//   const { columns, tableName } = DB.tables.restaurant_owner_address;
+//   const query = `UPDATE ${tableName}
+//   SET ${columns.addressId} = ?
+//   WHERE ${columns.restaurantId} = ? AND ${columns.userId} = ?`;
+//   const params = [addressId, restaurantId, user.id];
+//   return { params, query };
+// }
+//////////////
+type ReplaceUndefinedWithNull<T> = T extends undefined
+  ? NonNullable<T> | null
+  : T;
+
+function turnUndefinedToNull<
+  T extends Record<string, unknown>,
+  K extends keyof T
+>(
+  obj: T,
+  ...keys: K[]
+): {
+  [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
+} {
+  keys.forEach((key) => {
+    if (obj[key] === undefined) {
+      obj[key] = null as T[K];
+    }
+  });
+  return { ...obj } as {
+    [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
+  };
+}

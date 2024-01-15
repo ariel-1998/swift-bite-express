@@ -75,6 +75,7 @@ DB.addTable("addresses", {
   state: "state",
   country: "country",
   street: "street",
+  city: "city",
   building: "building",
   apartment: "apartment",
   entrance: "entrance",

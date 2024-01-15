@@ -8,6 +8,7 @@ import { authRouter } from "./routes/authRouter";
 import passport from "passport";
 import "./utils/strategies/passportConfig";
 import { errorHandler } from "./middleware/errorHandler";
+import { addressRouter } from "./routes/addressRouter";
 
 const app = express();
 
@@ -22,6 +23,8 @@ app.use(passport.session());
 
 //routes
 app.use("/api/auth", authRouter);
+app.use("/api/address", addressRouter);
+
 app.use(errorHandler);
 
 const PORT = process.env.PORT;
