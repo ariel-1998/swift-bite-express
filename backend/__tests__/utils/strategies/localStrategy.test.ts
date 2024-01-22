@@ -6,28 +6,18 @@ import {
   mockExecuteQuery,
   sqlResultSetHeader,
 } from "../../../__mocks__/utils/DB/dbConfig";
-import { mockUser } from "../../../__mocks__/models/User";
-import { MixedArray, TransactionQuery } from "../../../src/utils/DB/dbConfig";
 import {
-  Credentials,
-  IsOwner,
-  RegistrationData,
-  User,
-} from "../../../src/models/User";
+  credentials,
+  mockUser,
+  registrationData,
+} from "../../../__mocks__/models/User";
+import { MixedArray, TransactionQuery } from "../../../src/utils/DB/dbConfig";
+import { IsOwner, User } from "../../../src/models/User";
 import { FunctionError } from "../../../src/models/Errors/ErrorConstructor";
 import * as bcrypt from "../../../src/utils/bcrypt";
-import * as zod from "../../../src/models/Errors/ZodErrors";
-import { ZodError, ZodIssue } from "zod";
+import { ZodErrors } from "../../../src/models/Errors/ZodErrors";
 
 jest.mock("../../../src/utils/DB/dbConfig");
-const credentials: Credentials = {
-  email: mockUser.email,
-  password: "password",
-};
-const registrationData: RegistrationData = {
-  ...credentials,
-  fullName: "ariel",
-};
 
 const hashedPassword = "hashedPassword";
 
@@ -164,30 +154,20 @@ describe("localProvider", () => {
         expect(err.code).toBe(500);
       }
     });
-    // it("should throw error when parseSchemaThrowZodErrors fails", async () => {
-    //   jest.spyOn(bcrypt, "hashPassword").mockResolvedValue(hashedPassword);
-    //   const zodError: Partial<ZodError> = {
-    //     issues: [{ message: "error" } as ZodIssue] as ZodIssue[],
-    //   };
+    it("should throw error when parseSchemaThrowZodErrors fails", async () => {
+      jest.spyOn(bcrypt, "hashPassword").mockResolvedValue(hashedPassword);
 
-    //   jest
-    //     .spyOn(zod, "parseSchemaThrowZodErrors")
-    //     .mockRejectedValue(
-    //       new zod.ZodErrors(zodError as ZodError, 401) as never
-    //     );
-
-    //   try {
-    //     await testLocalProvider.userRegistrationHandler(
-    //       mockConnection,
-    //       registrationData
-    //     );
-    //   } catch (error) {
-    //     const err = error as zod.ZodErrors;
-    //     expect(err).toBeInstanceOf(zod.ZodErrors);
-    //     // expect(err.message).toStrictEqual(["error"]);
-    //     expect(err.code).toBe(400);
-    //   }
-    // });
+      try {
+        await testLocalProvider.userRegistrationHandler(mockConnection, {
+          ...registrationData,
+          email: "falseEmail",
+        });
+      } catch (error) {
+        const err = error as ZodErrors;
+        expect(err).toBeInstanceOf(ZodErrors);
+        expect(err.code).toBe(400);
+      }
+    });
     it("should throw duplicate error when executeQuery fails", async () => {
       jest.spyOn(bcrypt, "hashPassword").mockResolvedValue(hashedPassword);
       mockExecuteQuery.mockRejectedValueOnce({} as never);

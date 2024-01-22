@@ -1,5 +1,5 @@
 import { Profile } from "passport-google-oauth20";
-import { IsOwner } from "../../src/models/User";
+import { Credentials, IsOwner, RegistrationData } from "../../src/models/User";
 
 export const mockUser = {
   id: 1,
@@ -17,3 +17,12 @@ export const mockProfile = {
   id: "123",
   _json: { email: "someEmail@gmail.com" },
 } as Profile;
+
+export const credentials: Credentials = {
+  email: mockUser.email,
+  password: "password",
+};
+export const registrationData: RegistrationData = {
+  ...credentials,
+  fullName: "ariel",
+};
