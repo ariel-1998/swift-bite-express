@@ -39,7 +39,6 @@ export const getAddressByIdLogic = async (
 };
 
 type AddAddressReqBody = Omit<Address, "id" | "coordinates">;
-//default update is for user,if params have restaurantId then we update the restaurants address
 type AddAddressReq = Request<unknown, Address, AddAddressReqBody>;
 export const addAddressLogic = async (
   req: AddAddressReq,
@@ -77,7 +76,9 @@ export const addAddressLogic = async (
   }
 };
 
-async function getCoordsAndturnUndefinedToNull(req: AddAddressReq) {
+async function getCoordsAndturnUndefinedToNull<
+  T extends { body: AddAddressReqBody }
+>(req: T) {
   const addressObj = turnUndefinedToNull(
     req.body,
     "state",
@@ -85,7 +86,6 @@ async function getCoordsAndturnUndefinedToNull(req: AddAddressReq) {
     "apartment"
   );
   const coordinates = await geocoder.geocode(req.body);
-  console.log(coordinates);
   parseSchemaThrowZodErrors(addressSchema, {
     ...addressObj,
     coordinates,
@@ -141,6 +141,31 @@ function updateUserAddressIdQuery(
 //   return { params, query };
 // }
 //////////////
+
+type UpdateAddressReqBody = AddAddressReqBody;
+type UpdateAddressReqQuery = { restaurantId?: string };
+type UpdateAddressReq = Request<
+  unknown,
+  Address,
+  UpdateAddressReqBody,
+  UpdateAddressReqQuery
+>;
+export async function updateAddressLogic(
+  req: UpdateAddressReq
+  // res: Response<Address>,
+  // next: NextFunction
+) {
+  let connection: PoolConnection | undefined = undefined;
+  try {
+    verifyUser(req);
+    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    //create update address query / update user query
+  } catch (error) {}
+}
+
 type ReplaceUndefinedWithNull<T> = T extends undefined
   ? NonNullable<T> | null
   : T;

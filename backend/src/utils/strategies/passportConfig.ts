@@ -83,6 +83,7 @@ passport.use(
 
         done(null, user);
       } catch (error) {
+        console.log(error);
         connection?.rollback();
         const handledError = handleErrorTypes(error);
         done(handledError as Error);

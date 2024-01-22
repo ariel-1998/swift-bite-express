@@ -10,24 +10,20 @@ import {
 } from "../../models/User";
 import { hashPassword, verifyPassword } from "../bcrypt";
 import { FunctionError } from "../../models/Errors/ErrorConstructor";
-import { handleErrorTypes } from "../../middleware/errorHandler";
+import { parseSchemaThrowZodErrors } from "../../models/Errors/ZodErrors";
 
-class LocalProvider {
-  private getUserByEmail = async (
+export class LocalProvider {
+  protected getUserByEmail = async (
     connection: PoolConnection,
     email: string
   ): Promise<User | undefined> => {
-    try {
-      const query = `SELECT * FROM ${DB.tables.users.tableName} WHERE ${DB.tables.users.columns.email} = ?`;
-      const params = [email];
-      const [rows] = await executeQuery<User[]>(connection, {
-        query,
-        params,
-      });
-      return rows[0];
-    } catch (error) {
-      throw new FunctionError("Server Error", 500);
-    }
+    const query = `SELECT * FROM ${DB.tables.users.tableName} WHERE ${DB.tables.users.columns.email} = ?`;
+    const params = [email];
+    const [rows] = await executeQuery<User[]>(connection, {
+      query,
+      params,
+    });
+    return rows[0];
   };
 
   userLoginHandler = async (
@@ -37,13 +33,13 @@ class LocalProvider {
     const user = await this.getUserByEmail(connection, email);
     if (!user) throw new FunctionError("Email or Password are incorrect", 401); //need to check if error is needed to be thrown for 401 unAuthorized
     if (!user.password) {
-      throw new FunctionError("You registered with a different method", 1001);
+      throw new FunctionError("You registered with a different method", 409);
     }
     await verifyPassword(password, user.password);
     return user;
   };
 
-  private createDefaultUserOBJ = (
+  protected createDefaultUserOBJ = (
     { email, fullName }: RegistrationData,
     hashedPassword: string
   ): Omit<User, "id"> => {
@@ -79,15 +75,7 @@ class LocalProvider {
       newUser.primaryAddressId,
     ];
 
-    try {
-      //check errors to see how to respond////////
-      userRegistrationSchema.parse(userInfo);
-    } catch (error) {
-      const e = handleErrorTypes(error);
-      throw e;
-      //check errors to see how to respond////////
-      // console.log(error);
-    }
+    parseSchemaThrowZodErrors(userRegistrationSchema, userInfo);
 
     // email is uniqe so if there are duplicates it will throw an error
     try {

@@ -14,9 +14,6 @@ export const handleGoogleAuth =
       state: source, // Include the source parameter in the Google authentication request
     })(req, res);
 
-export const handleLocalAuth = (method: "signup" | "login") =>
-  passport.authenticate(`local-${method}`);
-
 type State = { state: Auth };
 export const handleProviderCBRedirect = (
   req: Request<unknown, unknown, unknown, State>,
@@ -31,6 +28,9 @@ export const handleProviderCBRedirect = (
     return res.redirect(redirectUrl);
   })(req, res);
 };
+
+export const handleLocalAuth = (method: "signup" | "login") =>
+  passport.authenticate(`local-${method}`);
 
 export const userInfoResponse = (
   req: Request,

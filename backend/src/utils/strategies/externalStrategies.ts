@@ -6,9 +6,9 @@ import { executeQuery } from "../DB/dbConfig";
 import { DB } from "../DB/tables";
 import { FunctionError } from "../../models/Errors/ErrorConstructor";
 
-class ExternalAuthProvider {
+export class ExternalAuthProvider {
   // check if providerUserId exsit in auth-provider db (if user was saved before)
-  private queryProviderData = async (
+  protected queryProviderData = async (
     connection: PoolConnection,
     profile: Profile
   ): Promise<AuthProvider | undefined> => {
@@ -23,7 +23,7 @@ class ExternalAuthProvider {
   };
 
   // get the user based on auth-provider row id
-  private getUserByAuthProviderId = async (
+  protected getUserByAuthProviderId = async (
     connection: PoolConnection,
     authProviderId: string
   ): Promise<User | undefined> => {
@@ -48,7 +48,7 @@ class ExternalAuthProvider {
     return userData;
   };
 
-  private createDefaultProviderOBJ = (
+  protected createDefaultProviderOBJ = (
     profile: Profile,
     id: string
   ): AuthProvider => {
@@ -59,12 +59,12 @@ class ExternalAuthProvider {
     };
   };
 
-  private addProviderDataToDB = async (
+  protected addProviderDataToDB = async (
     connection: PoolConnection,
     profile: Profile
   ) => {
     const { tableName, columns } = DB.tables.auth_provider;
-    const id = this.generateAutProviderIdForDB(profile);
+    const id = this.generateAuthProviderIdForDB(profile);
     const provider = this.createDefaultProviderOBJ(profile, id);
     const query = `INSERT INTO ${tableName} (${columns.id}, ${columns.provider}, ${columns.providerUserId}) VALUES (?, ?, ?)`;
     const params = [provider.id, provider.provider, provider.providerUserId];
@@ -73,7 +73,7 @@ class ExternalAuthProvider {
     return id;
   };
 
-  private createDefaultUserOBJ = (
+  protected createDefaultUserOBJ = (
     profile: Profile,
     dbRowId: string
   ): Omit<User, "id"> => {
@@ -89,7 +89,7 @@ class ExternalAuthProvider {
     };
   };
 
-  private addUserDataToDB = async (
+  protected addUserDataToDB = async (
     connection: PoolConnection,
     profile: Profile,
     providerRowId: string
@@ -121,13 +121,12 @@ class ExternalAuthProvider {
     profile: Profile
   ): Promise<User> => {
     const providerRowId = await this.addProviderDataToDB(connection, profile);
-
     const user = await this.addUserDataToDB(connection, profile, providerRowId);
     return user;
   };
 
-  private generateAutProviderIdForDB(profile: Profile) {
-    return `${profile.provider}-${profile.id}`;
+  protected generateAuthProviderIdForDB(profile: Profile) {
+    return `${profile.provider}-${profile.id}` as const;
   }
 }
 export const externalAuthProvider = new ExternalAuthProvider();
