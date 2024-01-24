@@ -1,6 +1,6 @@
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { DB } from "../DB/tables";
-import { executeQuery } from "../DB/dbConfig";
+import { executeQuery, pool } from "../DB/dbConfig";
 import {
   Credentials,
   IsOwner,
@@ -11,6 +11,9 @@ import {
 import { hashPassword, verifyPassword } from "../bcrypt";
 import { FunctionError } from "../../models/Errors/ErrorConstructor";
 import { parseSchemaThrowZodErrors } from "../../models/Errors/ZodErrors";
+import { Request } from "express";
+import { handleErrorTypes } from "../../middleware/errorHandler";
+import { VerifyCallback } from "passport-google-oauth20";
 
 export class LocalProvider {
   protected getUserByEmail = async (
@@ -88,15 +91,61 @@ export class LocalProvider {
       throw new FunctionError("Email already exist.", 409);
     }
   };
-  // userLoginHandler = async (
-  //   connection: PoolConnection,
-  //   credentials: Credentials
-  // ) => {
-  //   const user = await this.verifyUser(connection, credentials);
-  //   //means user exist
-  //   if (user) return user;
-
-  // };
 }
 
 export const localProvider = new LocalProvider();
+
+export const localSignupStrategy = async (
+  req: Request<unknown, unknown, RegistrationData>,
+  email: string,
+  password: string,
+  done: VerifyCallback
+) => {
+  let connection: PoolConnection | undefined = undefined;
+  const userInfo: RegistrationData = {
+    email,
+    password,
+    fullName: req.body.fullName,
+  };
+  try {
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const user = await localProvider.userRegistrationHandler(
+      connection,
+      userInfo
+    );
+    //commit connection
+    await connection.commit();
+
+    done(null, user);
+  } catch (error) {
+    console.log(error);
+    await connection?.rollback();
+    const handledError = handleErrorTypes(error);
+    done(handledError as Error);
+  } finally {
+    connection?.release();
+  }
+};
+
+export const localLoginStrategy = async (
+  email: string,
+  password: string,
+  done: VerifyCallback
+): Promise<void> => {
+  let connection: PoolConnection | undefined = undefined;
+  try {
+    connection = await pool.getConnection();
+    const user = await localProvider.userLoginHandler(connection, {
+      email,
+      password,
+    });
+
+    done(null, user);
+  } catch (error) {
+    const handledError = handleErrorTypes(error);
+    done(handledError as Error);
+  } finally {
+    connection?.release();
+  }
+};

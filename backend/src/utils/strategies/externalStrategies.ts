@@ -1,10 +1,11 @@
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { AuthProvider, ProviderLiterals } from "../../models/AuthProvider";
 import { IsOwner, User } from "../../models/User";
-import { Profile } from "passport-google-oauth20";
-import { executeQuery } from "../DB/dbConfig";
+import { Profile, VerifyCallback } from "passport-google-oauth20";
+import { executeQuery, pool } from "../DB/dbConfig";
 import { DB } from "../DB/tables";
 import { FunctionError } from "../../models/Errors/ErrorConstructor";
+import { handleErrorTypes } from "../../middleware/errorHandler";
 
 export class ExternalAuthProvider {
   // check if providerUserId exsit in auth-provider db (if user was saved before)
@@ -30,8 +31,8 @@ export class ExternalAuthProvider {
     const { columns, tableName } = DB.tables.users;
     const query = `SELECT * FROM ${tableName} WHERE ${columns.authProviderId} = ?`;
     const params = [authProviderId];
-    const [user] = await executeQuery<User[]>(connection, { query, params });
-    return user[0];
+    const [users] = await executeQuery<User[]>(connection, { query, params });
+    return users[0];
   };
 
   // checking and retriving user | null based on strategy profile
@@ -130,3 +131,43 @@ export class ExternalAuthProvider {
   }
 }
 export const externalAuthProvider = new ExternalAuthProvider();
+
+export async function externalAuthStrategy(
+  accessToken: string,
+  refreshToken: string,
+  profile: Profile,
+  done: VerifyCallback
+) {
+  let connection: PoolConnection | undefined = undefined;
+  console.log("started connection");
+
+  try {
+    //look for user in database in
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    console.log("before user req");
+
+    ///////////////////////////////only server errors can accure///////////////////
+    const user = await externalAuthProvider.getUserByProfile(
+      connection,
+      profile
+    );
+    //if user exist return the user and exit the function
+    if (user) return done(null, user);
+    //add provider to auth-provider DB
+    const newUser = await externalAuthProvider.createNewUserAndProvider(
+      connection,
+      profile
+    );
+    await connection.commit();
+    // const newUser = await createNewUserAndProvider(profile);
+    done(null, newUser);
+  } catch (error) {
+    //if it failed that means that the email provided in profile already exist in DB(email is unique)
+    await connection?.rollback();
+    const handledError = handleErrorTypes(error);
+    done(handledError as Error);
+  } finally {
+    connection?.release();
+  }
+}

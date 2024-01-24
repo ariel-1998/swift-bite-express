@@ -1,4 +1,4 @@
-import { jest, describe, it, expect } from "@jest/globals";
+import { describe, it, expect } from "@jest/globals";
 import { TransactionQuery } from "../../../src/utils/DB/dbConfig";
 import {
   createMockData,
@@ -15,8 +15,6 @@ import { IsOwner, User } from "../../../src/models/User";
 import { FunctionError } from "../../../src/models/Errors/ErrorConstructor";
 import { mockProfile, mockUser } from "../../../__mocks__/models/User";
 import { mockProviderData } from "../../../__mocks__/models/AuthProvider";
-
-jest.mock("../../../src/utils/DB/dbConfig");
 
 describe("externalAuthProvider", () => {
   //queryProviderData

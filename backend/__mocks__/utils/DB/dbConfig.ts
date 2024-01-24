@@ -1,7 +1,11 @@
 import { jest } from "@jest/globals";
 import * as mysql from "mysql2/promise";
-import { ResultSetHeader } from "mysql2/promise";
-import { executeQuery } from "../../../src/utils/DB/dbConfig";
+import {
+  executeQuery,
+  executeSingleQuery,
+} from "../../../src/utils/DB/dbConfig";
+jest.mock("../../../src/utils/DB/dbConfig");
+// jest.mock("mysql2/promise");
 
 export type QueryResult<T> = [T & mysql.RowDataPacket[], mysql.FieldPacket[]];
 export type DataType<T> = T & mysql.RowDataPacket[];
@@ -14,7 +18,12 @@ export const mockConnection = {
   beginTransaction: jest.fn() as () => Promise<void>,
 } as unknown as mysql.PoolConnection;
 
+export const mockPool = {
+  getConnection: () => Promise.resolve(mockConnection),
+} as unknown as mysql.Pool;
+
 export const mockExecuteQuery = executeQuery as jest.Mock;
+export const mockExecuteSingleQuery = executeSingleQuery as jest.Mock;
 
 // export function mockMysql2Module() {
 //   jest.mock("mysql2/promise", () => ({
@@ -34,7 +43,13 @@ export function createMockData<T>(data?: T): QueryResult<T> {
 
 export function sqlResultSetHeader(insertId = 12) {
   return [
-    { insertId } as DataType<ResultSetHeader>,
+    { insertId } as DataType<mysql.ResultSetHeader>,
     [],
-  ] as QueryResult<ResultSetHeader>;
+  ] as QueryResult<mysql.ResultSetHeader>;
 }
+
+export type MockDbConfigModule = {
+  mockConnection: mysql.PoolConnection;
+  mockPool: mysql.Pool;
+  mockExecuteQuery: jest.Mock;
+};
