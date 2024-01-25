@@ -14,7 +14,7 @@ type SQLTableNames =
   | "restaurants"
   | "restaurant_owner_address";
 
-class SqlTable<T> {
+export class SqlTable<T> {
   constructor(public tableName: SQLTableNames, public columns: Columns<T>) {}
 }
 

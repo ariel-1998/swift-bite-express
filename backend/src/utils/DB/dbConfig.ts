@@ -38,17 +38,11 @@ export async function executeSingleQuery<T>(query: string, params: MixedArray) {
   let connection: PoolConnection | undefined = undefined;
   try {
     connection = await pool.getConnection();
-  } catch (error) {
-    connection?.release();
-    throw new FunctionError("Server Error", 500);
-  }
-
-  try {
     const data = await executeQuery<T>(connection, { query, params });
-    connection.release();
     return data;
   } catch (error) {
-    connection.release();
-    throw error;
+    throw new FunctionError("Server Error", 500);
+  } finally {
+    connection?.release();
   }
 }
