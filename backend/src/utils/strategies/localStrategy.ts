@@ -119,7 +119,6 @@ export const localSignupStrategy = async (
 
     done(null, user);
   } catch (error) {
-    console.log(error);
     await connection?.rollback();
     const handledError = handleErrorTypes(error);
     done(handledError as Error);

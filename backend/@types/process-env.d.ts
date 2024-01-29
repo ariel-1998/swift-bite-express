@@ -14,7 +14,7 @@ export declare global {
       // GOOGLE_API_KEY: string;
       // GOOGLE_GEOCODEING_BASE_URL: string;
       ENV: "test" | "dev" | "prod";
-      NODE_ENV: "production" | undefined;
+      NODE_ENV: "production" | "test" | undefined;
     }
   }
 }

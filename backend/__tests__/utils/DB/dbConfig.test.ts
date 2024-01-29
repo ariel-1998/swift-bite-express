@@ -10,9 +10,9 @@ import { FunctionError } from "../../../src/models/Errors/ErrorConstructor";
 
 jest.mock("mysql2/promise", () => {
   return {
-    createPool: jest.fn(() => {
+    createPool: () => {
       return { getConnection: () => Promise.resolve(mockConnection) };
-    }),
+    },
   };
 });
 

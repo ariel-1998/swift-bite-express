@@ -139,13 +139,11 @@ export async function externalAuthStrategy(
   done: VerifyCallback
 ) {
   let connection: PoolConnection | undefined = undefined;
-  console.log("started connection");
 
   try {
     //look for user in database in
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    console.log("before user req");
 
     ///////////////////////////////only server errors can accure///////////////////
     const user = await externalAuthProvider.getUserByProfile(

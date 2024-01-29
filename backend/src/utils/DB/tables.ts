@@ -5,6 +5,7 @@ import { MenuItem } from "../../models/MenuItem";
 import { Restaurant } from "../../models/Restaurant";
 import { User } from "../../models/User";
 import { executeQuery, pool } from "./dbConfig";
+import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddressTable";
 
 type SQLTableNames =
   | "auth_provider"
@@ -83,7 +84,6 @@ DB.addTable("menu_items", {
 });
 
 DB.addTable("restaurant_owner_address", {
-  id: "id",
   addressId: "addressId",
   restaurantId: "restaurantId",
   userId: "userId",
@@ -94,13 +94,6 @@ DB.addTable("restaurants", {
   name: "name",
   imgUrl: "imgUrl",
 });
-
-type RestauransOwnerAddressTable = {
-  id: number;
-  addressId: number;
-  restaurantId: number;
-  userId: number;
-};
 
 async function create_auth_provider_table(connection: PoolConnection) {
   const { columns, tableName } = DB.tables.auth_provider;
@@ -172,9 +165,7 @@ async function create_users_table(connection: PoolConnection) {
   await executeQuery(connection, { query, params: [] });
 }
 
-type InitializeServerFn = () => void;
-
-export async function createDBTables(cb: InitializeServerFn) {
+export async function createDBTables() {
   let connection: PoolConnection | undefined = undefined;
   try {
     connection = await pool.getConnection();
@@ -183,9 +174,9 @@ export async function createDBTables(cb: InitializeServerFn) {
     await create_addresses_table(connection);
     await create_users_table(connection);
     await connection.commit();
-    cb();
   } catch (error) {
     await connection?.rollback();
+    throw error;
   } finally {
     connection?.release();
   }

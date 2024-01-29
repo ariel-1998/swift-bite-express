@@ -1,12 +1,14 @@
 import { Router } from "express";
 import {
-  getAddressByIdLogic,
-  addAddressLogic,
-  updateAddressLogic,
+  getAddressById,
+  addAddress,
+  updateAddress,
+  removeAddress,
 } from "../logic/addressLogic";
 
 export const addressRouter = Router();
 
-addressRouter.post("/", addAddressLogic);
-addressRouter.post("/", updateAddressLogic);
-addressRouter.get("/:addressId", getAddressByIdLogic);
+addressRouter.post("/", addAddress);
+addressRouter.put("/", updateAddress);
+addressRouter.delete("/", removeAddress);
+addressRouter.get("/:addressId", getAddressById);

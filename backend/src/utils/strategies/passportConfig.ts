@@ -101,7 +101,6 @@ passport.use(
 
 //         done(null, user);
 //       } catch (error) {
-//         console.log(error);
 //         connection?.rollback();
 //         const handledError = handleErrorTypes(error);
 //         done(handledError as Error);
@@ -171,13 +170,10 @@ const getUserById = async (userId: string): Promise<User | null> => {
 };
 
 passport.serializeUser((user, done) => {
-  console.log("serialized", user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id: string, done) => {
-  console.log("deserialized", id);
-
   try {
     const user = await getUserById(id);
     done(null, user);

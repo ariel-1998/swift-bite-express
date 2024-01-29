@@ -1,34 +1,28 @@
 import { NextFunction, Request, Response } from "express";
-import { DB } from "../utils/DB/tables";
-import {
-  TransactionQuery,
-  executeQuery,
-  executeSingleQuery,
-  pool,
-} from "../utils/DB/dbConfig";
-import { Address, addressSchema } from "../models/Address";
-// import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { geocoder } from "../utils/nominatimGeocoding";
-import { parseSchemaThrowZodErrors } from "../models/Errors/ZodErrors";
+import { executeQuery, executeSingleQuery, pool } from "../utils/DB/dbConfig";
+import { Address } from "../models/Address";
+import { FunctionError } from "../models/Errors/ErrorConstructor";
+import { getCoordsAndturnUndefinedToNull } from "../utils/nominatimGeocoding";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
-import { AssertUserInReq } from "../models/User";
 import { verifyUser } from "../middleware/verifyAuth";
 import { handleErrorTypes } from "../middleware/errorHandler";
+import { userQueries } from "../utils/DB/queries/userQueries";
+import { addressQueries } from "../utils/DB/queries/addressQueries";
+import { restauransOwnerAddressQueries } from "../utils/DB/queries/RestauransOwnerAddressQueries";
+import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTable";
 
 type GetAddressByIdParams = {
   addressId: string;
 };
 
-export const getAddressByIdLogic = async (
+export const getAddressById = async (
   req: Request<GetAddressByIdParams>,
   res: Response<Address>,
   next: NextFunction
 ) => {
   try {
     const { addressId } = req.params;
-    const { columns, tableName } = DB.tables.addresses;
-    const query = `SELECT * FROM ${tableName} WHERE ${columns.id} = ?`;
-    const params = [addressId];
+    const { params, query } = addressQueries.getAddressByIdQuery(+addressId);
     const [rows] = await executeSingleQuery<Address[]>(query, params);
     const address = rows[0];
     if (!address) res.sendStatus(404);
@@ -38,9 +32,15 @@ export const getAddressByIdLogic = async (
   }
 };
 
-type AddAddressReqBody = Omit<Address, "id" | "coordinates">;
-type AddAddressReq = Request<unknown, Address, AddAddressReqBody>;
-export const addAddressLogic = async (
+// maybe add addAddress req.query.restaurantId to check if
+export type AddressReqBody = Omit<Address, "id" | "coordinates">;
+export type AddAddressReq = Request<
+  unknown,
+  Address,
+  AddressReqBody,
+  AddressReqQuery
+>;
+export const addAddress = async (
   req: AddAddressReq,
   res: Response<Address>,
   next: NextFunction
@@ -49,26 +49,51 @@ export const addAddressLogic = async (
   let connection: PoolConnection | undefined = undefined;
   try {
     verifyUser(req);
+    //if user already create an address prevent from creating more than 1
+    const restaurantId = req.query.restaurantId;
+    const { user } = req;
     const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
-    const addressParams = await getCoordsAndAddressQuery(addressWithoutId);
-
+    const addressParams = addressQueries.AddAddressQuery(addressWithoutId);
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    //add address
-    const [addressRes] = await executeQuery<ResultSetHeader>(
-      connection,
-      addressParams
-    );
-    const addressId = addressRes.insertId;
-    //need to check if the update is for restaurant or a user
-    const updateParams = updateUserAddressIdQuery(req, addressId);
-    await executeQuery<ResultSetHeader>(connection, updateParams);
+
+    let addedAddressId: number;
+
+    if (!restaurantId) {
+      if (user.primaryAddressId) {
+        throw new FunctionError("Error: Address already created.", 400);
+      }
+      //add address
+      const [addressRes] = await executeQuery<ResultSetHeader>(
+        connection,
+        addressParams
+      );
+      addedAddressId = addressRes.insertId;
+      const updateParams = userQueries.updateUserAddressIdQuery(
+        user,
+        addedAddressId
+      );
+      await executeQuery<ResultSetHeader>(connection, updateParams);
+    } else {
+      const [addressRes] = await executeQuery<ResultSetHeader>(
+        connection,
+        addressParams
+      );
+      addedAddressId = addressRes.insertId;
+      //create add RestauransOwnerAddressTable query
+      const addRowQuery = restauransOwnerAddressQueries.addRow({
+        addressId: addedAddressId,
+        restaurantId: +restaurantId,
+        userId: user.id,
+      });
+      // add RestauransOwnerAddressTable row
+      await executeQuery(connection, addRowQuery);
+    }
 
     await connection.commit();
     //need to return address;
-    res.status(204).json({ ...addressWithoutId, id: addressId });
+    res.status(204).json({ ...addressWithoutId, id: addedAddressId });
   } catch (error) {
-    console.log(error);
     await connection?.rollback();
     next(handleErrorTypes(error));
   } finally {
@@ -76,115 +101,141 @@ export const addAddressLogic = async (
   }
 };
 
-async function getCoordsAndturnUndefinedToNull<
-  T extends { body: AddAddressReqBody }
->(req: T) {
-  const addressObj = turnUndefinedToNull(
-    req.body,
-    "state",
-    "entrance",
-    "apartment"
-  );
-  const coordinates = await geocoder.geocode(req.body);
-  parseSchemaThrowZodErrors(addressSchema, {
-    ...addressObj,
-    coordinates,
-  });
-  return { ...addressObj, coordinates };
-}
-
-async function getCoordsAndAddressQuery(
-  addressObj: Awaited<ReturnType<typeof getCoordsAndturnUndefinedToNull>>
-) {
-  const { columns, tableName } = DB.tables.addresses;
-  const params = [
-    addressObj.building,
-    addressObj.country,
-    addressObj.state,
-    addressObj.street,
-    addressObj.city,
-    addressObj.apartment,
-    addressObj.entrance,
-    addressObj.coordinates,
-  ];
-  const query = `INSERT INTO ${tableName} 
-  (${columns.building}, ${columns.country}, ${columns.state}, ${columns.street}, ${columns.city}, ${columns.apartment}, ${columns.entrance}, ${columns.coordinates})
-  VALUES(?,?,?,?,?,?,?,?)`;
-  return { params, query };
-}
-
-function updateUserAddressIdQuery(
-  req: AssertUserInReq<AddAddressReq>,
-  addressId: number
-): TransactionQuery {
-  const { columns, tableName } = DB.tables.users;
-  const { id } = req.user;
-  const query = `UPDATE ${tableName}
-  SET ${columns.primaryAddressId} = ?
-  WHERE ${columns.id} = ?`;
-  const params = [addressId, id];
-  return { params, query };
-}
-
-// function updateRestaurantAddressIdQuery(
-//   req: AssertUserInReq<AddAddressReq>,
-//   addressId: number
-// ): TransactionQuery {
-//   const { restaurantId } = req.query;
-//   const { user } = req;
-//   if (!restaurantId) throw new FunctionError("RestaurantId is required", 400);
-//   const { columns, tableName } = DB.tables.restaurant_owner_address;
-//   const query = `UPDATE ${tableName}
-//   SET ${columns.addressId} = ?
-//   WHERE ${columns.restaurantId} = ? AND ${columns.userId} = ?`;
-//   const params = [addressId, restaurantId, user.id];
-//   return { params, query };
-// }
-//////////////
-
-type UpdateAddressReqBody = AddAddressReqBody;
-type UpdateAddressReqQuery = { restaurantId?: string };
+type AddressReqQuery = { restaurantId?: string };
 type UpdateAddressReq = Request<
   unknown,
   Address,
-  UpdateAddressReqBody,
-  UpdateAddressReqQuery
+  AddressReqBody,
+  AddressReqQuery
 >;
-export async function updateAddressLogic(
-  req: UpdateAddressReq
-  // res: Response<Address>,
-  // next: NextFunction
+export async function updateAddress(
+  req: UpdateAddressReq,
+  res: Response<Address>,
+  next: NextFunction
 ) {
   let connection: PoolConnection | undefined = undefined;
   try {
     verifyUser(req);
-    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    const user = req.user;
 
+    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    const restaurantId = req.query.restaurantId;
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    //create update address query / update user query
-  } catch (error) {}
+    let updatedAddressId: number;
+    if (!restaurantId) {
+      //cannot update if user primaryAddressId doesnt exist
+      const addressId = user.primaryAddressId;
+      if (!addressId) {
+        throw new FunctionError(
+          "Cannot update address before cretating one",
+          400
+        );
+      }
+      //update user address
+      const updateQuery = addressQueries.updateAddressQuery(
+        addressWithoutId,
+        addressId
+      );
+      await executeQuery<ResultSetHeader>(connection, updateQuery);
+      updatedAddressId = addressId;
+    } else {
+      //check if user is restaurant owner from req.user.isRestaurantOwner
+      const errMsg = `You do not have permission to modify the address of this restaurant.`;
+      if (!user.isRestaurantOwner) throw new FunctionError(errMsg, 403);
+      //check if user is the owner of this restaurant
+      const isOwnerQuery =
+        restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
+          +restaurantId,
+          user.id
+        );
+      const [isOwnerRows] = await executeQuery<RestauransOwnerAddressTable[]>(
+        connection,
+        isOwnerQuery
+      );
+      const isOwner = isOwnerRows[0];
+      //if not throw error
+      if (!isOwner) throw new FunctionError(errMsg, 403);
+      //if owner update restaurant address
+      const updateAddressQuery = addressQueries.updateAddressQuery(
+        addressWithoutId,
+        isOwner.addressId
+      );
+      await executeQuery<ResultSetHeader>(connection, updateAddressQuery);
+      updatedAddressId = isOwner.addressId;
+    }
+    await connection.commit();
+    res.status(204).json({ ...addressWithoutId, id: updatedAddressId });
+  } catch (error) {
+    await connection?.rollback();
+    next(handleErrorTypes(error));
+  } finally {
+    connection?.release();
+  }
 }
 
-type ReplaceUndefinedWithNull<T> = T extends undefined
-  ? NonNullable<T> | null
-  : T;
-
-function turnUndefinedToNull<
-  T extends Record<string, unknown>,
-  K extends keyof T
->(
-  obj: T,
-  ...keys: K[]
-): {
-  [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
-} {
-  keys.forEach((key) => {
-    if (obj[key] === undefined) {
-      obj[key] = null as T[K];
+type RemoveAddressReq = Request<unknown, Address, unknown, AddressReqQuery>;
+export async function removeAddress(
+  req: RemoveAddressReq,
+  res: Response<undefined>,
+  next: NextFunction
+) {
+  let connection: PoolConnection | undefined = undefined;
+  try {
+    verifyUser(req);
+    const user = req.user;
+    const restaurantId = req.query.restaurantId;
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    if (!restaurantId) {
+      if (!user.primaryAddressId) return res.sendStatus(204);
+      //delete address from addresses
+      const deleteAddressQuery = addressQueries.deleteAddressQuery(
+        user.primaryAddressId
+      );
+      await executeQuery(connection, deleteAddressQuery);
+      //update user primaryAddressId to null
+      const updateAddressIdQuery = userQueries.updateUserAddressIdQuery(
+        user,
+        null
+      );
+      await executeQuery(connection, updateAddressIdQuery);
+    } else {
+      //check if isRestaurantOwner
+      const errMsg = `You do not have permission to modify the address of this restaurant.`;
+      if (!user.isRestaurantOwner) throw new FunctionError(errMsg, 403);
+      //check if owner of this specific restaurant with db query
+      const isOwnerQuery =
+        restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
+          +restaurantId,
+          user.id
+        );
+      const [isOwnerRows] = await executeQuery<RestauransOwnerAddressTable[]>(
+        connection,
+        isOwnerQuery
+      );
+      const isOwner = isOwnerRows[0];
+      //if not throw error
+      if (!isOwner) throw new FunctionError(errMsg, 403);
+      //delete address from addresses
+      const deleteAddressQuery = addressQueries.deleteAddressQuery(
+        isOwner.addressId
+      );
+      await executeQuery(connection, deleteAddressQuery);
+      //delete restaurant_owner_addresses column where userid and restaurantId are the same
+      const deleteRowQuery = restauransOwnerAddressQueries.deleteRow(
+        isOwner.restaurantId,
+        isOwner.userId,
+        isOwner.addressId
+      );
+      await executeQuery(connection, deleteRowQuery);
     }
-  });
-  return { ...obj } as {
-    [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
-  };
+    await connection.commit();
+    res.sendStatus(204);
+  } catch (error) {
+    await connection?.rollback();
+    next(handleErrorTypes(error));
+  } finally {
+    connection?.release();
+  }
 }

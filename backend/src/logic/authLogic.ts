@@ -21,7 +21,6 @@ export const handleProviderCBRedirect = (
 ) => {
   passport.authenticate("google", (err: Error) => {
     let redirectUrl = SUCCSESS_AUTH_REDIRECT;
-    console.log(req.user);
     const { state } = req.query;
     if (err) redirectUrl += `/auth/${state}?error=${err.message}`;
 
