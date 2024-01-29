@@ -147,8 +147,8 @@ async function create_users_table(connection: PoolConnection) {
     isRestaurantOwner,
     primaryAddressId,
   } = columns;
-  const auth_provider = DB.tables.auth_provider.tableName;
-  const addresses = DB.tables.addresses.tableName;
+  const auth_provider = DB.tables.auth_provider;
+  const addresses = DB.tables.addresses;
 
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -159,11 +159,51 @@ async function create_users_table(connection: PoolConnection) {
     ${password} VARCHAR(90) DEFAULT NULL,
     ${email} VARCHAR(90) UNIQUE NOT NULL,
     ${isRestaurantOwner} TINYINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider}(id),
-    FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses}(id)
+    FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}),
+    FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id})
     )`;
   await executeQuery(connection, { query, params: [] });
 }
+
+//check if right table
+async function create_restaurants_table(connection: PoolConnection) {
+  const { columns, tableName } = DB.tables.restaurants;
+  const { id, imgUrl, name } = columns;
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+    ${id} INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    ${name} VARCHAR(45) NOT NULL UNIQUE,
+    ${imgUrl} VARCHAR(500) DEFAULT NULL
+  )`;
+  await executeQuery(connection, { query, params: [] });
+}
+
+//check if right table
+async function create_restaurant_owner_address_table(
+  connection: PoolConnection
+) {
+  const tables = DB.tables;
+  const { columns, tableName } = tables.restaurant_owner_address;
+  const { addressId, restaurantId, userId } = columns;
+  const addresses = tables.addresses;
+  const restaurants = tables.restaurants;
+  const users = tables.users;
+
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+    ${addressId} INT DEFAULT NULL,
+    ${restaurantId} INT NOT NULL,
+    ${userId} INT NOT NULL,
+    PRIMARY KEY (${restaurantId}, ${userId}),
+    FOREIGN KEY (${addressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}),
+    FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants.tableName}(${restaurants.columns.id}),
+    FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id})
+  )`;
+
+  await executeQuery(connection, { query, params: [] });
+}
+
+//check if right table
 
 export async function createDBTables() {
   let connection: PoolConnection | undefined = undefined;
@@ -173,6 +213,8 @@ export async function createDBTables() {
     await create_auth_provider_table(connection);
     await create_addresses_table(connection);
     await create_users_table(connection);
+    await create_restaurants_table(connection);
+    await create_restaurant_owner_address_table(connection);
     await connection.commit();
   } catch (error) {
     await connection?.rollback();

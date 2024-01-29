@@ -7,6 +7,7 @@ import { FunctionError } from "../models/Errors/ErrorConstructor";
 const SUCCSESS_AUTH_REDIRECT = "http://localhost:5173";
 
 type Auth = "register" | "login";
+
 export const handleGoogleAuth =
   (source: Auth) => (req: Request, res: Response) =>
     passport.authenticate("google", {

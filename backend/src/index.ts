@@ -10,6 +10,7 @@ import "./utils/strategies/passportConfig";
 import { errorHandler } from "./middleware/errorHandler";
 import { addressRouter } from "./routes/addressRouter";
 import { createDBTables } from "./utils/DB/tables";
+import { restaurantRouter } from "./routes/restaurantRouter";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(passport.session());
 //routes
 app.use("/api/auth", authRouter);
 app.use("/api/address", addressRouter);
+app.use("/api/restaurant", restaurantRouter);
 
 app.use(errorHandler);
 
@@ -36,4 +38,4 @@ createDBTables()
       console.log(`listening on port ${PORT}`);
     });
   })
-  .catch(() => console.log("Starting app failed"));
+  .catch((e) => console.log("Error initilizing APP: ", e));

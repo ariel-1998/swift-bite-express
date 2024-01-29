@@ -8,8 +8,8 @@ import { verifyUser } from "../middleware/verifyAuth";
 import { handleErrorTypes } from "../middleware/errorHandler";
 import { userQueries } from "../utils/DB/queries/userQueries";
 import { addressQueries } from "../utils/DB/queries/addressQueries";
-import { restauransOwnerAddressQueries } from "../utils/DB/queries/RestauransOwnerAddressQueries";
 import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTable";
+import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 
 type GetAddressByIdParams = {
   addressId: string;
@@ -81,7 +81,7 @@ export const addAddress = async (
       );
       addedAddressId = addressRes.insertId;
       //create add RestauransOwnerAddressTable query
-      const addRowQuery = restauransOwnerAddressQueries.addRow({
+      const addRowQuery = restauransOwnerAddressQueries.updateAddressInRow({
         addressId: addedAddressId,
         restaurantId: +restaurantId,
         userId: user.id,
@@ -157,6 +157,11 @@ export async function updateAddress(
       //if not throw error
       if (!isOwner) throw new FunctionError(errMsg, 403);
       //if owner update restaurant address
+      if (!isOwner.addressId)
+        throw new FunctionError(
+          "Cannot update Aaddress before creating one",
+          400
+        );
       const updateAddressQuery = addressQueries.updateAddressQuery(
         addressWithoutId,
         isOwner.addressId
@@ -217,17 +222,19 @@ export async function removeAddress(
       const isOwner = isOwnerRows[0];
       //if not throw error
       if (!isOwner) throw new FunctionError(errMsg, 403);
+      //if addressId not exist that means he didnt create one at all so return success as deleted
+      if (!isOwner.addressId) return res.sendStatus(204);
       //delete address from addresses
       const deleteAddressQuery = addressQueries.deleteAddressQuery(
         isOwner.addressId
       );
       await executeQuery(connection, deleteAddressQuery);
       //delete restaurant_owner_addresses column where userid and restaurantId are the same
-      const deleteRowQuery = restauransOwnerAddressQueries.deleteRow(
-        isOwner.restaurantId,
-        isOwner.userId,
-        isOwner.addressId
-      );
+      const deleteRowQuery = restauransOwnerAddressQueries.updateAddressInRow({
+        addressId: null,
+        restaurantId: isOwner.restaurantId,
+        userId: isOwner.userId,
+      });
       await executeQuery(connection, deleteRowQuery);
     }
     await connection.commit();

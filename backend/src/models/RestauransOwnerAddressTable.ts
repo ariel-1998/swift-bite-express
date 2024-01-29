@@ -1,5 +1,5 @@
 export type RestauransOwnerAddressTable = {
-  addressId: number;
+  addressId: number | null;
   restaurantId: number;
   userId: number;
 };
