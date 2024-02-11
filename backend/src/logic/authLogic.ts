@@ -6,28 +6,14 @@ import { FunctionError } from "../models/Errors/ErrorConstructor";
 //need to change url on deployment
 const SUCCSESS_AUTH_REDIRECT = "http://localhost:5173";
 
-type Auth = "register" | "login";
+export const handleGoogleAuth = passport.authenticate("google", {
+  scope: ["profile", "email"],
+});
 
-export const handleGoogleAuth =
-  (source: Auth) => (req: Request, res: Response) =>
-    passport.authenticate("google", {
-      scope: ["profile", "email"],
-      state: source, // Include the source parameter in the Google authentication request
-    })(req, res);
-
-type State = { state: Auth };
-export const handleProviderCBRedirect = (
-  req: Request<unknown, unknown, unknown, State>,
-  res: Response
-) => {
-  passport.authenticate("google", (err: Error) => {
-    let redirectUrl = SUCCSESS_AUTH_REDIRECT;
-    const { state } = req.query;
-    if (err) redirectUrl += `/auth/${state}?error=${err.message}`;
-
-    return res.redirect(redirectUrl);
-  })(req, res);
-};
+export const handleProviderCBRedirect = passport.authenticate("google", {
+  successRedirect: SUCCSESS_AUTH_REDIRECT,
+  failureRedirect: `/auth/login?error=You might registered with a different method before.`,
+});
 
 export const handleLocalAuth = (method: "signup" | "login") =>
   passport.authenticate(`local-${method}`);

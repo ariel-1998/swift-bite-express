@@ -159,9 +159,21 @@ async function create_users_table(connection: PoolConnection) {
     ${password} VARCHAR(90) DEFAULT NULL,
     ${email} VARCHAR(90) UNIQUE NOT NULL,
     ${isRestaurantOwner} TINYINT NOT NULL DEFAULT 0,
-    FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}),
-    FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id})
+    FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}) ON DELETE CASCADE,
+    FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}) ON DELETE SET NULL
     )`;
+  // const query = `
+  // CREATE TABLE IF NOT EXISTS ${tableName} (
+  //   ${id} INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  //   ${authProviderId} VARCHAR(100) DEFAULT NULL,
+  //   ${primaryAddressId} INT DEFAULT NULL,
+  //   ${fullName} VARCHAR(100) NOT NULL,
+  //   ${password} VARCHAR(90) DEFAULT NULL,
+  //   ${email} VARCHAR(90) UNIQUE NOT NULL,
+  //   ${isRestaurantOwner} TINYINT NOT NULL DEFAULT 0,
+  //   FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}),
+  //   FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id})
+  //   )`;
   await executeQuery(connection, { query, params: [] });
 }
 
@@ -195,10 +207,21 @@ async function create_restaurant_owner_address_table(
     ${restaurantId} INT NOT NULL,
     ${userId} INT NOT NULL,
     PRIMARY KEY (${restaurantId}, ${userId}),
-    FOREIGN KEY (${addressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}),
-    FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants.tableName}(${restaurants.columns.id}),
-    FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id})
+    FOREIGN KEY (${addressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}) ON DELETE SET NULL,
+    FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants.tableName}(${restaurants.columns.id}) ON DELETE CASCADE,
+    FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id}) ON DELETE CASCADE
   )`;
+
+  // const query = `
+  // CREATE TABLE IF NOT EXISTS ${tableName} (
+  //   ${addressId} INT DEFAULT NULL,
+  //   ${restaurantId} INT NOT NULL,
+  //   ${userId} INT NOT NULL,
+  //   PRIMARY KEY (${restaurantId}, ${userId}),
+  //   FOREIGN KEY (${addressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}),
+  //   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants.tableName}(${restaurants.columns.id}),
+  //   FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id})
+  // )`;
 
   await executeQuery(connection, { query, params: [] });
 }

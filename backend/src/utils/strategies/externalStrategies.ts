@@ -150,6 +150,7 @@ export async function externalAuthStrategy(
       connection,
       profile
     );
+    console.log("user", user);
     //if user exist return the user and exit the function
     if (user) return done(null, user);
     //add provider to auth-provider DB

@@ -13,8 +13,8 @@ export const authRouter = Router();
 authRouter.get("/login", userInfoResponse);
 
 //google strategy
-authRouter.get("/register/google", handleGoogleAuth("register"));
-authRouter.get("/login/google", handleGoogleAuth("login"));
+authRouter.get("/google", handleGoogleAuth);
+// authRouter.get("/login/google", handleGoogleAuth("login"));
 authRouter.get("/google/callback", handleProviderCBRedirect);
 
 //local strategy register

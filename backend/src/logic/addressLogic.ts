@@ -179,7 +179,7 @@ export async function updateAddress(
   }
 }
 
-type RemoveAddressReq = Request<unknown, Address, unknown, AddressReqQuery>;
+type RemoveAddressReq = Request<unknown, unknown, unknown, AddressReqQuery>;
 export async function removeAddress(
   req: RemoveAddressReq,
   res: Response<undefined>,
@@ -200,11 +200,13 @@ export async function removeAddress(
       );
       await executeQuery(connection, deleteAddressQuery);
       //update user primaryAddressId to null
+      ////////////////
       const updateAddressIdQuery = userQueries.updateUserAddressIdQuery(
         user,
         null
-      );
+      ); //might not be needed because i set on delete to null
       await executeQuery(connection, updateAddressIdQuery);
+      /////////////////
     } else {
       //check if isRestaurantOwner
       const errMsg = `You do not have permission to modify the address of this restaurant.`;
@@ -230,12 +232,14 @@ export async function removeAddress(
       );
       await executeQuery(connection, deleteAddressQuery);
       //delete restaurant_owner_addresses column where userid and restaurantId are the same
+      ///////////////////
       const deleteRowQuery = restauransOwnerAddressQueries.updateAddressInRow({
         addressId: null,
         restaurantId: isOwner.restaurantId,
         userId: isOwner.userId,
-      });
+      }); //might not be needed because i set on delete to null
       await executeQuery(connection, deleteRowQuery);
+      ////////////////////
     }
     await connection.commit();
     res.sendStatus(204);

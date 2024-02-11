@@ -7,12 +7,9 @@ type AuthProviderBtnProps = {
   auth: Auth;
 };
 
-const AuthProviderBtn: React.FC<AuthProviderBtnProps> = ({
-  provider,
-  auth,
-}) => {
+const AuthProviderBtn: React.FC<AuthProviderBtnProps> = ({ provider }) => {
   const providerSignup = async () => {
-    window.open(authService.providerAuth(provider, auth), "_self");
+    window.open(authService.providerAuth(provider), "_self");
   };
   return (
     <Button type="button" size={"formBtn"} onClick={providerSignup}>
