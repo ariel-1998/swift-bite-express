@@ -3,12 +3,12 @@ import {
   getAddressById,
   addAddress,
   updateAddress,
-  removeAddress,
+  // removeAddress,
 } from "../logic/addressLogic";
 
 export const addressRouter = Router();
 
 addressRouter.post("/", addAddress);
 addressRouter.put("/", updateAddress);
-addressRouter.delete("/", removeAddress);
+// addressRouter.delete("/", removeAddress);
 addressRouter.get("/:addressId", getAddressById);

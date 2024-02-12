@@ -6,7 +6,7 @@ export enum IsOwner {
 export type User = {
   id: number;
   authProviderId: string | null;
-  primaryAddressId: string | null;
+  primaryAddressId: number | null;
   isRestaurantOwner: IsOwner;
   fullName: string;
   email: string;

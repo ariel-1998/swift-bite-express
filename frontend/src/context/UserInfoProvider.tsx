@@ -1,7 +1,9 @@
-import React, { ReactNode, createContext, useEffect, useState } from "react";
+import React, { ReactNode, createContext, useState } from "react";
 import { User } from "../models/User";
 import { authService } from "../services/authService";
 import { Address } from "../models/Address";
+import { useQuery } from "@tanstack/react-query";
+import { addressService } from "../services/addressService";
 
 export type UserContextProps = {
   user?: User;
@@ -21,13 +23,41 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
   const [address, setAddress] = useState<Address>();
   const [loadingUser, setLoadingUser] = useState(true);
 
-  useEffect(() => {
-    //fetchUser
-    authService
-      .getLogin()
-      .then((user) => setUser(user))
-      .finally(() => setLoadingUser(false));
-  }, []);
+  //get user data
+  useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      return authService
+        .getLogin()
+        .then((data) => {
+          setUser(data);
+          if (!data.primaryAddressId) setLoadingUser(false);
+          return data;
+        })
+        .catch((err) => {
+          setLoadingUser(false);
+          throw err;
+        });
+    },
+  });
+
+  //get user address
+  useQuery({
+    queryKey: ["userAddress"],
+    queryFn: async () => {
+      if (!user) return undefined;
+      return addressService
+        .getAddressById(user.primaryAddressId!)
+        .then((data) => {
+          setAddress(data);
+          return data;
+        })
+        .finally(() => {
+          setLoadingUser(false);
+        });
+    },
+    enabled: !!user?.primaryAddressId,
+  });
 
   return (
     <UserInfoContext.Provider value={{ user, setUser, address, setAddress }}>

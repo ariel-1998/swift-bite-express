@@ -49,13 +49,13 @@ class AddressQueries {
     const query = `
     UPDATE ${tableName}
     SET ${columns.apartment} = ?,
-    SET ${columns.building} = ?,
-    SET ${columns.city} = ?,
-    SET ${columns.country} = ?,
-    SET ${columns.entrance} = ?,
-    SET ${columns.state} = ?,
-    SET ${columns.street} = ?,
-    SET ${columns.coordinates} = ?
+      ${columns.building} = ?,
+      ${columns.city} = ?,
+      ${columns.country} = ?,
+      ${columns.entrance} = ?,
+      ${columns.state} = ?,
+      ${columns.street} = ?,
+      ${columns.coordinates} = ?
     WHERE ${columns.id} = ?`;
     const params: MixedArray = [
       apartment,
@@ -71,12 +71,12 @@ class AddressQueries {
     return { params, query };
   }
 
-  deleteAddressQuery(addressId: number): TransactionQuery {
-    const { columns, tableName } = DB.tables.addresses;
-    const query = `DELETE FROM ${tableName} WHERE ${columns.id} = ?`;
-    const params: MixedArray = [addressId];
-    return { params, query };
-  }
+  // deleteAddressQuery(addressId: number): TransactionQuery {
+  //   const { columns, tableName } = DB.tables.addresses;
+  //   const query = `DELETE FROM ${tableName} WHERE ${columns.id} = ?`;
+  //   const params: MixedArray = [addressId];
+  //   return { params, query };
+  // }
 }
 
 export const addressQueries = new AddressQueries();

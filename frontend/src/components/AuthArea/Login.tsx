@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { UserCredentials, userLoginFormSchema } from "../../models/User";
 import { authService } from "../../services/authService";
 import ProviderParamError from "./ProviderParamError";
+import { useMutation } from "@tanstack/react-query";
 
 const Login: React.FC = () => {
   const {
@@ -17,9 +18,11 @@ const Login: React.FC = () => {
     handleSubmit,
   } = useForm<UserCredentials>({ resolver: zodResolver(userLoginFormSchema) });
 
+  const mutatation = useMutation({
+    mutationFn: authService.localLogin,
+  });
   const submitLogin = async (data: UserCredentials) => {
-    console.log(data);
-    await authService.localLogin(data);
+    mutatation.mutate(data);
   };
 
   return (
@@ -39,7 +42,12 @@ const Login: React.FC = () => {
         placeholder="Password..."
         {...register("password")}
       />
-      <Button type="submit" size={"formBtn"} variant={"primary"}>
+      <Button
+        type="submit"
+        size={"formBtn"}
+        variant={"primary"}
+        disabled={mutatation.isPending}
+      >
         Sign In
       </Button>
       <hr />

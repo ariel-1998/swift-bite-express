@@ -11,12 +11,9 @@ export const nodeGeocoder = NodeGeocoder({
 
 type AddressToConvert = Partial<Address>;
 export class Geocoder {
-  protected convertAddressObjToQuery = (address: AddressToConvert) => {
-    const filteredAddress = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(address).filter(([key, value]) => Boolean(value))
-    );
-    return filteredAddress;
+  protected convertAddressObjToString = (address: AddressToConvert) => {
+    const addressString = `${address.building} ${address.street}, ${address.city}, ${address.country}, ${address.state}`;
+    return addressString;
   };
 
   protected formatCoords = (longitude: number, latitude: number) => {
@@ -25,8 +22,9 @@ export class Geocoder {
 
   geocode = async (address: AddressToConvert) => {
     try {
-      const filteredAddress = this.convertAddressObjToQuery(address);
-      const data = await nodeGeocoder.geocode(filteredAddress);
+      const addressString = this.convertAddressObjToString(address);
+      const data = await nodeGeocoder.geocode(addressString);
+
       if (!data.length) throw Error();
       const { longitude, latitude } = data[0];
       if (!longitude || !latitude) throw Error();

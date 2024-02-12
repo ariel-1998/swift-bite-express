@@ -1,7 +1,7 @@
 import React from "react";
 import useUserInfo from "../hooks/useUserInfo";
-import AuthedHome from "../components/Home/AuthedHome";
-import GuestHome from "../components/Home/GuestHome";
+import AuthedHome from "../components/HomeArea/AuthedHome";
+import GuestHome from "../components/HomeArea/GuestHome";
 
 const HomePage: React.FC = () => {
   const { user } = useUserInfo();

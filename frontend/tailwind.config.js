@@ -20,6 +20,13 @@ export default {
         error: {
           DEFAULT: "#dc3545",
         },
+        brown: {
+          DEFAULT: "#52493e",
+          dark: "#433c32",
+        },
+        orange: {
+          DEFAULT: "#f06f25",
+        },
       },
     },
   },

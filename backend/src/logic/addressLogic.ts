@@ -172,6 +172,7 @@ export async function updateAddress(
     await connection.commit();
     res.status(204).json({ ...addressWithoutId, id: updatedAddressId });
   } catch (error) {
+    console.log(error);
     await connection?.rollback();
     next(handleErrorTypes(error));
   } finally {
@@ -179,74 +180,74 @@ export async function updateAddress(
   }
 }
 
-type RemoveAddressReq = Request<unknown, unknown, unknown, AddressReqQuery>;
-export async function removeAddress(
-  req: RemoveAddressReq,
-  res: Response<undefined>,
-  next: NextFunction
-) {
-  let connection: PoolConnection | undefined = undefined;
-  try {
-    verifyUser(req);
-    const user = req.user;
-    const restaurantId = req.query.restaurantId;
-    connection = await pool.getConnection();
-    await connection.beginTransaction();
-    if (!restaurantId) {
-      if (!user.primaryAddressId) return res.sendStatus(204);
-      //delete address from addresses
-      const deleteAddressQuery = addressQueries.deleteAddressQuery(
-        user.primaryAddressId
-      );
-      await executeQuery(connection, deleteAddressQuery);
-      //update user primaryAddressId to null
-      ////////////////
-      const updateAddressIdQuery = userQueries.updateUserAddressIdQuery(
-        user,
-        null
-      ); //might not be needed because i set on delete to null
-      await executeQuery(connection, updateAddressIdQuery);
-      /////////////////
-    } else {
-      //check if isRestaurantOwner
-      const errMsg = `You do not have permission to modify the address of this restaurant.`;
-      if (!user.isRestaurantOwner) throw new FunctionError(errMsg, 403);
-      //check if owner of this specific restaurant with db query
-      const isOwnerQuery =
-        restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
-          +restaurantId,
-          user.id
-        );
-      const [isOwnerRows] = await executeQuery<RestauransOwnerAddressTable[]>(
-        connection,
-        isOwnerQuery
-      );
-      const isOwner = isOwnerRows[0];
-      //if not throw error
-      if (!isOwner) throw new FunctionError(errMsg, 403);
-      //if addressId not exist that means he didnt create one at all so return success as deleted
-      if (!isOwner.addressId) return res.sendStatus(204);
-      //delete address from addresses
-      const deleteAddressQuery = addressQueries.deleteAddressQuery(
-        isOwner.addressId
-      );
-      await executeQuery(connection, deleteAddressQuery);
-      //delete restaurant_owner_addresses column where userid and restaurantId are the same
-      ///////////////////
-      const deleteRowQuery = restauransOwnerAddressQueries.updateAddressInRow({
-        addressId: null,
-        restaurantId: isOwner.restaurantId,
-        userId: isOwner.userId,
-      }); //might not be needed because i set on delete to null
-      await executeQuery(connection, deleteRowQuery);
-      ////////////////////
-    }
-    await connection.commit();
-    res.sendStatus(204);
-  } catch (error) {
-    await connection?.rollback();
-    next(handleErrorTypes(error));
-  } finally {
-    connection?.release();
-  }
-}
+// type RemoveAddressReq = Request<unknown, unknown, unknown, AddressReqQuery>;
+// export async function removeAddress(
+//   req: RemoveAddressReq,
+//   res: Response<undefined>,
+//   next: NextFunction
+// ) {
+//   let connection: PoolConnection | undefined = undefined;
+//   try {
+//     verifyUser(req);
+//     const user = req.user;
+//     const restaurantId = req.query.restaurantId;
+//     connection = await pool.getConnection();
+//     await connection.beginTransaction();
+//     if (!restaurantId) {
+//       if (!user.primaryAddressId) return res.sendStatus(204);
+//       //delete address from addresses
+//       const deleteAddressQuery = addressQueries.deleteAddressQuery(
+//         user.primaryAddressId
+//       );
+//       await executeQuery(connection, deleteAddressQuery);
+//       //update user primaryAddressId to null
+//       ////////////////
+//       const updateAddressIdQuery = userQueries.updateUserAddressIdQuery(
+//         user,
+//         null
+//       ); //might not be needed because i set on delete to null
+//       await executeQuery(connection, updateAddressIdQuery);
+//       /////////////////
+//     } else {
+//       //check if isRestaurantOwner
+//       const errMsg = `You do not have permission to modify the address of this restaurant.`;
+//       if (!user.isRestaurantOwner) throw new FunctionError(errMsg, 403);
+//       //check if owner of this specific restaurant with db query
+//       const isOwnerQuery =
+//         restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
+//           +restaurantId,
+//           user.id
+//         );
+//       const [isOwnerRows] = await executeQuery<RestauransOwnerAddressTable[]>(
+//         connection,
+//         isOwnerQuery
+//       );
+//       const isOwner = isOwnerRows[0];
+//       //if not throw error
+//       if (!isOwner) throw new FunctionError(errMsg, 403);
+//       //if addressId not exist that means he didnt create one at all so return success as deleted
+//       if (!isOwner.addressId) return res.sendStatus(204);
+//       //delete address from addresses
+//       const deleteAddressQuery = addressQueries.deleteAddressQuery(
+//         isOwner.addressId
+//       );
+//       await executeQuery(connection, deleteAddressQuery);
+//       //delete restaurant_owner_addresses column where userid and restaurantId are the same
+//       ///////////////////
+//       const deleteRowQuery = restauransOwnerAddressQueries.updateAddressInRow({
+//         addressId: null,
+//         restaurantId: isOwner.restaurantId,
+//         userId: isOwner.userId,
+//       }); //might not be needed because i set on delete to null
+//       await executeQuery(connection, deleteRowQuery);
+//       ////////////////////
+//     }
+//     await connection.commit();
+//     res.sendStatus(204);
+//   } catch (error) {
+//     await connection?.rollback();
+//     next(handleErrorTypes(error));
+//   } finally {
+//     connection?.release();
+//   }
+// }
