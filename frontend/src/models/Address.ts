@@ -9,9 +9,8 @@ export type Address = {
   building: number;
   entrance?: string;
   apartment?: number;
-  coordinates?: string;
-  // longitude: string;
-  // latitude: string;
+  longitude: number;
+  latitude: number;
 };
 
 //check how to autocomplete names via google geolocation api

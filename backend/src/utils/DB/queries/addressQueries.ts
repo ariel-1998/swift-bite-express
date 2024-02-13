@@ -23,11 +23,12 @@ class AddressQueries {
       addressObj.city,
       addressObj.apartment,
       addressObj.entrance,
-      addressObj.coordinates,
+      addressObj.longitude,
+      addressObj.latitude,
     ];
     const query = `INSERT INTO ${tableName} 
-    (${columns.building}, ${columns.country}, ${columns.state}, ${columns.street}, ${columns.city}, ${columns.apartment}, ${columns.entrance}, ${columns.coordinates})
-    VALUES(?,?,?,?,?,?,?,?)`;
+    (${columns.building}, ${columns.country}, ${columns.state}, ${columns.street}, ${columns.city}, ${columns.apartment}, ${columns.entrance}, ${columns.longitude}, ${columns.latitude})
+    VALUES(?,?,?,?,?,?,?,?,?)`;
     return { params, query };
   }
 
@@ -44,7 +45,8 @@ class AddressQueries {
       entrance,
       state,
       street,
-      coordinates,
+      longitude,
+      latitude,
     } = addressObj;
     const query = `
     UPDATE ${tableName}
@@ -55,7 +57,8 @@ class AddressQueries {
         ${columns.entrance} = ?,
         ${columns.state} = ?,
         ${columns.street} = ?,
-        ${columns.coordinates} = ?
+        ${columns.longitude} = ?,
+        ${columns.latitude} = ?
     WHERE ${columns.id} = ?`;
     const params: MixedArray = [
       apartment,
@@ -65,7 +68,8 @@ class AddressQueries {
       entrance,
       state,
       street,
-      coordinates,
+      longitude,
+      latitude,
       addressId,
     ];
     return { params, query };

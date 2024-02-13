@@ -49,6 +49,7 @@ export const addAddress = async (
   let connection: PoolConnection | undefined = undefined;
   try {
     verifyUser(req);
+    console.log(req.body);
     //if user already create an address prevent from creating more than 1
     const restaurantId = req.query.restaurantId;
     const { user } = req;
@@ -94,6 +95,8 @@ export const addAddress = async (
     //need to return address;
     res.status(204).json({ ...addressWithoutId, id: addedAddressId });
   } catch (error) {
+    console.log(error);
+
     await connection?.rollback();
     next(handleErrorTypes(error));
   } finally {

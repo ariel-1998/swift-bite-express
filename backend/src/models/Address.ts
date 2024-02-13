@@ -10,7 +10,8 @@ export type Address = {
   state: string | undefined | null;
   entrance: string | undefined | null;
   apartment: number | undefined | null;
-  coordinates: string;
+  longitude: number;
+  latitude: number;
 };
 //no foreign keys
 
@@ -51,7 +52,8 @@ export const addressSchema = z.object({
     .number({ invalid_type_error: "Entrance is Optional or Number" })
     .nullable()
     .optional(),
-  coordinates: z.string({ required_error: "Address NOT Found!" }), //if coords are not found so is the location
+  longitude: z.number({ required_error: "Address NOT Found!" }), //if coords are not found so is the location
+  latitude: z.number({ required_error: "Address NOT Found!" }), //if coords are not found so is the location
 });
 
 export type AddressSchema = z.infer<typeof addressSchema>;

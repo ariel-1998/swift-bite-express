@@ -4,6 +4,7 @@ import {
   // deleteRestaurant,
   getRestaurantsByPage,
   getSingleRestaurantById,
+  searchRestaurants,
   updateRestaurant,
 } from "../logic/restaurantLogic";
 
@@ -15,6 +16,7 @@ restaurantRouter.get("/", getRestaurantsByPage);
 restaurantRouter.get("/:restaurantId", getSingleRestaurantById);
 //with body
 restaurantRouter.post("/", addRestaurant);
+restaurantRouter.get("/search/:search", searchRestaurants);
 //with body
 restaurantRouter.put("/", updateRestaurant);
 //with params

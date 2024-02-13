@@ -21,6 +21,8 @@ import { handleErrorTypes } from "../middleware/errorHandler";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
+import { addressQueries } from "../utils/DB/queries/addressQueries";
+import { Address } from "../models/Address";
 
 //need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
@@ -47,6 +49,58 @@ export async function getSingleRestaurantById(
 }
 
 export async function getRestaurantsByPage() {}
+
+type CoordinatesInParams = { longitude?: string; latitude?: string };
+type Coordinates = { longitude: number; latitude: number };
+type SearchRestaurant = Request<
+  { search: string },
+  unknown,
+  unknown,
+  CoordinatesInParams
+>;
+export async function searchRestaurants(
+  req: SearchRestaurant,
+  res: Response<Restaurant[]>,
+  next: NextFunction
+) {
+  let connection: PoolConnection | undefined = undefined;
+  try {
+    const { search } = req.params;
+    const { longitude, latitude } = req.query;
+    let coords: Required<Coordinates> = {
+      latitude: 48.8584,
+      longitude: 2.2945,
+    };
+    if (longitude && latitude)
+      coords = { longitude: +longitude, latitude: +latitude };
+
+    connection = await pool.getConnection();
+
+    if (!longitude || !latitude) {
+      if (req.user && req.user.primaryAddressId) {
+        const getUserAddressQuery = addressQueries.getAddressByIdQuery(
+          req.user.primaryAddressId
+        );
+        const [rows] = await executeQuery<Address[]>(
+          connection,
+          getUserAddressQuery
+        );
+        coords = { longitude: rows[0].latitude, latitude: rows[0].latitude };
+      }
+    }
+    const searchQuery = restaurantQueries.searchRestaurantByName(
+      search,
+      +coords.longitude,
+      +coords.latitude
+    );
+    const [rows] = await executeQuery<Restaurant[]>(connection, searchQuery);
+    res.status(200).json(rows);
+  } catch (error) {
+    next(handleErrorTypes(error));
+  } finally {
+    connection?.release();
+  }
+}
 
 type RestaurantReq = Request<unknown, unknown, Pick<Restaurant, "name">>;
 export async function addRestaurant(

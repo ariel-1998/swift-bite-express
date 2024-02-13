@@ -10,7 +10,7 @@ class AddressService {
   private addressRoute = "/address";
   private turnAddressFormDataToAddress(
     address: AddressFormData
-  ): Omit<Address, "id"> {
+  ): Omit<Address, "id" | "longitude" | "latitude"> {
     const building = +address.building;
     const apartment = address.apartment ? +address.apartment : undefined;
     return { ...address, building, apartment };

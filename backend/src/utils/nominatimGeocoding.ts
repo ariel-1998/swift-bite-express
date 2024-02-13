@@ -28,8 +28,7 @@ export class Geocoder {
       if (!data.length) throw Error();
       const { longitude, latitude } = data[0];
       if (!longitude || !latitude) throw Error();
-      const coords = this.formatCoords(longitude, latitude);
-      return coords;
+      return { longitude, latitude };
     } catch (error) {
       throw new FunctionError("No accurate address found.", 404);
     }
@@ -50,7 +49,7 @@ export async function getCoordsAndturnUndefinedToNull<
   const coordinates = await geocoder.geocode(req.body);
   parseSchemaThrowZodErrors(addressSchema, {
     ...addressObj,
-    coordinates,
+    ...coordinates,
   });
-  return { ...addressObj, coordinates };
+  return { ...addressObj, ...coordinates };
 }
