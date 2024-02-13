@@ -18,8 +18,8 @@ class RestauransOwnerAddressQueries {
     const query = `
     UPDATE ${tableName} 
     SET ${columns.addressId} = ?
-    WHERE ${columns.restaurantId} = ? AND ${columns.userId} = ?
-    `;
+    WHERE ${columns.restaurantId} = ? 
+    AND ${columns.userId} = ?`;
     const params: MixedArray = [addressId, restaurantId, userId];
     return { params, query };
   }

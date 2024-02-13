@@ -15,6 +15,10 @@ export declare global {
       // GOOGLE_GEOCODEING_BASE_URL: string;
       ENV: "test" | "dev" | "prod";
       NODE_ENV: "production" | "test" | undefined;
+      CLOUDINARY_CLOUD_NAME: string;
+      CLOUDINARY_UPLOAD_PRESET: string;
+      CLOUDINARY_API_KEY: string;
+      CLOUDINARY_API_SECRET: string;
     }
   }
 }

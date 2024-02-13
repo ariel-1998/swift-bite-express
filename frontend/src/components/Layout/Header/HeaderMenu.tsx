@@ -14,7 +14,7 @@ const HeaderMenu: React.FC = () => {
         className="font-semibold text-secondary cursor-pointer "
         onClick={toggleMenu}
       >
-        Hello {user?.fullName ?? "Guest"}
+        Hello, {user?.fullName ?? "Guest"}
       </div>
       {open && <OptionList />}
     </div>

@@ -10,7 +10,7 @@ function App() {
   const { user } = useUserInfo();
 
   return (
-    <div className="min-h-screen flex flex-col bg-primary-special">
+    <div className="min-h-screen flex flex-col bg-primary-special bg-[#f7f7f1]">
       <BrowserRouter>
         <Routes>
           <Route path="/" Component={HomePage} />

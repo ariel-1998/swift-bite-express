@@ -49,13 +49,13 @@ class AddressQueries {
     const query = `
     UPDATE ${tableName}
     SET ${columns.apartment} = ?,
-      ${columns.building} = ?,
-      ${columns.city} = ?,
-      ${columns.country} = ?,
-      ${columns.entrance} = ?,
-      ${columns.state} = ?,
-      ${columns.street} = ?,
-      ${columns.coordinates} = ?
+        ${columns.building} = ?,
+        ${columns.city} = ?,
+        ${columns.country} = ?,
+        ${columns.entrance} = ?,
+        ${columns.state} = ?,
+        ${columns.street} = ?,
+        ${columns.coordinates} = ?
     WHERE ${columns.id} = ?`;
     const params: MixedArray = [
       apartment,

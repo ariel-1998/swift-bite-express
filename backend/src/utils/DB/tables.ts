@@ -93,6 +93,7 @@ DB.addTable("restaurants", {
   id: "id",
   name: "name",
   imgUrl: "imgUrl",
+  imgPublicId: "imgPublicId",
 });
 
 async function create_auth_provider_table(connection: PoolConnection) {
@@ -180,12 +181,13 @@ async function create_users_table(connection: PoolConnection) {
 //check if right table
 async function create_restaurants_table(connection: PoolConnection) {
   const { columns, tableName } = DB.tables.restaurants;
-  const { id, imgUrl, name } = columns;
+  const { id, imgUrl, name, imgPublicId } = columns;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
     ${id} INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     ${name} VARCHAR(45) NOT NULL UNIQUE,
-    ${imgUrl} VARCHAR(500) DEFAULT NULL
+    ${imgUrl} VARCHAR(500) DEFAULT NULL,
+    ${imgPublicId} VARCHAR(500) DEFAULT NULL
   )`;
   await executeQuery(connection, { query, params: [] });
 }

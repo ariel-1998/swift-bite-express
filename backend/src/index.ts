@@ -11,12 +11,18 @@ import { errorHandler } from "./middleware/errorHandler";
 import { addressRouter } from "./routes/addressRouter";
 import { createDBTables } from "./utils/DB/tables";
 import { restaurantRouter } from "./routes/restaurantRouter";
+import fileUpload from "express-fileupload";
 
 const app = express();
 
-// app.use(cors());
 app.use(cors(corsOptions));
 app.use(json());
+app.use(
+  fileUpload({
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
 app.use(session(sessionOptions));
 
 //passport

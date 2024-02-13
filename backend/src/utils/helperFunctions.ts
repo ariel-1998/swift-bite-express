@@ -1,4 +1,4 @@
-type ReplaceUndefinedWithNull<T> = T extends undefined
+export type ReplaceUndefinedWithNull<T> = T extends undefined
   ? NonNullable<T> | null
   : T;
 
