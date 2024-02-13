@@ -1,3 +1,8 @@
+import {
+  NestedRestauranAndAddress,
+  RestaurantJoinedWithAddress,
+} from "../models/Restaurant";
+
 export type ReplaceUndefinedWithNull<T> = T extends undefined
   ? NonNullable<T> | null
   : T;
@@ -19,4 +24,29 @@ export function turnUndefinedToNull<
   return { ...obj } as {
     [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
   };
+}
+
+export function rearrangeRestaurantAddressDataArray(
+  array: RestaurantJoinedWithAddress[]
+): NestedRestauranAndAddress[] {
+  const rearrangedData = array.map((item) => {
+    const obj: NestedRestauranAndAddress = {
+      id: item.id,
+      name: item.name,
+      imgUrl: item.imgUrl,
+      imgPublicId: item.imgPublicId,
+      address: {
+        apartment: item.apartment,
+        building: item.building,
+        city: item.city,
+        coordinates: item.coordinates,
+        country: item.country,
+        entrance: item.entrance,
+        state: item.state,
+        street: item.street,
+      },
+    };
+    return obj;
+  });
+  return rearrangedData;
 }

@@ -1,10 +1,15 @@
 import { z } from "zod";
+import { Address } from "./Address";
 
 export type Restaurant = {
   id: number;
   name: string;
   imgUrl: string | undefined | null;
   imgPublicId: string | undefined | null;
+};
+
+export type NestedRestauranAndAddress = Restaurant & {
+  address: Partial<Omit<Address, "id">>;
 };
 
 const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
@@ -27,8 +32,5 @@ export const restaurantSchema = z.object({
     .max(45, "Name is too long"),
   image: imageSchema,
 });
+
 export type RestaurantSchema = z.infer<typeof restaurantSchema>;
-/**
- * a table for addressId, restaurantId and userId was created
- * for many to many relationship
- */

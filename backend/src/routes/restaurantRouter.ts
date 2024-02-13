@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   addRestaurant,
-  deleteRestaurant,
+  // deleteRestaurant,
   getRestaurantsByPage,
   getSingleRestaurantById,
   updateRestaurant,
@@ -18,4 +18,4 @@ restaurantRouter.post("/", addRestaurant);
 //with body
 restaurantRouter.put("/", updateRestaurant);
 //with params
-restaurantRouter.delete("/:restaurantId", deleteRestaurant);
+// restaurantRouter.delete("/:restaurantId", deleteRestaurant);

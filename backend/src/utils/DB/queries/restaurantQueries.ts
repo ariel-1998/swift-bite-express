@@ -22,30 +22,27 @@ class RestaurantQueries {
     return { params, query };
   }
 
-  getSingleRestaurantQuery(restaurantId: number): TransactionQuery {
-    // const addressCols = DB.tables.addresses.columns;
-    // const addressTableName = DB.tables.addresses.tableName;
+  getSingleRestaurantById(restaurantId: number): TransactionQuery {
+    const addressCols = DB.tables.addresses.columns;
+    const addressTableName = DB.tables.addresses.tableName;
+    const combineCols = DB.tables.restaurant_owner_address.columns;
+    const combineTableName = DB.tables.restaurant_owner_address.tableName;
     //NEED to add join statement
 
-    //     SELECT
-    //     restaurant.*,
-    //     JSON_OBJECT(
-    //         'address_id', addr.address_id,
-    //         'street', addr.street,
-    //         'city', addr.city,
-    //         'state', addr.state,
-    //         'country', addr.country
-    //     ) AS address
-    // FROM
-    //     restaurant
-    // JOIN
-    //     addresses AS addr ON restaurant.address_id = addr.address_id
-    // WHERE
-    //     restaurant_id = ?;
-    const query = `SELECT * FROM ${tableName} WHERE ${columns.id} = ?`;
+    const query = `
+    SELECT ${addressTableName}.*, ${tableName}.${columns.name}, 
+    ${tableName}.${columns.imgUrl}, ${tableName}.${columns.imgPublicId}
+    FROM ${tableName}
+    LEFT JOIN ${combineTableName} ON ${tableName}.${columns.id} = ${combineTableName}.${combineCols.restaurantId}
+    LEFT JOIN ${addressTableName} on ${addressTableName}.${addressCols.id} = ${combineTableName}.${combineCols.addressId}
+    where ${tableName}.${columns.id} = ?
+    `;
+    // const query = `SELECT * FROM ${tableName} WHERE ${columns.id} = ?`;
     const params: MixedArray = [restaurantId];
     return { params, query };
   }
+
+  deleteRestaurant() {}
 }
 
 export const restaurantQueries = new RestaurantQueries();

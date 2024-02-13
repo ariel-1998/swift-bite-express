@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { Address } from "./Address";
 // import { Address } from "./Address";
 
 export type Restaurant = {
@@ -8,6 +9,11 @@ export type Restaurant = {
   imgPublicId: string | undefined | null;
 };
 
+export type NestedRestauranAndAddress = Restaurant & {
+  address: Partial<Omit<Address, "id">>;
+};
+export type RestaurantJoinedWithAddress = Restaurant &
+  Partial<Omit<Address, "id">>;
 export const restaurantSchema = z.object({
   name: z
     .string({
