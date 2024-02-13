@@ -21,8 +21,6 @@ import { handleErrorTypes } from "../middleware/errorHandler";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
-import { addressQueries } from "../utils/DB/queries/addressQueries";
-import { Address } from "../models/Address";
 
 //need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
@@ -48,10 +46,60 @@ export async function getSingleRestaurantById(
   }
 }
 
-export async function getRestaurantsByPage() {}
+type GetRestaurantsByPage = Request<
+  unknown,
+  unknown,
+  unknown,
+  CoordinatesInParams & { page?: string }
+>;
+//check if works
+export async function getRestaurantsByPage(
+  req: GetRestaurantsByPage,
+  res: Response<NestedRestauranAndAddress[]>,
+  next: NextFunction
+) {
+  let connection: PoolConnection | undefined = undefined;
+  try {
+    const { longitude, latitude, page } = req.query;
+    if (!page) {
+      throw new FunctionError("Bad Request: page is required in query", 400);
+    }
+    if (isNaN(+page) || +page < 1) {
+      throw new FunctionError("Bad Request: page must be a valid number", 400);
+    }
+    let coords: Required<Coordinates> = {
+      latitude: 48.8584,
+      longitude: 2.2945,
+    };
+    if (longitude && latitude)
+      coords = { longitude: +longitude, latitude: +latitude };
 
+    connection = await pool.getConnection();
+    //continue with coords now
+
+    const getRestaurantsQuery = restaurantQueries.getRestaurantsByPage(
+      +page,
+      coords.longitude,
+      coords.latitude
+    );
+    // console.log(getRestaurantsQuery);
+    console.log("query", req.query);
+    const [rows] = await executeQuery<NestedRestauranAndAddress[]>(
+      connection,
+      getRestaurantsQuery
+    );
+    const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
+    res.status(200).json(rearrangedData);
+  } catch (error) {
+    console.log(error);
+    next(handleErrorTypes(error));
+  } finally {
+    connection?.release();
+  }
+}
+
+export type Coordinates = { longitude: number; latitude: number };
 type CoordinatesInParams = { longitude?: string; latitude?: string };
-type Coordinates = { longitude: number; latitude: number };
 type SearchRestaurant = Request<
   { search: string },
   unknown,
@@ -76,18 +124,6 @@ export async function searchRestaurants(
 
     connection = await pool.getConnection();
 
-    if (!longitude || !latitude) {
-      if (req.user && req.user.primaryAddressId) {
-        const getUserAddressQuery = addressQueries.getAddressByIdQuery(
-          req.user.primaryAddressId
-        );
-        const [rows] = await executeQuery<Address[]>(
-          connection,
-          getUserAddressQuery
-        );
-        coords = { longitude: rows[0].latitude, latitude: rows[0].latitude };
-      }
-    }
     const searchQuery = restaurantQueries.searchRestaurantByName(
       search,
       +coords.longitude,

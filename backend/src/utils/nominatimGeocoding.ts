@@ -16,19 +16,15 @@ export class Geocoder {
     return addressString;
   };
 
-  protected formatCoords = (longitude: number, latitude: number) => {
-    return `${latitude}, ${longitude}` as const;
-  };
-
   geocode = async (address: AddressToConvert) => {
     try {
       const addressString = this.convertAddressObjToString(address);
+      console.log(addressString);
       const data = await nodeGeocoder.geocode(addressString);
-
       if (!data.length) throw Error();
       const { longitude, latitude } = data[0];
       if (!longitude || !latitude) throw Error();
-      return { longitude, latitude };
+      return { longitude: `${longitude}`, latitude: `${latitude}` };
     } catch (error) {
       throw new FunctionError("No accurate address found.", 404);
     }

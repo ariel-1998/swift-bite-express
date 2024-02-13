@@ -9,6 +9,10 @@ type RestaurantWithoutId = {
   imgPublicId: string | null;
 };
 
+const DISTANCE = 20;
+const LIMIT = 50;
+const generateOffset = (page: number) => (page - 1) * LIMIT;
+
 class RestaurantQueries {
   addRestaurant(restaurant: RestaurantWithoutId): TransactionQuery {
     const query = `
@@ -39,7 +43,6 @@ class RestaurantQueries {
     LEFT JOIN ${addressTableName} ON ${addressTableName}.${addressCols.id} = ${combineTableName}.${combineCols.addressId}
     WHERE ${tableName}.${columns.id} = ?
     `;
-    // const query = `SELECT * FROM ${tableName} WHERE ${columns.id} = ?`;
     const params: MixedArray = [restaurantId];
     return { params, query };
   }
@@ -49,7 +52,6 @@ class RestaurantQueries {
     longitude: number,
     latitude: number
   ): TransactionQuery {
-    //need to select from db based on the location of the user
     const { columns: combinedCols, tableName: combined } =
       DB.tables.restaurant_owner_address;
     const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
@@ -65,21 +67,41 @@ class RestaurantQueries {
         cos(radians(${addresses}.${addressCols.longitude}) - radians(?)) +
       sin(radians(?)) * sin(radians(${addresses}.${addressCols.latitude}))
       )
-    ) <= 20 AND ${tableName}.${columns.name} LIKE %?%`;
-    const params: MixedArray = [latitude, longitude, latitude, search];
-    // JOIN restaurant_owner_address roa ON r.id = roa.restaurantId
-    // JOIN addresses a ON roa.addressId = a.id
-    // WHERE
-    //   (
-    //     6371 * acos(
-    //       cos(radians(32.08996360)) * cos(radians(a.latitude)) * cos(radians(a.longitude) - radians(34.88061490)) +
-    //       sin(radians(32.08996360)) * sin(radians(a.latitude))
-    //     )
-    //   ) <= 20 AND r.name LIKE "%a%"
+    ) <= ${DISTANCE} AND ${tableName}.${columns.name} LIKE ?
+    `;
+    const params: MixedArray = [latitude, longitude, latitude, `%${search}%`];
     return { params, query };
   }
 
-  deleteRestaurant() {}
+  //need to create the get routes
+  getRestaurantsByPage(
+    page: number,
+    longitude: number,
+    latitude: number
+  ): TransactionQuery {
+    const { columns: combinedCols, tableName: combined } =
+      DB.tables.restaurant_owner_address;
+    const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
+    const offset = generateOffset(page);
+    const query = `
+    SELECT ${addresses}.*, ${tableName}.${columns.name}, 
+    ${tableName}.${columns.imgUrl}, ${tableName}.${columns.imgPublicId}
+    FROM ${tableName}
+    JOIN ${combined} ON ${tableName}.${columns.id} = ${combined}.${combinedCols.restaurantId}
+    JOIN ${addresses} ON ${combined}.${combinedCols.addressId} = ${addresses}.${addressCols.id}
+    WHERE (
+      6371 * acos(
+        cos(radians(?)) * cos(radians(${addresses}.${addressCols.latitude})) * 
+        cos(radians(${addresses}.${addressCols.longitude}) - radians(?)) +
+      sin(radians(?)) * sin(radians(${addresses}.${addressCols.latitude}))
+      )
+    ) <= ${DISTANCE} LIMIT ${LIMIT} OFFSET ${offset}
+    `;
+    const params: MixedArray = [latitude, longitude, latitude];
+    return { params, query };
+  }
+
+  // deleteRestaurant() {}
 }
 
 export const restaurantQueries = new RestaurantQueries();

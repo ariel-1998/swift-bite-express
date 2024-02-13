@@ -3,12 +3,15 @@ import { testGeocoder } from "../../__mocks__/utils/nominatimGeocoding";
 import { Address } from "../../src/models/Address";
 import { FunctionError } from "../../src/models/Errors/ErrorConstructor";
 
-const longitude = 45.2131;
-const latitude = 44.98564;
+const longitude = "45.2131";
+const latitude = "44.98564";
+
+const addressStringWithUndefined = `31 Jaffa, jerusalem, israel, undefined`;
 jest.mock("node-geocoder", () => () => {
   return {
-    geocode: (address: string | Record<string, unknown>) => {
-      if (typeof address === "object") return [{ longitude, latitude }];
+    geocode: (address: string) => {
+      if (address === addressStringWithUndefined)
+        return [{ longitude, latitude }];
       if (typeof address === "string") return [];
       throw new Error();
     },
@@ -22,11 +25,10 @@ const validAddress = {
   street: "Jaffa",
 };
 
-const coords = `${latitude}, ${longitude}`;
-
 describe("geocoder", () => {
-  describe("convertAddressObjToQuery", () => {
+  describe("convertAddressObjToString", () => {
     it("should return object with no nullish values", () => {
+      const addressString = `31 Jaffa, jerusalem, israel, null`;
       const address: Partial<Address> = {
         country: "israel",
         city: "jerusalem",
@@ -34,14 +36,8 @@ describe("geocoder", () => {
         building: 31,
         street: "Jaffa",
       };
-      const res = testGeocoder.testConvertAddressObjToQuery(address);
-      expect(res).toStrictEqual(validAddress);
-    });
-  });
-  describe("formatCoords", () => {
-    it("should return coords format", () => {
-      const res = testGeocoder.testFormatCoords(longitude, latitude);
-      expect(res).toBe(coords);
+      const res = testGeocoder.testConvertAddressObjToString(address);
+      expect(res).toBe(addressString);
     });
   });
 
@@ -70,7 +66,10 @@ describe("geocoder", () => {
     });
     it("should convert address to coords", async () => {
       const res = await testGeocoder.geocode(validAddress);
-      expect(res).toBe(coords);
+      expect(res).toStrictEqual({
+        longitude,
+        latitude,
+      });
     });
   });
 });
