@@ -48,6 +48,7 @@ class RestaurantService {
         params: { page, ...coordinates },
       }
     );
+    console.log(data);
     return data;
   }
 

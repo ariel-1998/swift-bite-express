@@ -1,10 +1,11 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect } from "react";
 import { AdvancedImage } from "@cloudinary/react";
 import cld from "../../utils/cloudinaryConfig";
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
 // import useGenerateImg from "../../hooks/useGenerateImg";
 import { CONSTANTS } from "../../utils/constants";
 import { NestedRestauranAndAddress } from "../../models/Restaurant";
+import { restaurantService } from "../../services/restaurantService";
 
 type RestaurantCardProps = {
   restaurant: NestedRestauranAndAddress;

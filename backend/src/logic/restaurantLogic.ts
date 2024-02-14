@@ -142,7 +142,6 @@ export async function addRestaurant(
   next: NextFunction
 ) {
   let connection: PoolConnection | undefined = undefined;
-  let imgUrl: string | null = null;
   let imgPublicId: string | null = null;
   try {
     verifyUser(req);
@@ -154,12 +153,10 @@ export async function addRestaurant(
     if (files?.file) {
       image = files.file as UploadedFile;
       const data = await cloudinary.uploadImage(image.tempFilePath);
-      imgUrl = data.url;
       imgPublicId = data.public_id;
     }
     const restaurant = {
       ...req.body,
-      imgUrl,
       imgPublicId,
     } satisfies ReplaceUndefinedWithNull<Omit<Restaurant, "id">>;
     parseSchemaThrowZodErrors(restaurantSchema, restaurant);

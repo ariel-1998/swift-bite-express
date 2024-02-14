@@ -4,7 +4,6 @@ import { Address } from "./Address";
 export type Restaurant = {
   id: number;
   name: string;
-  imgUrl: string | undefined | null;
   imgPublicId: string | undefined | null;
 };
 

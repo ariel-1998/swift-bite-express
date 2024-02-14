@@ -5,7 +5,6 @@ import { Address } from "./Address";
 export type Restaurant = {
   id: number;
   name: string;
-  imgUrl: string | undefined | null;
   imgPublicId: string | undefined | null;
 };
 
@@ -21,9 +20,9 @@ export const restaurantSchema = z.object({
       required_error: "Name is required",
     })
     .max(45, "Name is too long"),
-  imgUrl: z
-    .string({ invalid_type_error: "Name must be a string" })
-    .max(500, "Invalid URL")
+  imgPublicId: z
+    .string({ invalid_type_error: "image id must be a string" })
+    .max(20, "Invalid image id")
     .nullable()
     .optional(),
 });

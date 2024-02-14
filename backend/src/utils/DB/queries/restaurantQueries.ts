@@ -5,7 +5,6 @@ const { columns, tableName } = DB.tables.restaurants;
 
 type RestaurantWithoutId = {
   name: string;
-  imgUrl: string | null;
   imgPublicId: string | null;
 };
 
@@ -17,33 +16,39 @@ class RestaurantQueries {
   addRestaurant(restaurant: RestaurantWithoutId): TransactionQuery {
     const query = `
         INSERT INTO ${tableName}
-        (${columns.name}, ${columns.imgUrl}, ${columns.imgPublicId}) 
-        VALUES(?, ?, ?)
+        (${columns.name}, ${columns.imgPublicId}) 
+        VALUES(?, ?)
     `;
-    const params: MixedArray = [
-      restaurant.name,
-      restaurant.imgUrl,
-      restaurant.imgPublicId,
-    ];
+    const params: MixedArray = [restaurant.name, restaurant.imgPublicId];
     return { params, query };
   }
 
   getSingleRestaurantById(restaurantId: number): TransactionQuery {
     const addressCols = DB.tables.addresses.columns;
-    const addressTableName = DB.tables.addresses.tableName;
+    const addresses = DB.tables.addresses.tableName;
     const combineCols = DB.tables.restaurant_owner_address.columns;
     const combineTableName = DB.tables.restaurant_owner_address.tableName;
     //NEED to add join statement
 
     const query = `
-    SELECT ${addressTableName}.*, ${tableName}.${columns.name}, 
-    ${tableName}.${columns.imgUrl}, ${tableName}.${columns.imgPublicId}
+    SELECT ${tableName}.*, 
+    ${addresses}.${addressCols.apartment}, 
+    ${addresses}.${addressCols.building}, 
+    ${addresses}.${addressCols.city}, 
+    ${addresses}.${addressCols.country}, 
+    ${addresses}.${addressCols.entrance}, 
+    ${addresses}.${addressCols.latitude}, 
+    ${addresses}.${addressCols.longitude}, 
+    ${addresses}.${addressCols.state}, 
+    ${addresses}.${addressCols.street}
     FROM ${tableName}
     LEFT JOIN ${combineTableName} ON ${tableName}.${columns.id} = ${combineTableName}.${combineCols.restaurantId}
-    LEFT JOIN ${addressTableName} ON ${addressTableName}.${addressCols.id} = ${combineTableName}.${combineCols.addressId}
+    LEFT JOIN ${addresses} ON ${addresses}.${addressCols.id} = ${combineTableName}.${combineCols.addressId}
     WHERE ${tableName}.${columns.id} = ?
     `;
     const params: MixedArray = [restaurantId];
+    console.log(query);
+    console.log(restaurantId);
     return { params, query };
   }
 
@@ -84,8 +89,16 @@ class RestaurantQueries {
     const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
     const offset = generateOffset(page);
     const query = `
-    SELECT ${addresses}.*, ${tableName}.${columns.name}, 
-    ${tableName}.${columns.imgUrl}, ${tableName}.${columns.imgPublicId}
+    SELECT ${tableName}.*, 
+    ${addresses}.${addressCols.apartment}, 
+    ${addresses}.${addressCols.building}, 
+    ${addresses}.${addressCols.city}, 
+    ${addresses}.${addressCols.country}, 
+    ${addresses}.${addressCols.entrance}, 
+    ${addresses}.${addressCols.latitude}, 
+    ${addresses}.${addressCols.longitude}, 
+    ${addresses}.${addressCols.state}, 
+    ${addresses}.${addressCols.street}
     FROM ${tableName}
     JOIN ${combined} ON ${tableName}.${columns.id} = ${combined}.${combinedCols.restaurantId}
     JOIN ${addresses} ON ${combined}.${combinedCols.addressId} = ${addresses}.${addressCols.id}

@@ -33,7 +33,6 @@ export function rearrangeRestaurantAddressDataArray(
     const obj: NestedRestauranAndAddress = {
       id: item.id,
       name: item.name,
-      imgUrl: item.imgUrl,
       imgPublicId: item.imgPublicId,
       address: {
         apartment: item.apartment,
