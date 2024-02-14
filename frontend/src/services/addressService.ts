@@ -8,6 +8,7 @@ export type AddressReq = {
 
 class AddressService {
   private addressRoute = "/address";
+
   private turnAddressFormDataToAddress(
     address: AddressFormData
   ): Omit<Address, "id" | "longitude" | "latitude"> {
@@ -49,11 +50,22 @@ class AddressService {
     );
     return data;
   };
-
+  //need to be used to remove address from restaurant
   removeAddress = async (restaurantId: number | null = null) => {
     await credentialsAxios.delete(this.addressRoute, {
       params: { restaurantId },
     });
+  };
+
+  convertAddressToCoords = async (
+    address: AddressFormData
+  ): Promise<Omit<Address, "id">> => {
+    const convertedAddress = this.turnAddressFormDataToAddress(address);
+    const { data } = await defaultAxios.post<Omit<Address, "id">>(
+      `${this.addressRoute}/convert`,
+      convertedAddress
+    );
+    return data;
   };
 }
 

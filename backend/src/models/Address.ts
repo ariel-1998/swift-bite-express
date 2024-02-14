@@ -15,6 +15,8 @@ export type Address = {
 };
 //no foreign keys
 
+export type Coordinates = { longitude: number; latitude: number };
+
 //check how to autocomplete names via google geolocation api
 export const addressSchema = z.object({
   country: z

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export type Address = {
-  id: number;
+  id?: number;
   country: string;
   state?: string;
   city: string;
@@ -9,9 +9,11 @@ export type Address = {
   building: number;
   entrance?: string;
   apartment?: number;
-  longitude: number;
-  latitude: number;
+  longitude: string;
+  latitude: string;
 };
+
+export type Coordinates = { longitude: string; latitude: string };
 
 //check how to autocomplete names via google geolocation api
 export const addressSchema = z.object({

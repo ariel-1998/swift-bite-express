@@ -10,7 +10,7 @@ type RestaurantWithoutId = {
 };
 
 const DISTANCE = 20;
-const LIMIT = 50;
+const LIMIT = 30;
 const generateOffset = (page: number) => (page - 1) * LIMIT;
 
 class RestaurantQueries {

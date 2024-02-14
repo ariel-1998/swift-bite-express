@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AddressFormToShow from "./AddressFormToShow";
 import HeaderMenu from "./HeaderMenu";
+import CurrentAddress from "./CurrentAddress";
 
 const Header: React.FC = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -17,12 +18,7 @@ const Header: React.FC = () => {
           </span>
           <span className="text-lg font-bold leading-none">express</span>
         </div>
-        <div
-          onClick={toggleAddressForm}
-          className="font-semibold cursor-pointer"
-        >
-          Add adress
-        </div>
+        <CurrentAddress onClick={toggleAddressForm} />
       </div>
       <div className="flex justify-around gap-36">
         <div>

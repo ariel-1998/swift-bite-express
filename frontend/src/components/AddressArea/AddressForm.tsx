@@ -6,7 +6,8 @@ import AuthForm from "../AuthArea/AuthForm";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import { useMutation } from "@tanstack/react-query";
-import { AddressReq } from "../../services/addressService";
+import { AddressReq, addressService } from "../../services/addressService";
+import useUserInfo from "../../hooks/useUserInfo";
 
 type AddressFormProps = {
   address?: Address;
@@ -23,6 +24,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
   restaurantId,
   onSuccess = () => undefined,
 }) => {
+  const { user, setAddress } = useUserInfo();
   const {
     register,
     formState: { errors },
@@ -33,9 +35,21 @@ const AddressForm: React.FC<AddressFormProps> = ({
     mutationFn: fn,
     onSuccess,
   });
+  const converAddressMut = useMutation({
+    mutationFn: addressService.convertAddressToCoords,
+    onSuccess(data) {
+      // save the address in local storage and update address
+      localStorage.setItem("address", JSON.stringify(data));
+      setAddress(data);
+      onSuccess();
+    },
+    onError: (error) => console.log(error),
+  });
 
   const submitAddress = (data: AddressFormData) => {
-    mutation.mutate({ address: data, restaurantId });
+    if (user) return mutation.mutate({ address: data, restaurantId });
+    //if no user that means he inputs his own address so save it in the local storage
+    converAddressMut.mutate(data);
   };
 
   return (

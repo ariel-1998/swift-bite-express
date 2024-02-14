@@ -5,7 +5,7 @@ import {
   getRestaurantsByPage,
   getSingleRestaurantById,
   searchRestaurants,
-  updateRestaurant,
+  // updateRestaurant,
 } from "../logic/restaurantLogic";
 
 export const restaurantRouter = Router();
@@ -18,6 +18,6 @@ restaurantRouter.get("/:restaurantId", getSingleRestaurantById);
 restaurantRouter.post("/", addRestaurant);
 restaurantRouter.get("/search/:search", searchRestaurants);
 //with body
-restaurantRouter.put("/", updateRestaurant);
+// restaurantRouter.put("/", updateRestaurant);
 //with params
 // restaurantRouter.delete("/:restaurantId", deleteRestaurant);

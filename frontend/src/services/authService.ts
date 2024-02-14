@@ -32,6 +32,7 @@ class AuthService {
     const { data } = await credentialsAxios.get<User>("/auth/login");
     return data;
   };
+  logout = async () => await credentialsAxios.post("/auth/logout");
 }
 
 export const authService = new AuthService();

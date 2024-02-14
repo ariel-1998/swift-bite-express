@@ -21,6 +21,7 @@ import { handleErrorTypes } from "../middleware/errorHandler";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
+import { Coordinates } from "../models/Address";
 
 //need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
@@ -82,8 +83,6 @@ export async function getRestaurantsByPage(
       coords.longitude,
       coords.latitude
     );
-    // console.log(getRestaurantsQuery);
-    console.log("query", req.query);
     const [rows] = await executeQuery<NestedRestauranAndAddress[]>(
       connection,
       getRestaurantsQuery
@@ -91,14 +90,12 @@ export async function getRestaurantsByPage(
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
     res.status(200).json(rearrangedData);
   } catch (error) {
-    console.log(error);
     next(handleErrorTypes(error));
   } finally {
     connection?.release();
   }
 }
 
-export type Coordinates = { longitude: number; latitude: number };
 type CoordinatesInParams = { longitude?: string; latitude?: string };
 type SearchRestaurant = Request<
   { search: string },
@@ -216,7 +213,7 @@ export async function addRestaurant(
   }
 }
 
-export async function updateRestaurant() {}
+// export async function updateRestaurant() {}
 
 // type DeleteRestaurantReq = Request<{ restaurantId: string }>;
 // export async function deleteRestaurant(

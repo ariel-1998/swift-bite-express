@@ -33,7 +33,7 @@ export const getAddressById = async (
 };
 
 // maybe add addAddress req.query.restaurantId to check if
-export type AddressReqBody = Omit<Address, "id" | "coordinates">;
+export type AddressReqBody = Omit<Address, "id" | "longitude" | "latitude">;
 export type AddAddressReq = Request<
   unknown,
   Address,
@@ -254,3 +254,17 @@ export async function updateAddress(
 //     connection?.release();
 //   }
 // }
+
+type ConvertAddressToCoordsReq = Request<unknown, unknown, AddressReqBody>;
+export async function convertAddressToCoords(
+  req: ConvertAddressToCoordsReq,
+  res: Response<Omit<Address, "id">>,
+  next: NextFunction
+) {
+  try {
+    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    res.status(200).json(addressWithoutId);
+  } catch (error) {
+    next(handleErrorTypes(error));
+  }
+}

@@ -38,7 +38,8 @@ export const userInfoResponse = (
 
 export const logout = (req: Request, res: Response, next: NextFunction) => {
   req.logout((err) => {
-    if (err) return next(err);
+    if (err)
+      return next(new FunctionError("Server Error: Could NOT logout.", 500));
     res.sendStatus(200);
   });
 };

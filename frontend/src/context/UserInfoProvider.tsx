@@ -1,4 +1,4 @@
-import React, { ReactNode, createContext, useState } from "react";
+import React, { ReactNode, createContext, useEffect, useState } from "react";
 import { User } from "../models/User";
 import { authService } from "../services/authService";
 import { Address } from "../models/Address";
@@ -10,6 +10,7 @@ export type UserContextProps = {
   setUser: (user: User) => void;
   address?: Address;
   setAddress: (address: Address) => void;
+  logout(): void;
 };
 
 export const UserInfoContext = createContext<UserContextProps | null>(null);
@@ -59,8 +60,23 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
     enabled: !!user?.primaryAddressId,
   });
 
+  useEffect(() => {
+    if (user) return;
+    const stringAddress = localStorage.getItem("address");
+    if (!stringAddress) return;
+    const address: Address = JSON.parse(stringAddress);
+    setAddress(address);
+  }, [user]);
+
+  function logout() {
+    setUser(undefined);
+    setAddress(undefined);
+  }
+
   return (
-    <UserInfoContext.Provider value={{ user, setUser, address, setAddress }}>
+    <UserInfoContext.Provider
+      value={{ user, setUser, address, setAddress, logout }}
+    >
       {loadingUser ? "Loading..." : children}
     </UserInfoContext.Provider>
   );

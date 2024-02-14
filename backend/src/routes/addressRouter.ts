@@ -3,6 +3,7 @@ import {
   getAddressById,
   addAddress,
   updateAddress,
+  convertAddressToCoords,
   // removeAddress,
 } from "../logic/addressLogic";
 
@@ -12,3 +13,4 @@ addressRouter.post("/", addAddress);
 addressRouter.put("/", updateAddress);
 // addressRouter.delete("/", removeAddress);
 addressRouter.get("/:addressId", getAddressById);
+addressRouter.post("/convert", convertAddressToCoords);
