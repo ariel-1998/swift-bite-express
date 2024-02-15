@@ -48,6 +48,7 @@ class AddressService {
         params: { restaurantId },
       }
     );
+    console.log("data", data);
     return data;
   };
   //need to be used to remove address from restaurant

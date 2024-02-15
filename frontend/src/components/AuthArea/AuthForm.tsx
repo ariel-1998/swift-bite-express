@@ -1,7 +1,7 @@
 import React, { ComponentProps, MouseEvent, ReactNode } from "react";
 
 type AuthFormProps = {
-  title: string;
+  title?: string;
   children: ReactNode;
 } & ComponentProps<"form">;
 

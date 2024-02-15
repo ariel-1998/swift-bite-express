@@ -1,6 +1,6 @@
 import { Coordinates } from "../models/Address";
 import {
-  NestedRestauranAndAddress,
+  NestedRestaurantAndAddress,
   Restaurant,
   RestaurantSchema,
 } from "../models/Restaurant";
@@ -8,17 +8,24 @@ import { credentialsAxios, defaultAxios } from "../utils/axiosConfig";
 
 const restaurantRoute = "/restaurant";
 
-type UpdateRestaurantImage = Pick<Restaurant, "id"> & {
-  image: FileList;
+type UpdateRestaurant = {
+  restaurantId: number;
+  image?: FileList;
+  logoImage?: FileList;
+  name?: string;
 };
 
-type UpdateRestaurantName = Pick<Restaurant, "id" | "name">;
+type UpdateRestaurantQueryParams = {
+  image?: boolean;
+  logoImage?: boolean;
+  name?: string;
+};
 
 class RestaurantService {
   //need to implement in restaurant page
   async getSingleRestaurantById(
     restaurantId: number
-  ): Promise<NestedRestauranAndAddress> {
+  ): Promise<NestedRestaurantAndAddress> {
     const { data } = await defaultAxios.get(
       `${restaurantRoute}/${restaurantId}`
     );
@@ -27,48 +34,68 @@ class RestaurantService {
   //need to implement search
   async searchRestaurantsByName(
     search: string,
+    page: number,
     coordinates: Partial<Coordinates>
   ): Promise<Restaurant[]> {
     const { data } = await defaultAxios.get(
       `${restaurantRoute}/search/${search}`,
-      { params: coordinates }
+      { params: { ...coordinates, page } }
     );
     return data;
   }
-  // if there is no userAddress, then search return the most liked restaurants (in the backend)
+
   async getNearRestaurantsByPage(
     page: number,
     coordinates: Partial<Coordinates>
-  ): Promise<NestedRestauranAndAddress[]> {
-    console.log(coordinates);
-    console.log(page);
-    const { data } = await defaultAxios.get<NestedRestauranAndAddress[]>(
+  ): Promise<NestedRestaurantAndAddress[]> {
+    const { data } = await defaultAxios.get<NestedRestaurantAndAddress[]>(
       restaurantRoute,
       {
         params: { page, ...coordinates },
       }
     );
-    console.log(data);
     return data;
   }
 
   async createRestaurant({
     image,
+    logoImage,
     name,
-  }: RestaurantSchema): Promise<NestedRestauranAndAddress> {
+  }: RestaurantSchema): Promise<NestedRestaurantAndAddress> {
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("file", image[0]);
-    const { data } = await credentialsAxios.post<NestedRestauranAndAddress>(
+    formData.append("image", image[0]);
+    formData.append("logoImage", logoImage[0]);
+    const { data } = await credentialsAxios.post<NestedRestaurantAndAddress>(
       restaurantRoute,
       formData
     );
     return data;
   }
 
-  async updateRestaurantImage(obj: UpdateRestaurantImage) {}
-  async updateRestaurantName(obj: UpdateRestaurantName) {}
-  async removeRestaurant(id: number): Promise<void> {}
-}
+  async updateRestaurant({
+    restaurantId,
+    image,
+    logoImage,
+    name,
+  }: UpdateRestaurant): Promise<NestedRestaurantAndAddress> {
+    const formData = new FormData();
+    if (image) formData.append("image", image[0]);
+    if (logoImage) formData.append("image", logoImage[0]);
 
+    const params: UpdateRestaurantQueryParams = {
+      image: Boolean(image),
+      logoImage: Boolean(logoImage),
+      name: name,
+    };
+    const { data } = await credentialsAxios.put(
+      `${restaurantRoute}/${restaurantId}`,
+      {},
+      { params }
+    );
+    return data;
+  }
+
+  // async removeRestaurant(id: number): Promise<void> {}
+}
 export const restaurantService = new RestaurantService();

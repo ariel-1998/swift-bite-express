@@ -173,7 +173,7 @@ export async function updateAddress(
       updatedAddressId = isOwner.addressId;
     }
     await connection.commit();
-    res.status(204).json({ ...addressWithoutId, id: updatedAddressId });
+    res.status(200).json({ ...addressWithoutId, id: updatedAddressId });
   } catch (error) {
     console.log(error);
     await connection?.rollback();

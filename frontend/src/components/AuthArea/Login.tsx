@@ -2,7 +2,7 @@ import React from "react";
 import AuthForm from "./AuthForm";
 import Button from "../Customs/Button";
 import Input from "../Customs/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import AuthProviderBtn from "./AuthProviderBtn";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,8 +10,12 @@ import { UserCredentials, userLoginFormSchema } from "../../models/User";
 import { authService } from "../../services/authService";
 import ProviderParamError from "./ProviderParamError";
 import { useMutation } from "@tanstack/react-query";
+import useUserInfo from "../../hooks/useUserInfo";
 
 const Login: React.FC = () => {
+  const { setUser } = useUserInfo();
+  const navigate = useNavigate();
+
   const {
     register,
     formState: { errors },
@@ -20,7 +24,12 @@ const Login: React.FC = () => {
 
   const mutatation = useMutation({
     mutationFn: authService.localLogin,
+    onSuccess: (data) => {
+      setUser(data);
+      navigate("/");
+    },
   });
+
   const submitLogin = async (data: UserCredentials) => {
     mutatation.mutate(data);
   };

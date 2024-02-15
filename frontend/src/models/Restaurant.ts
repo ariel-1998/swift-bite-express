@@ -5,14 +5,15 @@ export type Restaurant = {
   id: number;
   name: string;
   imgPublicId: string | undefined | null;
+  logoPublicId: string | undefined | null;
 };
 
-export type NestedRestauranAndAddress = Restaurant & {
+export type NestedRestaurantAndAddress = Restaurant & {
   address: Partial<Omit<Address, "id">>;
 };
 
 const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
-const imageSchema = z.instanceof(FileList).refine((files) => {
+const optionalImageSchema = z.instanceof(FileList).refine((files) => {
   const file = files[0];
   //image is optional
   if (!file) return true;
@@ -23,13 +24,24 @@ const imageSchema = z.instanceof(FileList).refine((files) => {
   return true;
 }, "Must be a regular Image");
 
+const restaurantNameSchame = z
+  .string({
+    required_error: "Name is required",
+  })
+  .max(45, "Name is too long")
+  .min(1, "Name is required");
+
 export const restaurantSchema = z.object({
-  name: z
-    .string({
-      required_error: "Name is required",
-    })
-    .max(45, "Name is too long"),
-  image: imageSchema,
+  name: restaurantNameSchame,
+  image: optionalImageSchema,
+  logoImage: optionalImageSchema,
+});
+
+export const updateRestaurantSchema = z.object({
+  name: restaurantNameSchame.optional(),
+  image: optionalImageSchema,
+  logoImage: optionalImageSchema,
 });
 
 export type RestaurantSchema = z.infer<typeof restaurantSchema>;
+export type UpdateRestaurantSchema = z.infer<typeof updateRestaurantSchema>;

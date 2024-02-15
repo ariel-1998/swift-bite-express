@@ -24,7 +24,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
   restaurantId,
   onSuccess = () => undefined,
 }) => {
-  const { user, setAddress } = useUserInfo();
+  const { user, setAddress, setUser } = useUserInfo();
   const {
     register,
     formState: { errors },
@@ -33,16 +33,20 @@ const AddressForm: React.FC<AddressFormProps> = ({
 
   const mutation = useMutation({
     mutationFn: fn,
-    onSuccess,
+    onSuccess: (data) => {
+      //check if need to chang it into update and create user address form,
+      //because this can be also used for update / add restaurant address
+      setAddress(data);
+      if (user)
+        setUser((prev) => {
+          return prev ? { ...prev, primaryAddressId: data.id } : prev;
+        });
+      onSuccess();
+    },
   });
   const converAddressMut = useMutation({
     mutationFn: addressService.convertAddressToCoords,
-    onSuccess(data) {
-      // save the address in local storage and update address
-      localStorage.setItem("address", JSON.stringify(data));
-      setAddress(data);
-      onSuccess();
-    },
+    onSuccess: onSuccess,
     onError: (error) => console.log(error),
   });
 

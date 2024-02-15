@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AddressFormToShow from "./AddressFormToShow";
 import HeaderMenu from "./HeaderMenu";
 import CurrentAddress from "./CurrentAddress";
+import RestaurantSearch from "../../RestaurantArea/RestaurantSearch";
 
 const Header: React.FC = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -22,7 +23,7 @@ const Header: React.FC = () => {
       </div>
       <div className="flex justify-around gap-36">
         <div>
-          <input />
+          <RestaurantSearch />
         </div>
         <HeaderMenu />
       </div>

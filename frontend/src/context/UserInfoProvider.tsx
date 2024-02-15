@@ -4,13 +4,14 @@ import { authService } from "../services/authService";
 import { Address } from "../models/Address";
 import { useQuery } from "@tanstack/react-query";
 import { addressService } from "../services/addressService";
+import queryKeys from "../utils/queryKeys";
 
 export type UserContextProps = {
   user?: User;
-  setUser: (user: User) => void;
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
   address?: Address;
-  setAddress: (address: Address) => void;
-  logout(): void;
+  setAddress: (address: Address | undefined) => void;
+  clearCache(): void;
 };
 
 export const UserInfoContext = createContext<UserContextProps | null>(null);
@@ -26,7 +27,7 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
 
   //get user data
   useQuery({
-    queryKey: ["user"],
+    queryKey: queryKeys.auth.getLogin,
     queryFn: async () => {
       return authService
         .getLogin()
@@ -44,11 +45,10 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
 
   //get user address
   useQuery({
-    queryKey: ["userAddress"],
+    queryKey: queryKeys.addresses.getAddressById,
     queryFn: async () => {
-      if (!user) return undefined;
       return addressService
-        .getAddressById(user.primaryAddressId!)
+        .getAddressById(user!.primaryAddressId!)
         .then((data) => {
           setAddress(data);
           return data;
@@ -68,14 +68,14 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
     setAddress(address);
   }, [user]);
 
-  function logout() {
+  function clearCache() {
     setUser(undefined);
     setAddress(undefined);
   }
 
   return (
     <UserInfoContext.Provider
-      value={{ user, setUser, address, setAddress, logout }}
+      value={{ user, setUser, address, setAddress, clearCache }}
     >
       {loadingUser ? "Loading..." : children}
     </UserInfoContext.Provider>

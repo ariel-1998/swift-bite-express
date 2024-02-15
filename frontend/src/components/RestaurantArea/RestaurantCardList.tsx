@@ -4,13 +4,15 @@ import { restaurantService } from "../../services/restaurantService";
 import { CONSTANTS } from "../../utils/constants";
 import RestaurantCard from "./RestaurantCard";
 import useUserInfo from "../../hooks/useUserInfo";
+import queryKeys from "../../utils/queryKeys";
 
 const RestaurantCardList: React.FC = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const { address } = useUserInfo();
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage, isError } =
     useInfiniteQuery({
-      queryKey: ["restaurants", "page"],
+      //need to check if another key is required to remember the page number
+      queryKey: queryKeys.restaurants.getNearRestaurantsByPage,
       queryFn: ({ pageParam }) =>
         restaurantService.getNearRestaurantsByPage(pageParam, {
           latitude: address?.latitude,
@@ -26,7 +28,7 @@ const RestaurantCardList: React.FC = () => {
     });
 
   const observer = useCallback(
-    (node: HTMLDivElement) => {
+    (node: HTMLAnchorElement) => {
       if (isFetchingNextPage) return;
       if (observerRef.current && isError) {
         return observerRef.current.disconnect();
@@ -42,14 +44,16 @@ const RestaurantCardList: React.FC = () => {
       return () => {
         if (observerRef.current) {
           observerRef.current.disconnect();
-          observerRef.current = null; // Reset the ref when unmounting
+          observerRef.current = null;
+          console.log("out");
         }
       };
     },
     [fetchNextPage, hasNextPage, isError, isFetchingNextPage]
   );
+
   return (
-    <div className="">
+    <div className="grid grid-flow-col auto-cols-max gap-4">
       {data?.pages.map((page) =>
         page.map((restaurant, i) => {
           if (page.length === i + 1) {

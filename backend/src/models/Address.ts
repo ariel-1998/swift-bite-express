@@ -24,7 +24,8 @@ export const addressSchema = z.object({
       required_error: "Coutry is Required",
       invalid_type_error: "Country Must be string",
     })
-    .max(45, "Invalid Country"),
+    .max(45, "Invalid Country")
+    .min(1, "Country is Required"),
   state: z
     .string({ invalid_type_error: "State is Optional or String" })
     .max(45, "Invalid State")
@@ -35,13 +36,15 @@ export const addressSchema = z.object({
       invalid_type_error: "City Must be String",
       required_error: "City is Required",
     })
-    .max(90, "Invalid City"),
+    .max(90, "Invalid City")
+    .min(1, "City is required"),
   street: z
     .string({
       invalid_type_error: "Street Must be String",
       required_error: "Street is Required",
     })
-    .max(90, "Invalid Street"), //check if need to be longer than 90
+    .max(90, "Invalid Street")
+    .min(1, "Street is required"), //check if need to be longer than 90
   building: z.number({
     invalid_type_error: "Building Must be Number",
     required_error: "Building is Required",

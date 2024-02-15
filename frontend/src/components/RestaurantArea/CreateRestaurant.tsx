@@ -17,6 +17,9 @@ const CreateRestaurant: React.FC = () => {
 
   const mutatation = useMutation({
     mutationFn: restaurantService.createRestaurant,
+    onSuccess(data) {
+      //need to update query cache
+    },
   });
 
   const submitForm = (data: RestaurantSchema) => {
@@ -38,6 +41,13 @@ const CreateRestaurant: React.FC = () => {
         accept="image/*"
         errMessage={errors.image?.message}
         {...register("image")}
+      />
+      <Input
+        label="Restaurant Logo:"
+        type="file"
+        accept="image/*"
+        errMessage={errors.logoImage?.message}
+        {...register("logoImage")}
       />
 
       <Button

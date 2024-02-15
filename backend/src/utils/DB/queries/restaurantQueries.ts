@@ -6,20 +6,26 @@ const { columns, tableName } = DB.tables.restaurants;
 type RestaurantWithoutId = {
   name: string;
   imgPublicId: string | null;
+  logoPublicId: string | null;
 };
 
 const DISTANCE = 20;
-const LIMIT = 30;
-const generateOffset = (page: number) => (page - 1) * LIMIT;
+const PAGE_LIMIT = 30;
+const SEARCH_LIMIT = 15;
+const generateOffset = (page: number) => (page - 1) * PAGE_LIMIT;
 
 class RestaurantQueries {
   addRestaurant(restaurant: RestaurantWithoutId): TransactionQuery {
     const query = `
         INSERT INTO ${tableName}
-        (${columns.name}, ${columns.imgPublicId}) 
-        VALUES(?, ?)
+        (${columns.name}, ${columns.imgPublicId}, ${columns.logoPublicId}) 
+        VALUES(?, ?, ?)
     `;
-    const params: MixedArray = [restaurant.name, restaurant.imgPublicId];
+    const params: MixedArray = [
+      restaurant.name,
+      restaurant.imgPublicId,
+      restaurant.logoPublicId,
+    ];
     return { params, query };
   }
 
@@ -55,11 +61,13 @@ class RestaurantQueries {
   searchRestaurantByName(
     search: string,
     longitude: number,
-    latitude: number
+    latitude: number,
+    page: number
   ): TransactionQuery {
     const { columns: combinedCols, tableName: combined } =
       DB.tables.restaurant_owner_address;
     const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
+    const offset = generateOffset(page);
 
     const query = `
     SELECT ${tableName}.*
@@ -73,6 +81,7 @@ class RestaurantQueries {
       sin(radians(?)) * sin(radians(${addresses}.${addressCols.latitude}))
       )
     ) <= ${DISTANCE} AND ${tableName}.${columns.name} LIKE ?
+    LIMIT ${SEARCH_LIMIT} OFFSET ${offset}
     `;
     const params: MixedArray = [latitude, longitude, latitude, `%${search}%`];
     return { params, query };
@@ -108,12 +117,48 @@ class RestaurantQueries {
         cos(radians(${addresses}.${addressCols.longitude}) - radians(?)) +
       sin(radians(?)) * sin(radians(${addresses}.${addressCols.latitude}))
       )
-    ) <= ${DISTANCE} LIMIT ${LIMIT} OFFSET ${offset}
+    ) <= ${DISTANCE} LIMIT ${PAGE_LIMIT} OFFSET ${offset}
     `;
     const params: MixedArray = [latitude, longitude, latitude];
     return { params, query };
   }
 
+  updateRestaurantImgPublicId(
+    restaurantId: number,
+    imgPublicId: string
+  ): TransactionQuery {
+    const query = `
+    UPDATE ${tableName}
+    SET ${columns.imgPublicId} = ?
+    WHERE ${columns.id} = ?
+    `;
+    const params: MixedArray = [imgPublicId, restaurantId];
+    return { params, query };
+  }
+  updateRestaurantlogoPublicId(
+    restaurantId: number,
+    logoPublicId: string
+  ): TransactionQuery {
+    const query = `
+    UPDATE ${tableName}
+    SET ${columns.logoPublicId} = ?
+    WHERE ${columns.id} = ?
+    `;
+    const params: MixedArray = [logoPublicId, restaurantId];
+    return { params, query };
+  }
+  updateRestaurantName(
+    restaurantId: number,
+    restaurantName: string
+  ): TransactionQuery {
+    const query = `
+    UPDATE ${tableName}
+    SET ${columns.name} = ?
+    WHERE ${columns.id} = ?
+    `;
+    const params: MixedArray = [restaurantName, restaurantId];
+    return { params, query };
+  }
   // deleteRestaurant() {}
 }
 

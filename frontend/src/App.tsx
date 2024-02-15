@@ -4,6 +4,7 @@ import Register from "./components/AuthArea/Register";
 import Login from "./components/AuthArea/Login";
 import Logout from "./components/AuthArea/Logout";
 import HomePage from "./pages/HomePage";
+import RestaurantPage from "./pages/RestaurantPage";
 
 function App() {
   return (
@@ -19,7 +20,10 @@ function App() {
             <Route path="/auth/logout" Component={Logout} />
             <Route path="*" element={<Navigate to={"/auth/login"} />} />
           </Route>
-          {/** home route */}
+          {/** restaurant route*/}
+          <Route path="restaurants">
+            <Route path=":restaurantId" Component={RestaurantPage} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </div>

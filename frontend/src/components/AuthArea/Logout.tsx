@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
 import useUserInfo from "../../hooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { authService } from "../../services/authService";
 
 const Logout: React.FC = () => {
-  const { logout } = useUserInfo();
+  const { clearCache } = useUserInfo();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
   const mutation = useMutation({
     mutationFn: authService.logout,
     onSuccess: onSuccessLogout,
@@ -14,7 +16,8 @@ const Logout: React.FC = () => {
   });
 
   function onSuccessLogout() {
-    logout();
+    clearCache();
+    queryClient.clear();
     navigate("/auth/login");
   }
 

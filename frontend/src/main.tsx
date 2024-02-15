@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import UserInfoProvider from "./context/UserInfoProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const staleTime = 20 * 60 * 1000;
 
@@ -22,6 +23,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <UserInfoProvider>
         <App />
       </UserInfoProvider>
+      <ReactQueryDevtools />
     </QueryClientProvider>
   </React.StrictMode>
 );

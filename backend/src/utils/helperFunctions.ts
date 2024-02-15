@@ -1,5 +1,5 @@
 import {
-  NestedRestauranAndAddress,
+  NestedRestaurantAndAddress,
   RestaurantJoinedWithAddress,
 } from "../models/Restaurant";
 
@@ -28,12 +28,13 @@ export function turnUndefinedToNull<
 
 export function rearrangeRestaurantAddressDataArray(
   array: RestaurantJoinedWithAddress[]
-): NestedRestauranAndAddress[] {
+): NestedRestaurantAndAddress[] {
   const rearrangedData = array.map((item) => {
-    const obj: NestedRestauranAndAddress = {
+    const obj: NestedRestaurantAndAddress = {
       id: item.id,
       name: item.name,
       imgPublicId: item.imgPublicId,
+      logoPublicId: item.logoPublicId,
       address: {
         apartment: item.apartment,
         building: item.building,
