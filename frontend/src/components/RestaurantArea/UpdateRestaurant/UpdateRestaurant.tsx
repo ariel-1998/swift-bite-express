@@ -2,9 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import React, { MouseEvent, useState } from "react";
 import { useParams } from "react-router-dom";
 import { restaurantService } from "../../../services/restaurantService";
-import AuthForm from "../../AuthArea/AuthForm";
-import Input from "../../Customs/Input";
-import UpdateRestaurantName from "./UpdateRestaurantName";
 import queryKeys from "../../../utils/queryKeys";
 
 type UpdateRestaurantProps = {
@@ -24,7 +21,6 @@ const UpdateRestaurant: React.FC<UpdateRestaurantProps> = ({ props }) => {
   const setForm = (formName: FormNames) => () => {
     setActiveForm(formName);
   };
-
   return (
     <>
       {isLoading && "loading..."}

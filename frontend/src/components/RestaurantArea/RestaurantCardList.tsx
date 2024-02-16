@@ -12,7 +12,7 @@ const RestaurantCardList: React.FC = () => {
   const { data, hasNextPage, isFetchingNextPage, fetchNextPage, isError } =
     useInfiniteQuery({
       //need to check if another key is required to remember the page number
-      queryKey: queryKeys.restaurants.getNearRestaurantsByPage,
+      queryKey: queryKeys.restaurants.getNearRestaurantsByPage(address),
       queryFn: ({ pageParam }) =>
         restaurantService.getNearRestaurantsByPage(pageParam, {
           latitude: address?.latitude,

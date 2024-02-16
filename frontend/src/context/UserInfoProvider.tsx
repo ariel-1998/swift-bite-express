@@ -61,12 +61,12 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
   });
 
   useEffect(() => {
-    if (user) return;
+    if (user || loadingUser) return;
     const stringAddress = localStorage.getItem("address");
     if (!stringAddress) return;
     const address: Address = JSON.parse(stringAddress);
     setAddress(address);
-  }, [user]);
+  }, [user, loadingUser]);
 
   function clearCache() {
     setUser(undefined);

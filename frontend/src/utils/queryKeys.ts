@@ -1,3 +1,5 @@
+import { Address } from "../models/Address";
+
 const restaurants = "restaurants";
 const user = "user";
 const addresses = "addresses";
@@ -14,11 +16,13 @@ class QueryKeys {
       return [restaurants, "byId", restaurantId];
     },
     //infinite query check if valid or need to add another variable for page
-    searchRestaurantsByName(search: string) {
-      return [restaurants, "search", search];
+    searchRestaurantsByName(search: string, address: Address | undefined) {
+      return [restaurants, "search", search, address];
     },
     //infinite query check if valid or need to add another variable for page
-    getNearRestaurantsByPage: [restaurants, "pages"],
+    getNearRestaurantsByPage(address: Address | undefined) {
+      return [restaurants, "pages", address];
+    },
   };
 }
 

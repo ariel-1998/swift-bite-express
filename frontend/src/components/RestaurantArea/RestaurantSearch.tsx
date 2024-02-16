@@ -21,7 +21,7 @@ const RestaurantSearch: React.FC = () => {
     isLoading,
   } = useInfiniteQuery({
     //need to check if another key is required to remember the page number
-    queryKey: queryKeys.restaurants.searchRestaurantsByName(search),
+    queryKey: queryKeys.restaurants.searchRestaurantsByName(search, address),
     queryFn: ({ pageParam }) =>
       restaurantService.searchRestaurantsByName(search!, pageParam, {
         latitude: address?.latitude,

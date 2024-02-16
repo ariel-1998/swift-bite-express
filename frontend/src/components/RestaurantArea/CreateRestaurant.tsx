@@ -18,7 +18,8 @@ const CreateRestaurant: React.FC = () => {
   const mutatation = useMutation({
     mutationFn: restaurantService.createRestaurant,
     onSuccess(data) {
-      //need to update query cache
+      //no need to update query cache for restaurants as there is no address in it and all the query caches are with addresses
+      //need to navigate to update restaurant address page "restaurant/owner/:restaurantId"
     },
   });
 
