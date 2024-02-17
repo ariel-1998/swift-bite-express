@@ -9,10 +9,10 @@ export type Restaurant = {
 };
 
 export type NestedRestaurantAndAddress = Restaurant & {
-  address: Partial<Omit<Address, "id">>;
+  address: Partial<Address>;
 };
 export type RestaurantJoinedWithAddress = Restaurant &
-  Partial<Omit<Address, "id">>;
+  Partial<Omit<Address, "id"> & { addressId: number }>;
 
 const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
 

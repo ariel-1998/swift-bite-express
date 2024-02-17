@@ -9,7 +9,7 @@ export type Restaurant = {
 };
 
 export type NestedRestaurantAndAddress = Restaurant & {
-  address: Partial<Omit<Address, "id">>;
+  address: Partial<Address>;
 };
 
 const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];

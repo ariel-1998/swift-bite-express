@@ -38,6 +38,7 @@ class RestaurantQueries {
 
     const query = `
     SELECT ${tableName}.*, 
+    ${addresses}.${addressCols.id} as addressId, 
     ${addresses}.${addressCols.apartment}, 
     ${addresses}.${addressCols.building}, 
     ${addresses}.${addressCols.city}, 
@@ -99,6 +100,7 @@ class RestaurantQueries {
     const offset = generateOffset(page);
     const query = `
     SELECT ${tableName}.*, 
+    ${addresses}.${addressCols.id} as addressId, 
     ${addresses}.${addressCols.apartment}, 
     ${addresses}.${addressCols.building}, 
     ${addresses}.${addressCols.city}, 
@@ -157,6 +159,30 @@ class RestaurantQueries {
     WHERE ${columns.id} = ?
     `;
     const params: MixedArray = [restaurantName, restaurantId];
+    return { params, query };
+  }
+  getAllOwnerRestaurants(userId: number): TransactionQuery {
+    const { columns: combinedCols, tableName: combined } =
+      DB.tables.restaurant_owner_address;
+    const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
+    const query = `
+    SELECT ${tableName}.*,
+    ${addresses}.${addressCols.id} as addressId, 
+    ${addresses}.${addressCols.apartment}, 
+    ${addresses}.${addressCols.building}, 
+    ${addresses}.${addressCols.city}, 
+    ${addresses}.${addressCols.country}, 
+    ${addresses}.${addressCols.entrance}, 
+    ${addresses}.${addressCols.latitude}, 
+    ${addresses}.${addressCols.longitude}, 
+    ${addresses}.${addressCols.state}, 
+    ${addresses}.${addressCols.street}
+    FROM ${tableName}
+    LEFT JOIN ${combined} ON ${combined}.${combinedCols.restaurantId} = ${tableName}.${columns.id}
+    LEFT JOIN ${addresses} ON ${combined}.${combinedCols.addressId} = ${addresses}.${addressCols.id}
+    WHERE ${combined}.${combinedCols.userId} = ?
+    `;
+    const params: MixedArray = [userId];
     return { params, query };
   }
   // deleteRestaurant() {}

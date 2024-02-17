@@ -443,19 +443,26 @@ export async function updateRestaurant(
   }
 }
 //only for restaurantOwners
-// export async function getOwnerRestaurants(
-//   req: Request,
-//   res: Response<NestedRestaurantAndAddress[]>,
-//   next: NextFunction
-// ) {
-// try {
-//   verifyUser(req)
-//   verifyIsOwner(req)
-//   req.user.
-// } catch (error) {
-//   console.log()
-// }
-// }
+//check if works
+export async function getOwnerRestaurants(
+  req: Request,
+  res: Response<NestedRestaurantAndAddress[]>,
+  next: NextFunction
+) {
+  try {
+    verifyUser(req);
+    const { user } = req;
+    const { params, query } = restaurantQueries.getAllOwnerRestaurants(user.id);
+    const [rows] = await executeSingleQuery<RestaurantJoinedWithAddress[]>(
+      query,
+      params
+    );
+    const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
+    res.status(200).json(rearrangedData);
+  } catch (error) {
+    next(handleErrorTypes(error));
+  }
+}
 // export async function updateRestaurant() {}
 
 // type DeleteRestaurantReq = Request<{ restaurantId: string }>;

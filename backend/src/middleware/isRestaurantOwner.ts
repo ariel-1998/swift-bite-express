@@ -15,7 +15,7 @@ export function isRestaurantOwner(
     )
   );
 }
-//check
+//check if needed
 export function verifyIsOwner<T extends { user: User }>(
   req: T
 ): asserts req is T & {

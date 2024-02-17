@@ -36,6 +36,7 @@ export function rearrangeRestaurantAddressDataArray(
       imgPublicId: item.imgPublicId,
       logoPublicId: item.logoPublicId,
       address: {
+        id: item.addressId,
         apartment: item.apartment,
         building: item.building,
         city: item.city,
