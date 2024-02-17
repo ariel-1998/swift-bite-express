@@ -5,10 +5,11 @@ import Login from "./components/AuthArea/Login";
 import Logout from "./components/AuthArea/Logout";
 import HomePage from "./pages/HomePage";
 import RestaurantPage from "./pages/RestaurantPage";
+import Layout from "./components/Layout/Layout";
 
 function App() {
   return (
-    <div className="min-h-screen flex flex-col bg-primary-special bg-[#f7f7f1]">
+    <Layout>
       <BrowserRouter>
         <Routes>
           {/** home route */}
@@ -26,7 +27,7 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </div>
+    </Layout>
   );
 }
 

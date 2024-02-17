@@ -40,7 +40,7 @@ const RestaurantCardList: React.FC = () => {
       });
 
       if (node) observerRef.current.observe(node);
-
+      //check if needed
       return () => {
         if (observerRef.current) {
           observerRef.current.disconnect();
@@ -53,7 +53,7 @@ const RestaurantCardList: React.FC = () => {
   );
 
   return (
-    <div className="grid grid-flow-col auto-cols-max gap-4">
+    <div className="flex flex-wrap gap-4 p-2 ">
       {data?.pages.map((page) =>
         page.map((restaurant, i) => {
           if (page.length === i + 1) {

@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { useParams } from "react-router-dom";
 import { restaurantService } from "../services/restaurantService";
-import RestaurantCard from "../components/RestaurantArea/RestaurantCard";
 import queryKeys from "../utils/queryKeys";
+import RestaurantHeaderImg from "../components/RestaurantArea/RestaurantHeaderImg";
 
 const RestaurantPage: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
@@ -16,9 +16,9 @@ const RestaurantPage: React.FC = () => {
 
   return (
     <>
-      {data && <RestaurantCard restaurant={data} />}
       {isLoading && "loading..."}
       {isError && "error"}
+      {data && <RestaurantHeaderImg restaurant={data} />}
     </>
   );
 };

@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --restaurant-header: 500px;
+}
+.restaurant-header-img {
+  height: var(--restaurant-header);
+}
+
+.restaurant-header-logo {
+  height: var(--restaurant-header / 2);
+}

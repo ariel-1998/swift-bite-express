@@ -1,12 +1,9 @@
 import { forwardRef } from "react";
 import { AdvancedImage } from "@cloudinary/react";
-import cld from "../../utils/cloudinaryConfig";
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
-// import useGenerateImg from "../../hooks/useGenerateImg";
-import { CONSTANTS } from "../../utils/constants";
 import { NestedRestaurantAndAddress } from "../../models/Restaurant";
-import { CloudinaryImage } from "@cloudinary/url-gen/index";
 import { Link } from "react-router-dom";
+import { generateCldResizedImage } from "../../utils/cloudinaryConfig";
 
 type RestaurantCardProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -15,26 +12,18 @@ type RestaurantCardProps = {
 const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
   ({ restaurant }, ref) => {
     //check if need hook in useEffect
-    let img: CloudinaryImage;
-    let logo: CloudinaryImage;
-    if (!restaurant.imgPublicId) {
-      // need to upload default image
-      img = cld.image(CONSTANTS.DEFAULT_RESTAURANT_IMG_PUBLIC_ID);
-    } else {
-      img = cld.image(restaurant.imgPublicId);
-    }
-    img.resize(
+    const img = generateCldResizedImage(
+      restaurant.imgPublicId,
+      "image",
       thumbnail()
         .width(288)
         .height((288 / 3) * 2)
     );
-
-    if (!restaurant.logoPublicId) {
-      logo = cld.image(CONSTANTS.DEFAULT_RESTAURANT_LOGO_PUBLIC_ID);
-    } else {
-      logo = cld.image(restaurant.logoPublicId);
-    }
-    logo.resize(thumbnail().width(50).height(50));
+    const logo = generateCldResizedImage(
+      restaurant.logoPublicId,
+      "logo",
+      thumbnail().width(50).height(50)
+    );
 
     return (
       <Link
@@ -47,10 +36,11 @@ const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
             ref.current = e;
           }
         }}
-        className="bg-white rounded transition-shadow hover:shadow-md max-w-72 flex flex-col cursor-pointer"
+        className="bg-white rounded transition-shadow hover:shadow-md min-w-72 max-w-80 flex 
+        overflow-hidden flex-col cursor-pointer grow h-fit pb-1"
       >
         <AdvancedImage cldImg={img} />
-        <div className="flex gap-2">
+        <div className="flex gap-2 px-0.5">
           <AdvancedImage cldImg={logo} />
           <div className="flex flex-col">
             <span className="font-bold text-lg font-serif">

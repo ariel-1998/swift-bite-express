@@ -30,6 +30,7 @@ import { cloudinary } from "../utils/cloudinaryConfig";
 import { Coordinates } from "../models/Address";
 import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTable";
 import { UploadApiResponse } from "cloudinary";
+import { verifyIsOwner } from "../middleware/isRestaurantOwner";
 
 //need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
@@ -441,6 +442,20 @@ export async function updateRestaurant(
     connection?.release();
   }
 }
+//only for restaurantOwners
+// export async function getOwnerRestaurants(
+//   req: Request,
+//   res: Response<NestedRestaurantAndAddress[]>,
+//   next: NextFunction
+// ) {
+// try {
+//   verifyUser(req)
+//   verifyIsOwner(req)
+//   req.user.
+// } catch (error) {
+//   console.log()
+// }
+// }
 // export async function updateRestaurant() {}
 
 // type DeleteRestaurantReq = Request<{ restaurantId: string }>;
