@@ -1,13 +1,15 @@
 import React from "react";
+import { NestedRestaurantAndAddress } from "../../../models/Restaurant";
+import RestaurantAddressForm from "../../AddressArea/RestaurantAddressForm";
 
 type UpdateRestaurantAddressProps = {
-  // Define props here
+  restaurant: NestedRestaurantAndAddress;
 };
 
 const UpdateRestaurantAddress: React.FC<UpdateRestaurantAddressProps> = ({
-  props,
+  restaurant,
 }) => {
-  return <div>{/* Component content */}</div>;
+  return <RestaurantAddressForm restaurant={restaurant} />;
 };
 
 export default UpdateRestaurantAddress;

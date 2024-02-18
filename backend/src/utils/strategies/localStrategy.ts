@@ -62,6 +62,8 @@ export class LocalProvider {
   ): Promise<User> => {
     const usersTable = DB.tables.users;
     const { tableName, columns } = usersTable;
+    console.log("start");
+    parseSchemaThrowZodErrors(userRegistrationSchema, userInfo);
     const hashedPassword = await hashPassword(userInfo.password);
     const newUser = this.createDefaultUserOBJ(userInfo, hashedPassword);
     const query = `
@@ -77,8 +79,6 @@ export class LocalProvider {
       newUser.isRestaurantOwner,
       newUser.primaryAddressId,
     ];
-
-    parseSchemaThrowZodErrors(userRegistrationSchema, userInfo);
 
     // email is uniqe so if there are duplicates it will throw an error
     try {

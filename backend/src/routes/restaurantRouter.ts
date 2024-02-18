@@ -12,14 +12,15 @@ import { isRestaurantOwner } from "../middleware/isRestaurantOwner";
 
 export const restaurantRouter = Router();
 
-//with query.page check the page for pagination (might get it with address)
 restaurantRouter.get("/", getRestaurantsByPage);
-restaurantRouter.get("/:restaurantId", getSingleRestaurantById);
-restaurantRouter.post("/", addRestaurant);
-restaurantRouter.put("/:restaurantId", updateRestaurant);
-// restaurantRouter.delete("/:restaurantId", deleteRestaurant);
-
-//check if works and check if middleware works
 restaurantRouter.get("/owner", isRestaurantOwner, getOwnerRestaurants);
-
+restaurantRouter.get("/:restaurantId([0-9]+)", getSingleRestaurantById);
 restaurantRouter.get("/search/:search", searchRestaurants);
+restaurantRouter.post("/", addRestaurant);
+//check if works and check if middleware works
+restaurantRouter.put(
+  "/:restaurantId([0-9]+)",
+  isRestaurantOwner,
+  updateRestaurant
+);
+// restaurantRouter.delete("/:restaurantId", deleteRestaurant);

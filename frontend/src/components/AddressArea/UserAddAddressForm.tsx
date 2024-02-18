@@ -1,5 +1,5 @@
 import React from "react";
-import AddressForm from "./AddressForm";
+import UserAddressForm from "./UserAddressForm";
 import { addressService } from "../../services/addressService";
 
 type UserAddAddressFormProps = {
@@ -10,12 +10,10 @@ const UserAddAddressForm: React.FC<UserAddAddressFormProps> = ({
   onSuccess = () => undefined,
 }) => {
   return (
-    <AddressForm
+    <UserAddressForm
       title="Add your Address"
       fn={addressService.postAddress}
-      restaurantId={null}
       onSuccess={onSuccess}
-      //need to add navigate onuccess
     />
   );
 };

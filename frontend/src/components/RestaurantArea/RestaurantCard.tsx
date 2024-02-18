@@ -7,10 +7,11 @@ import { generateCldResizedImage } from "../../utils/cloudinaryConfig";
 
 type RestaurantCardProps = {
   restaurant: NestedRestaurantAndAddress;
+  navigateOnClick: string;
 };
 
 const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
-  ({ restaurant }, ref) => {
+  ({ restaurant, navigateOnClick }, ref) => {
     //check if need hook in useEffect
     const img = generateCldResizedImage(
       restaurant.imgPublicId,
@@ -27,7 +28,7 @@ const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
 
     return (
       <Link
-        to={`/restaurants/${restaurant.id}`}
+        to={navigateOnClick}
         ref={(e) => {
           //handle both function ref and object ref
           if (typeof ref === "function") {
@@ -42,7 +43,7 @@ const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
         <AdvancedImage cldImg={img} />
         <div className="flex gap-2 px-0.5">
           <AdvancedImage cldImg={logo} />
-          <div className="flex flex-col">
+          <div className="flex flex-col ">
             <span className="font-bold text-lg font-serif">
               {restaurant.name}
             </span>

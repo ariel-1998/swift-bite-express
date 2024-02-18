@@ -22,7 +22,6 @@ type UpdateRestaurantQueryParams = {
 };
 
 class RestaurantService {
-  //need to implement in restaurant page
   async getSingleRestaurantById(
     restaurantId: number
   ): Promise<NestedRestaurantAndAddress> {
@@ -31,7 +30,6 @@ class RestaurantService {
     );
     return data;
   }
-  //need to implement search
   async searchRestaurantsByName(
     search: string,
     page: number,
@@ -72,7 +70,7 @@ class RestaurantService {
     );
     return data;
   }
-
+  //check
   async updateRestaurant({
     restaurantId,
     image,
@@ -83,16 +81,23 @@ class RestaurantService {
     if (image) formData.append("image", image[0]);
     if (logoImage) formData.append("image", logoImage[0]);
 
-    const params: UpdateRestaurantQueryParams = {
-      image: Boolean(image),
-      logoImage: Boolean(logoImage),
-      name: name,
-    };
+    const params: UpdateRestaurantQueryParams = name
+      ? { name }
+      : image
+      ? { image: true }
+      : { logoImage: true };
     const { data } = await credentialsAxios.put(
       `${restaurantRoute}/${restaurantId}`,
-      {},
+      formData,
       { params }
     );
+    return data;
+  }
+  //need to implement
+  async getOwnerRestaurants(): Promise<NestedRestaurantAndAddress[]> {
+    const route = `${restaurantRoute}/owner`;
+    console.log(route);
+    const { data } = await credentialsAxios.get(route);
     return data;
   }
 

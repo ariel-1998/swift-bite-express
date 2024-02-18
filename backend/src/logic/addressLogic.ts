@@ -5,11 +5,13 @@ import { FunctionError } from "../models/Errors/ErrorConstructor";
 import { getCoordsAndturnUndefinedToNull } from "../utils/nominatimGeocoding";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { verifyUser } from "../middleware/verifyAuth";
-import { handleErrorTypes } from "../middleware/errorHandler";
 import { userQueries } from "../utils/DB/queries/userQueries";
 import { addressQueries } from "../utils/DB/queries/addressQueries";
-import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTable";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
+import {
+  verifyIsOwner,
+  verifyOwnershipByRestaurantIdAndUserId,
+} from "../middleware/isRestaurantOwner";
 
 type GetAddressByIdParams = {
   addressId: string;
@@ -28,15 +30,16 @@ export const getAddressById = async (
     if (!address) res.sendStatus(404);
     res.status(200).json(address);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   }
 };
 
 // maybe add addAddress req.query.restaurantId to check if
+type AddressReqQuery = { restaurantId?: string };
 export type AddressReqBody = Omit<Address, "id" | "longitude" | "latitude">;
 export type AddAddressReq = Request<
   unknown,
-  Address,
+  unknown,
   AddressReqBody,
   AddressReqQuery
 >;
@@ -49,9 +52,9 @@ export const addAddress = async (
   let connection: PoolConnection | undefined = undefined;
   try {
     verifyUser(req);
-    console.log(req.body);
     //if user already create an address prevent from creating more than 1
     const restaurantId = req.query.restaurantId;
+    if (restaurantId) verifyIsOwner(req);
     const { user } = req;
     const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
     const addressParams = addressQueries.AddAddressQuery(addressWithoutId);
@@ -76,6 +79,17 @@ export const addAddress = async (
       );
       await executeQuery<ResultSetHeader>(connection, updateParams);
     } else {
+      const isOwner = await verifyOwnershipByRestaurantIdAndUserId(
+        connection,
+        +restaurantId,
+        user.id
+      );
+      if (isOwner.addressId) {
+        throw new FunctionError(
+          "Address was already created for this restaurant",
+          400
+        );
+      }
       const [addressRes] = await executeQuery<ResultSetHeader>(
         connection,
         addressParams
@@ -93,18 +107,17 @@ export const addAddress = async (
 
     await connection.commit();
     //need to return address;
-    res.status(204).json({ ...addressWithoutId, id: addedAddressId });
+    res.status(201).json({ ...addressWithoutId, id: addedAddressId });
   } catch (error) {
     console.log(error);
 
     await connection?.rollback();
-    next(handleErrorTypes(error));
+    next(error);
   } finally {
     connection?.release();
   }
 };
 
-type AddressReqQuery = { restaurantId?: string };
 type UpdateAddressReq = Request<
   unknown,
   Address,
@@ -120,9 +133,10 @@ export async function updateAddress(
   try {
     verifyUser(req);
     const user = req.user;
+    const restaurantId = req.query.restaurantId;
+    if (restaurantId) verifyIsOwner(req);
 
     const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
-    const restaurantId = req.query.restaurantId;
     connection = await pool.getConnection();
     await connection.beginTransaction();
     let updatedAddressId: number;
@@ -143,23 +157,11 @@ export async function updateAddress(
       await executeQuery<ResultSetHeader>(connection, updateQuery);
       updatedAddressId = addressId;
     } else {
-      //check if user is restaurant owner from req.user.isRestaurantOwner
-      const errMsg = `You do not have permission to modify the address of this restaurant.`;
-      if (!user.isRestaurantOwner) throw new FunctionError(errMsg, 403);
-      //check if user is the owner of this restaurant
-      const isOwnerQuery =
-        restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
-          +restaurantId,
-          user.id
-        );
-      const [isOwnerRows] = await executeQuery<RestauransOwnerAddressTable[]>(
+      const isOwner = await verifyOwnershipByRestaurantIdAndUserId(
         connection,
-        isOwnerQuery
+        +restaurantId,
+        user.id
       );
-      const isOwner = isOwnerRows[0];
-      //if not throw error
-      if (!isOwner) throw new FunctionError(errMsg, 403);
-      //if owner update restaurant address
       if (!isOwner.addressId)
         throw new FunctionError(
           "Cannot update Aaddress before creating one",
@@ -177,7 +179,7 @@ export async function updateAddress(
   } catch (error) {
     console.log(error);
     await connection?.rollback();
-    next(handleErrorTypes(error));
+    next(error);
   } finally {
     connection?.release();
   }
@@ -249,7 +251,7 @@ export async function updateAddress(
 //     res.sendStatus(204);
 //   } catch (error) {
 //     await connection?.rollback();
-//     next(handleErrorTypes(error));
+//     next(error);
 //   } finally {
 //     connection?.release();
 //   }
@@ -265,6 +267,6 @@ export async function convertAddressToCoords(
     const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
     res.status(200).json(addressWithoutId);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   }
 }

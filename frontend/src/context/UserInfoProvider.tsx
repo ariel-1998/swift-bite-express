@@ -10,7 +10,7 @@ export type UserContextProps = {
   user?: User;
   setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
   address?: Address;
-  setAddress: (address: Address | undefined) => void;
+  setAddress: React.Dispatch<React.SetStateAction<Address | undefined>>;
   clearCache(): void;
 };
 
@@ -75,7 +75,13 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
 
   return (
     <UserInfoContext.Provider
-      value={{ user, setUser, address, setAddress, clearCache }}
+      value={{
+        user,
+        setUser,
+        address,
+        setAddress,
+        clearCache,
+      }}
     >
       {loadingUser ? "Loading..." : children}
     </UserInfoContext.Provider>

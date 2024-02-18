@@ -19,11 +19,13 @@ const RestaurantHeaderImg: React.FC<RestaurantHeaderImgProps> = ({
   )
     .quality("auto")
     .format("auto");
+
   const logo = generateCldResizedImage(
     restaurant.logoPublicId,
     "logo",
     thumbnail().width(120).height(120)
   );
+
   return (
     <div className="relative flex">
       <AdvancedImage

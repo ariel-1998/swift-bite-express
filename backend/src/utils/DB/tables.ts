@@ -134,8 +134,8 @@ async function create_addresses_table(connection: PoolConnection) {
     ${apartment} INT DEFAULT NULL,
     ${state} VARCHAR(45) DEFAULT NULL,
     ${city} VARCHAR(90) NOT NULL,
-    ${longitude} DECIMAL(11, 8) NOT NULL,
-    ${latitude} DECIMAL(11, 8) NOT NULL
+    ${longitude} DECIMAL(20, 17) NOT NULL,
+    ${latitude} DECIMAL(20, 17) NOT NULL
     )`;
   await executeQuery(connection, { query, params: [] });
 }

@@ -28,14 +28,17 @@ export type Credentials = {
 //   email: z.string().email(),
 // });
 export const userRegistrationSchema = z.object({
-  email: z.string().email().max(90, "Email too long"),
+  email: z
+    .string({ required_error: "Email is required" })
+    .email()
+    .max(90, "Email too long"),
   password: z
-    .string()
+    .string({ required_error: "Password is required" })
     .trim()
     .min(6, "Password to short (min 6 chars)")
     .max(10, "Password to long (max 10 chars)"),
   fullName: z
-    .string()
+    .string({ required_error: "Full name is required" })
     .trim()
     .min(2, "Full Name to short (min 2 chars)")
     .max(20, "Full Name to long (max 20 chars)"),

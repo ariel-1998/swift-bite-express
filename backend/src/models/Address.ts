@@ -57,8 +57,6 @@ export const addressSchema = z.object({
     .number({ invalid_type_error: "Entrance is Optional or Number" })
     .nullable()
     .optional(),
-  longitude: z.string({ required_error: "Address NOT Found!" }), //if coords are not found so is the location
-  latitude: z.string({ required_error: "Address NOT Found!" }), //if coords are not found so is the location
 });
 
-export type AddressSchema = z.infer<typeof addressSchema>;
+// export type AddressSchema = z.infer<typeof addressSchema>;

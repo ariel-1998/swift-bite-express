@@ -23,14 +23,11 @@ import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
 import { userQueries } from "../utils/DB/queries/userQueries";
 import { IsOwner } from "../models/User";
-import { handleErrorTypes } from "../middleware/errorHandler";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
 import { Coordinates } from "../models/Address";
-import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTable";
-import { UploadApiResponse } from "cloudinary";
-import { verifyIsOwner } from "../middleware/isRestaurantOwner";
+import { verifyOwnershipByRestaurantIdAndUserId } from "../middleware/isRestaurantOwner";
 
 //need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
@@ -52,7 +49,7 @@ export async function getSingleRestaurantById(
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
     res.status(200).json(rearrangedData[0]);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   }
 }
 
@@ -69,7 +66,6 @@ export async function getRestaurantsByPage(
   next: NextFunction
 ) {
   let connection: PoolConnection | undefined = undefined;
-  console.log(req.query);
   try {
     const { longitude, latitude, page } = req.query;
     if (!page) {
@@ -99,21 +95,21 @@ export async function getRestaurantsByPage(
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
     res.status(200).json(rearrangedData);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   } finally {
     connection?.release();
   }
 }
 
 type CoordinatesInParams = { longitude?: string; latitude?: string };
-type SearchRestaurant = Request<
+type SearchRestaurants = Request<
   { search: string },
   unknown,
   unknown,
   CoordinatesInParams & { page?: string }
 >;
 export async function searchRestaurants(
-  req: SearchRestaurant,
+  req: SearchRestaurants,
   res: Response<Restaurant[]>,
   next: NextFunction
 ) {
@@ -146,7 +142,7 @@ export async function searchRestaurants(
     const [rows] = await executeQuery<Restaurant[]>(connection, searchQuery);
     res.status(200).json(rows);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   } finally {
     connection?.release();
   }
@@ -226,134 +222,12 @@ export async function addRestaurant(
     if (imgPublicId) await cloudinary.deleteImage(imgPublicId);
     if (logoPublicId) await cloudinary.deleteImage(logoPublicId);
     await connection?.rollback();
-    next(handleErrorTypes(error));
+    next(error);
   } finally {
     connection?.release();
   }
 }
 //check if works
-// type UpdateRestaurantImage = Request<
-//   { restaurantId: string },
-//   unknown,
-//   unknown,
-//   { image?: boolean; logoImage?: boolean; name?: string }
-// >;
-// export async function updateRestaurant(
-//   req: UpdateRestaurantImage,
-//   response: Response<NestedRestaurantAndAddress>,
-//   next: NextFunction
-// ) {
-//   let connection: PoolConnection | undefined = undefined;
-
-//   try {
-//     verifyUser(req);
-//     const user = req.user;
-//     const { restaurantId } = req.params;
-//     if (!user.isRestaurantOwner) {
-//       throw new FunctionError(
-//         "You do not have premission to update this restaurant",
-//         403
-//       );
-//     }
-//     //check if correct or if always return an obj
-//     if (!req.query) {
-//       throw new FunctionError(
-//         "image | logoImage | name, Are required in Query",
-//         400
-//       );
-//     }
-//     connection = await pool.getConnection();
-
-//     const isRestaurantOwnerQuery =
-//       restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
-//         +restaurantId,
-//         user.id
-//       );
-
-//     const [data] = await executeQuery<RestauransOwnerAddressTable[]>(
-//       connection,
-//       isRestaurantOwnerQuery
-//     );
-//     if (!data.length) {
-//       throw new FunctionError(
-//         "You do not have premission to update this restaurant",
-//         403
-//       );
-//     }
-
-//     if (req.query.name) {
-//       //update name
-//     } else if (req.files?.image || req.files?.logoImage) {
-//       const files = req.files;
-//       let imageResponse: UploadApiResponse = {} as UploadApiResponse;
-
-//       if (!files.image && !files.logoImage) {
-//         throw new FunctionError("Bad Request: image file wasn't sent", 400);
-//       }
-
-//       if (req.query.image) {
-//         //update image
-//         const image = files.image;
-//         if (!image) {
-//           throw new FunctionError("Bad Request: image file wasn't sent", 400);
-//         }
-//         parseSchemaThrowZodErrors(imageSchema, image);
-//         imageResponse = await cloudinary.uploadImage(image.tempFilePath);
-//       } else if (req.query.logoImage) {
-//         //update logoImage
-//         const logoImage = files.logoImage;
-//         if (!logoImage) {
-//           throw new FunctionError("Bad Request: image file wasn't sent", 400);
-//         }
-//         parseSchemaThrowZodErrors(imageSchema, logoImage);
-//         imageResponse = await cloudinary.uploadImage(logoImage.tempFilePath);
-//       }
-//       const updateRestaurantQuery =
-//         restaurantQueries.updateRestaurantImgPublicId(
-//           +restaurantId,
-//           imageResponse.public_id
-//         );
-//       await executeQuery(connection, updateRestaurantQuery);
-//       const getRestaurantQuery = restaurantQueries.getSingleRestaurantById(
-//         +restaurantId
-//       );
-
-//       const [rows] = await executeQuery<RestaurantJoinedWithAddress[]>(
-//         connection,
-//         getRestaurantQuery
-//       );
-//       const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
-//       response.status(200).json(rearrangedData[0]);
-//     } else {
-//       throw new FunctionError("Bad Request", 400);
-//     }
-//   } catch (error) {
-//     next(handleErrorTypes(error));
-//   } finally {
-//     connection?.release();
-//   }
-// }
-
-// type UpdateRestaurantLogo = Request<{ restaurantId: string }> & {
-//   files?: { logoImage?: UploadedFile };
-// };
-
-//check if works
-// export function updateRestaurantLogo(
-//   req: UpdateRestaurantLogo,
-//   response: Response<NestedRestaurantAndAddress>,
-//   next: NextFunction
-// ) {
-//   let connection: PoolConnection | undefined = undefined;
-// try {
-
-// } catch (error) {
-//   next(handleErrorTypes(error));
-// } finally {
-//   connection?.release()
-// }
-// }
-
 type UpdateRestaurant = Request<
   { restaurantId: string },
   unknown,
@@ -381,51 +255,14 @@ export async function updateRestaurant(
       );
     }
     connection = await pool.getConnection();
-    //check if user is the owner of the requested restaurant
-    //i might make it a middleware
-    const isRestaurantOwnerQuery =
-      restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
-        +restaurantId,
-        user.id
-      );
-
-    const [data] = await executeQuery<RestauransOwnerAddressTable[]>(
+    await verifyOwnershipByRestaurantIdAndUserId(
       connection,
-      isRestaurantOwnerQuery
+      +restaurantId,
+      user.id
     );
-    if (!data.length) {
-      throw new FunctionError(
-        "You do not have premission to update this restaurant",
-        403
-      );
-    }
 
     let updateQuery: TransactionQuery;
-    if (query.name) {
-      updateQuery = restaurantQueries.updateRestaurantName(
-        +restaurantId,
-        query.name
-      );
-    } else {
-      if (!req.files || Object.values(req.files).length) {
-        throw new FunctionError("image was not sent in request", 400);
-      }
-      const image = Object.values(req.files)[0] as UploadedFile;
-      parseSchemaThrowZodErrors(imageSchema, image);
-      const imageResponse = await cloudinary.uploadImage(image.tempFilePath);
-      if (query.image) {
-        updateQuery = restaurantQueries.updateRestaurantImgPublicId(
-          +restaurantId,
-          imageResponse.public_id
-        );
-      } else {
-        updateQuery = restaurantQueries.updateRestaurantlogoPublicId(
-          +restaurantId,
-          imageResponse.public_id
-        );
-      }
-    }
-    await executeQuery(connection, updateQuery);
+    ////
     const getRestaurantQuery = restaurantQueries.getSingleRestaurantById(
       +restaurantId
     );
@@ -434,10 +271,50 @@ export async function updateRestaurant(
       connection,
       getRestaurantQuery
     );
-    const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
-    res.status(200).json(rearrangedData[0]);
+    const rearrangedDataArray = rearrangeRestaurantAddressDataArray(rows);
+    const rearrangedData = rearrangedDataArray[0];
+    /////
+    if (query.name) {
+      updateQuery = restaurantQueries.updateRestaurantName(
+        rearrangedData.id,
+        query.name
+      );
+      rearrangedData.name = query.name;
+    } else {
+      if (!req.files || !Object.values(req.files).length) {
+        throw new FunctionError("image was not sent in request", 400);
+      }
+      const image = Object.values(req.files)[0] as UploadedFile;
+      parseSchemaThrowZodErrors(imageSchema, image);
+      const updateArg = query.logoImage
+        ? rearrangedData.logoPublicId
+        : rearrangedData.imgPublicId;
+      const imageResponse = await cloudinary.updateImage(
+        updateArg,
+        image.tempFilePath
+      );
+      console.log(query);
+      if (query.image) {
+        console.log("image");
+        updateQuery = restaurantQueries.updateRestaurantImgPublicId(
+          +restaurantId,
+          imageResponse.public_id
+        );
+        rearrangedData.imgPublicId = imageResponse.public_id;
+      } else {
+        console.log("logo");
+
+        updateQuery = restaurantQueries.updateRestaurantlogoPublicId(
+          +restaurantId,
+          imageResponse.public_id
+        );
+        rearrangedData.logoPublicId = imageResponse.public_id;
+      }
+    }
+    await executeQuery(connection, updateQuery);
+    res.status(200).json(rearrangedData);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   } finally {
     connection?.release();
   }
@@ -450,9 +327,13 @@ export async function getOwnerRestaurants(
   next: NextFunction
 ) {
   try {
+    console.log("starting");
+
     verifyUser(req);
     const { user } = req;
     const { params, query } = restaurantQueries.getAllOwnerRestaurants(user.id);
+    console.log(query);
+    console.log(params);
     const [rows] = await executeSingleQuery<RestaurantJoinedWithAddress[]>(
       query,
       params
@@ -460,7 +341,7 @@ export async function getOwnerRestaurants(
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
     res.status(200).json(rearrangedData);
   } catch (error) {
-    next(handleErrorTypes(error));
+    next(error);
   }
 }
 // export async function updateRestaurant() {}
@@ -493,7 +374,7 @@ export async function getOwnerRestaurants(
 //     //if not found throw error 400 bad request or 403 forbidden
 //   } catch (error) {
 //     await connection?.rollback();
-//     next(handleErrorTypes(error));
+//     next(error);
 //   } finally {
 //     connection?.release();
 //   }

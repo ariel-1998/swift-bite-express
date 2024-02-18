@@ -54,8 +54,6 @@ class RestaurantQueries {
     WHERE ${tableName}.${columns.id} = ?
     `;
     const params: MixedArray = [restaurantId];
-    console.log(query);
-    console.log(restaurantId);
     return { params, query };
   }
 
@@ -185,6 +183,7 @@ class RestaurantQueries {
     const params: MixedArray = [userId];
     return { params, query };
   }
+
   // deleteRestaurant() {}
 }
 

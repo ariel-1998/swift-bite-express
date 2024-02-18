@@ -45,7 +45,6 @@ const RestaurantCardList: React.FC = () => {
         if (observerRef.current) {
           observerRef.current.disconnect();
           observerRef.current = null;
-          console.log("out");
         }
       };
     },
@@ -59,6 +58,7 @@ const RestaurantCardList: React.FC = () => {
           if (page.length === i + 1) {
             return (
               <RestaurantCard
+                navigateOnClick={`/restaurants/${restaurant.id}`}
                 restaurant={restaurant}
                 key={restaurant.id}
                 ref={observer}

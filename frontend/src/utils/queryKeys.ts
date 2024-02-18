@@ -23,6 +23,7 @@ class QueryKeys {
     getNearRestaurantsByPage(address: Address | undefined) {
       return [restaurants, "pages", address];
     },
+    getOwnerRestaurants: [restaurants, "owner"],
   };
 }
 

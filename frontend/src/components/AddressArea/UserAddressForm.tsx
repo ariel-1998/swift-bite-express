@@ -2,27 +2,25 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Address, AddressFormData, addressSchema } from "../../models/Address";
 import { zodResolver } from "@hookform/resolvers/zod";
-import AuthForm from "../AuthArea/AuthForm";
+import AuthForm from "../AuthArea/UserAddressForm";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import { useMutation } from "@tanstack/react-query";
 import { AddressReq, addressService } from "../../services/addressService";
 import useUserInfo from "../../hooks/useUserInfo";
 
-type AddressFormProps = {
+type UserAddressFormProps = {
   address?: Address;
   title: string;
   fn: (address: AddressReq) => Promise<Address>;
-  restaurantId: number | null;
   onSuccess?: () => void;
 };
 
-const AddressForm: React.FC<AddressFormProps> = ({
+const UserAddressForm: React.FC<UserAddressFormProps> = ({
   address,
   title,
   fn,
-  restaurantId,
-  onSuccess = () => undefined,
+  onSuccess,
 }) => {
   const { user, setAddress, setUser } = useUserInfo();
   const {
@@ -41,9 +39,10 @@ const AddressForm: React.FC<AddressFormProps> = ({
         setUser((prev) => {
           return prev ? { ...prev, primaryAddressId: data.id } : prev;
         });
-      onSuccess();
+      if (onSuccess) onSuccess();
     },
   });
+
   const converAddressMut = useMutation({
     mutationFn: addressService.convertAddressToCoords,
     onSuccess: onSuccess,
@@ -51,7 +50,7 @@ const AddressForm: React.FC<AddressFormProps> = ({
   });
 
   const submitAddress = (data: AddressFormData) => {
-    if (user) return mutation.mutate({ address: data, restaurantId });
+    if (user) return mutation.mutate({ address: data, restaurantId: null });
     //if no user that means he inputs his own address so save it in the local storage
     converAddressMut.mutate(data);
   };
@@ -123,4 +122,4 @@ const AddressForm: React.FC<AddressFormProps> = ({
   );
 };
 
-export default AddressForm;
+export default UserAddressForm;

@@ -1,5 +1,5 @@
 import React from "react";
-import AuthForm from "../AuthArea/AuthForm";
+import AuthForm from "../AuthArea/UserAddressForm";
 import Input from "../Customs/Input";
 import { useMutation } from "@tanstack/react-query";
 import { restaurantService } from "../../services/restaurantService";

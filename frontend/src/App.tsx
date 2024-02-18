@@ -6,28 +6,40 @@ import Logout from "./components/AuthArea/Logout";
 import HomePage from "./pages/HomePage";
 import RestaurantPage from "./pages/RestaurantPage";
 import Layout from "./components/Layout/Layout";
+import OwnerRestaurantList from "./components/RestaurantArea/OwnerRestaurantList";
+import UpdateRestaurant from "./components/RestaurantArea/UpdateRestaurant/UpdateRestaurant";
 
 function App() {
   return (
-    <Layout>
-      <BrowserRouter>
-        <Routes>
-          {/** home route */}
-          <Route path="/" Component={HomePage} />
+    <BrowserRouter>
+      <Routes>
+        {/** home route */}
+        <Route path="/" Component={Layout}>
+          <Route path="" Component={HomePage} />
           {/** auth routes */}
-          <Route element={<Auth />}>
-            <Route path="/auth/register" Component={Register} />
-            <Route path="/auth/login" Component={Login} />
-            <Route path="/auth/logout" Component={Logout} />
-            <Route path="*" element={<Navigate to={"/auth/login"} />} />
+          <Route path="auth/" element={<Auth />}>
+            <Route path="register" Component={Register} />
+            <Route path="register" Component={Register} />
+            <Route path="login" Component={Login} />
+            <Route path="logout" Component={Logout} />
+            {/* <Route path="*" element={<Navigate to={"/auth/login"} />} /> */}
           </Route>
           {/** restaurant route*/}
           <Route path="restaurants">
+            {
+              <>
+                <Route path="owner" Component={OwnerRestaurantList} />
+                <Route
+                  path="owner/:restaurantId"
+                  Component={UpdateRestaurant}
+                />
+              </>
+            }
             <Route path=":restaurantId" Component={RestaurantPage} />
           </Route>
-        </Routes>
-      </BrowserRouter>
-    </Layout>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 

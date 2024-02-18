@@ -14,7 +14,6 @@ authRouter.get("/login", userInfoResponse);
 
 //google strategy
 authRouter.get("/google", handleGoogleAuth);
-// authRouter.get("/login/google", handleGoogleAuth("login"));
 authRouter.get("/google/callback", handleProviderCBRedirect);
 
 //local strategy register

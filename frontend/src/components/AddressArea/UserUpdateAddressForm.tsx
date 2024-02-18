@@ -1,6 +1,6 @@
 import React from "react";
 import useUserInfo from "../../hooks/useUserInfo";
-import AddressForm from "./AddressForm";
+import AddressForm from "./UserAddressForm";
 import { addressService } from "../../services/addressService";
 
 type UserUpdateAddressFormProps = {
@@ -14,7 +14,6 @@ const UserUpdateAddressForm: React.FC<UserUpdateAddressFormProps> = ({
   return (
     <AddressForm
       title="Update your Address"
-      restaurantId={null}
       address={address}
       fn={addressService.updateAddress}
       onSuccess={onSuccess}

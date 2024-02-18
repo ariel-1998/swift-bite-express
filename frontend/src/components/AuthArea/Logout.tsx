@@ -9,21 +9,22 @@ const Logout: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const { mutate } = useMutation({
     mutationFn: authService.logout,
     onSuccess: onSuccessLogout,
     onError: (error) => console.log(error),
   });
 
   function onSuccessLogout() {
+    console.log("error");
     clearCache();
     queryClient.clear();
     navigate("/auth/login");
   }
 
   useEffect(() => {
-    mutation.mutate();
-  }, [mutation]);
+    mutate();
+  }, [mutate]);
 
   return null;
 };

@@ -12,14 +12,15 @@ export const nodeGeocoder = NodeGeocoder({
 type AddressToConvert = Partial<Address>;
 export class Geocoder {
   protected convertAddressObjToString = (address: AddressToConvert) => {
-    const addressString = `${address.building} ${address.street}, ${address.city}, ${address.country}, ${address.state}`;
+    const addressString = `${address.building ?? ""} ${address.street ?? ""}, ${
+      address.city ?? ""
+    }, ${address.country ?? ""}, ${address.state ?? ""}`;
     return addressString;
   };
 
   geocode = async (address: AddressToConvert) => {
     try {
       const addressString = this.convertAddressObjToString(address);
-      console.log(addressString);
       const data = await nodeGeocoder.geocode(addressString);
       if (!data.length) throw Error();
       const { longitude, latitude } = data[0];
@@ -42,10 +43,9 @@ export async function getCoordsAndturnUndefinedToNull<
     "entrance",
     "apartment"
   );
-  const coordinates = await geocoder.geocode(req.body);
   parseSchemaThrowZodErrors(addressSchema, {
     ...addressObj,
-    ...coordinates,
   });
+  const coordinates = await geocoder.geocode(req.body);
   return { ...addressObj, ...coordinates };
 }
