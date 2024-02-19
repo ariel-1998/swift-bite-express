@@ -5,9 +5,12 @@ import {
 } from "../../../models/Restaurant";
 import Input from "../../Customs/Input";
 import Button from "../../Customs/Button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../services/restaurantService";
 import { ZodError } from "zod";
+import { updateRestaurantCache } from "../../../utils/cacheUpdates";
+import useUserInfo from "../../../hooks/useUserInfo";
+import { useNavigate } from "react-router-dom";
 
 type UpdateRestaurantNameProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -17,10 +20,20 @@ const UpdateRestaurantName: React.FC<UpdateRestaurantNameProps> = ({
   restaurant,
 }) => {
   const nameRef = useRef<HTMLInputElement | null>(null);
+  const queryClient = useQueryClient();
+  const { address } = useUserInfo();
+  const navigate = useNavigate();
 
   const mutation = useMutation({
     mutationFn: restaurantService.updateRestaurant,
-    //onSuccess: update restaurant queries
+    onSuccess(data) {
+      updateRestaurantCache.updateSingleRestaurantInCache(
+        data,
+        queryClient,
+        address
+      );
+      navigate("/restaurants/owner");
+    },
   });
 
   const submitUpdate = (e: FormEvent<HTMLFormElement>) => {
@@ -38,15 +51,16 @@ const UpdateRestaurantName: React.FC<UpdateRestaurantNameProps> = ({
   };
 
   return (
-    <form onSubmit={submitUpdate}>
+    <form onSubmit={submitUpdate} className="flex flex-col gap-3 p-10">
       <Input label="Restaurant Name:" type="text" ref={nameRef} />
       <Button
         type="submit"
         size={"formBtn"}
         variant={"primary"}
         disabled={mutation.isPending}
+        defaultValue={restaurant.name}
       >
-        Sign In
+        Update Name
       </Button>
     </form>
   );

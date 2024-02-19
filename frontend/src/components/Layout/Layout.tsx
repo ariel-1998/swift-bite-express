@@ -5,9 +5,14 @@ import { Outlet } from "react-router-dom";
 
 const Layout: React.FC = () => {
   return (
-    <div className="grid grid-rows-[auto,1fr,auto] min-h-screen bg-primary-special bg-[#f7f7f1]">
+    <div
+      className="flex flex-col cursor-default w-full min-h-screen overflow-y-auto 
+      bg-primary-special bg-[#f7f7f1] m-0"
+    >
       <Header />
-      <Outlet />
+      <div className="grow">
+        <Outlet />
+      </div>
       <Footer />
     </div>
   );

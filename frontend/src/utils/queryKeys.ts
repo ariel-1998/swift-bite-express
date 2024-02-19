@@ -17,11 +17,11 @@ class QueryKeys {
     },
     //infinite query check if valid or need to add another variable for page
     searchRestaurantsByName(search: string, address: Address | undefined) {
-      return [restaurants, "search", search, address];
+      return [restaurants, address, "search", search];
     },
     //infinite query check if valid or need to add another variable for page
     getNearRestaurantsByPage(address: Address | undefined) {
-      return [restaurants, "pages", address];
+      return [restaurants, address, "pages"];
     },
     getOwnerRestaurants: [restaurants, "owner"],
   };

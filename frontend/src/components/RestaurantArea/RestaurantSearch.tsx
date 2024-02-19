@@ -6,12 +6,28 @@ import useUserInfo from "../../hooks/useUserInfo";
 import { CONSTANTS } from "../../utils/constants";
 import RestaurantSearchResultCard from "./RestaurantSearchResultCard";
 import queryKeys from "../../utils/queryKeys";
+import useScreenSize from "../../hooks/useScreenSize";
+import { FaSearch } from "react-icons/fa";
+import { FaWindowClose } from "react-icons/fa";
+import useDebounce from "../../hooks/useDebounce";
 
-const RestaurantSearch: React.FC = () => {
+type RestaurantSearchProps = {
+  openSearch: boolean;
+  toggleOpenSearch: () => void;
+};
+
+const RestaurantSearch: React.FC<RestaurantSearchProps> = ({
+  openSearch,
+  toggleOpenSearch,
+}) => {
   const [search, setSearch] = useState("");
   const { address } = useUserInfo();
   const observerRef = useRef<IntersectionObserver | null>(null);
-
+  const isSmaller = useScreenSize("lg");
+  const { loading, debounce: debounceSearch } = useDebounce({
+    wait: 500,
+    fn: updateSeach,
+  });
   const {
     data,
     hasNextPage,
@@ -61,33 +77,71 @@ const RestaurantSearch: React.FC = () => {
     [fetchNextPage, hasNextPage, isError, isFetchingNextPage]
   );
 
+  function updateSeach(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log("asdlknasdlnalskdnalskdndlkasndlkansdlknasdlkasndlkasnlksan");
+    setSearch(e.target.value);
+  }
   return (
-    <div>
-      <Input
-        placeholder="Serach Restaurants"
-        onChange={(e) => setSearch(e.target.value)}
-      />
-      {data?.pages.map((page) =>
-        page.map((restaurant, i) => {
-          if (page.length === i + 1) {
-            return (
-              <RestaurantSearchResultCard
-                restaurant={restaurant}
-                key={restaurant.id}
-                ref={observer}
-              />
-            );
-          }
-          return (
-            <RestaurantSearchResultCard
-              restaurant={restaurant}
-              key={restaurant.id}
+    <div className={`w-full flex flex-col cursor-pointer`}>
+      <div className="relative">
+        {!isSmaller || openSearch ? (
+          <>
+            <Input
+              className={`${isSmaller && openSearch && "indent-10"}`}
+              placeholder="Serach Restaurants"
+              onChange={debounceSearch}
             />
-          );
-        })
-      )}
-      {isLoading && "loading..."}
+            {isSmaller && (
+              <div
+                className="absolute top-1/2 transform cursor-pointer -translate-y-2/4 left-2 text-3xl text-brown bg-transparent"
+                onClick={() => {
+                  setSearch("");
+                  toggleOpenSearch();
+                }}
+              >
+                <FaWindowClose />
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            className="border border-white rounded-full p-1.5 text-white"
+            onClick={toggleOpenSearch}
+          >
+            <FaSearch className="text-md" />
+          </div>
+        )}
+      </div>
+      {(isLoading || loading) && "loading..."}
       {isError && "error"}
+      {search && data && openSearch && (
+        <div className="relative">
+          <div
+            onClick={toggleOpenSearch}
+            className="absolute top-0 w-full bg-white"
+          >
+            {data?.pages.map((page) =>
+              page.map((restaurant, i) => {
+                if (page.length === i + 1) {
+                  return (
+                    <RestaurantSearchResultCard
+                      restaurant={restaurant}
+                      key={restaurant.id}
+                      ref={observer}
+                    />
+                  );
+                }
+                return (
+                  <RestaurantSearchResultCard
+                    restaurant={restaurant}
+                    key={restaurant.id}
+                  />
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

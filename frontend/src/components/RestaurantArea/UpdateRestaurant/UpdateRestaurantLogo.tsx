@@ -5,9 +5,12 @@ import {
 } from "../../../models/Restaurant";
 import Button from "../../Customs/Button";
 import Input from "../../Customs/Input";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../services/restaurantService";
 import { ZodError } from "zod";
+import { updateRestaurantCache } from "../../../utils/cacheUpdates";
+import useUserInfo from "../../../hooks/useUserInfo";
+import { useNavigate } from "react-router-dom";
 
 type UpdateRestaurantLogoProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -17,15 +20,19 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
   restaurant,
 }) => {
   const logoRef = useRef<HTMLInputElement | null>(null);
-
+  const { address } = useUserInfo();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: restaurantService.updateRestaurant,
     //onSuccess: update restaurant queries
     onSuccess(data) {
-      //update owner restaurants query data
-      //and update single restaurant query data
-      //if there is address in the restaurant then invalidate restaurants data and search data
-      console.log(data);
+      updateRestaurantCache.updateSingleRestaurantInCache(
+        data,
+        queryClient,
+        address
+      );
+      navigate("/restaurants/owner");
     },
     onError(error) {
       console.log(error);
@@ -49,7 +56,7 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
     }
   };
   return (
-    <form onSubmit={submitUpdate}>
+    <form onSubmit={submitUpdate} className="flex flex-col gap-3 p-10">
       <Input label="Restaurant Logo:" type="file" ref={logoRef} />
       <Button
         type="submit"
@@ -57,7 +64,7 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
         variant={"primary"}
         disabled={mutation.isPending}
       >
-        Sign In
+        Update
       </Button>
     </form>
   );

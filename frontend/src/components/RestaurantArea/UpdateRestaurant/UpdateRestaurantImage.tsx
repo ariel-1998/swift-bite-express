@@ -4,10 +4,13 @@ import {
   updateRestaurantSchema,
 } from "../../../models/Restaurant";
 import { ZodError } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../services/restaurantService";
 import Input from "../../Customs/Input";
 import Button from "../../Customs/Button";
+import useUserInfo from "../../../hooks/useUserInfo";
+import { updateRestaurantCache } from "../../../utils/cacheUpdates";
+import { useNavigate } from "react-router-dom";
 
 type UpdateRestaurantImageProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -17,15 +20,18 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
   restaurant,
 }) => {
   const imageRef = useRef<HTMLInputElement | null>(null);
-
+  const queryClient = useQueryClient();
+  const { address } = useUserInfo();
+  const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: restaurantService.updateRestaurant,
-    //onSuccess: update restaurant queries
     onSuccess(data) {
-      //update owner restaurants query data
-      //and update single restaurant query data
-      //if there is address in the restaurant then invalidate restaurants data and search data
-      console.log(data);
+      updateRestaurantCache.updateSingleRestaurantInCache(
+        data,
+        queryClient,
+        address
+      );
+      navigate("/restaurants/owner");
     },
     onError(error) {
       console.log(error);
@@ -49,15 +55,15 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
     }
   };
   return (
-    <form onSubmit={submitUpdate}>
-      <Input label="Restaurant Logo:" type="file" ref={imageRef} />
+    <form onSubmit={submitUpdate} className="flex flex-col gap-3 p-10">
+      <Input label="Restaurant Image:" type="file" ref={imageRef} />
       <Button
         type="submit"
         size={"formBtn"}
         variant={"primary"}
         disabled={mutation.isPending}
       >
-        Sign In
+        Update
       </Button>
     </form>
   );

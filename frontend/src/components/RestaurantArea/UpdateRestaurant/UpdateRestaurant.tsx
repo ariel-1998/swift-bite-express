@@ -9,15 +9,14 @@ import UpdateRestaurantImage from "./UpdateRestaurantImage";
 import UpdateRestaurantName from "./UpdateRestaurantName";
 import AddRestaurantAddress from "../AddRestaurantAddress";
 
-type FormNames = "Name" | "Logo" | "Image" | "Address";
+type FormNames = "name" | "logo" | "image" | "address";
 export type UpdateRestaurantLocationState = { activeForm?: FormNames };
 const searchParam = "activeForm";
 
 const UpdateRestaurant: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const activeForm: FormNames = searchParams.get(searchParam) as FormNames;
+  const activeForm = (searchParams.get(searchParam) as FormNames) || "name";
 
   const { data, isLoading, isError } = useQuery({
     queryKey: queryKeys.restaurants.getSingleRestaurantById(+restaurantId!),
@@ -31,24 +30,49 @@ const UpdateRestaurant: React.FC = () => {
       return prev;
     });
   };
+
   return (
     <>
       {isLoading && "loading..."}
       {isError && "error"}
       {data && (
-        <div className="p-6 sm:p-10 border-secondary border-2 flex flex-col w-[95vw] sm:w-[500px] gap-4 bg-white">
-          <h1 className="text-center font-bold text-xl pb-3">{activeForm}</h1>
-          <ul>
-            <li onClick={() => setActiveForm("Name")}>Name</li>
-            <li onClick={() => setActiveForm("Logo")}>Logo</li>
-            <li onClick={() => setActiveForm("Image")}>Image</li>
-            <li onClick={() => setActiveForm("Address")}>Address</li>
+        <div className="rounded m-auto mt-5 shadow-md border-secondary border-2 p-5 flex flex-col w-[95vw] sm:w-[500px]  bg-white">
+          <ul className="flex font-bold justify-around mb-5  divide-x divide-solid">
+            <li
+              onClick={() => setActiveForm("name")}
+              className="cursor-pointer grow hover:bg-secondary p-2 transition-colors text-center"
+            >
+              Name
+            </li>
+            <li
+              onClick={() => setActiveForm("logo")}
+              className="cursor-pointer grow hover:bg-secondary p-2 transition-colors text-center"
+            >
+              Logo
+            </li>
+            <li
+              onClick={() => setActiveForm("logo")}
+              className="cursor-pointer grow hover:bg-secondary p-2 transition-colors text-center"
+            >
+              Image
+            </li>
+            <li
+              onClick={() => setActiveForm("address")}
+              className="cursor-pointer grow hover:bg-secondary p-2 transition-colors text-center"
+            >
+              Address
+            </li>
           </ul>
-          {activeForm === "Image" ? (
+
+          <h1 className="text-center font-bold text-2xl ">
+            Update {activeForm}
+          </h1>
+
+          {activeForm === "image" ? (
             <UpdateRestaurantImage restaurant={data} />
-          ) : activeForm === "Logo" ? (
+          ) : activeForm === "logo" ? (
             <UpdateRestaurantLogo restaurant={data} />
-          ) : activeForm === "Address" ? (
+          ) : activeForm === "address" ? (
             data.address.id ? (
               <UpdateRestaurantAddress restaurant={data} />
             ) : (

@@ -1,12 +1,16 @@
 import React from "react";
 import AuthForm from "../AuthArea/UserAddressForm";
 import Input from "../Customs/Input";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../services/restaurantService";
 import Button from "../Customs/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RestaurantSchema, restaurantSchema } from "../../models/Restaurant";
+import { updateRestaurantCache } from "../../utils/cacheUpdates";
+import { useNavigate } from "react-router-dom";
+import useUserInfo from "../../hooks/useUserInfo";
+import { IsOwner } from "../../models/User";
 
 const CreateRestaurant: React.FC = () => {
   const {
@@ -15,9 +19,22 @@ const CreateRestaurant: React.FC = () => {
     formState: { errors },
   } = useForm<RestaurantSchema>({ resolver: zodResolver(restaurantSchema) });
 
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { address, setUser } = useUserInfo();
   const mutatation = useMutation({
     mutationFn: restaurantService.createRestaurant,
     onSuccess(data) {
+      updateRestaurantCache.updateSingleRestaurantInCache(
+        data,
+        queryClient,
+        address
+      );
+      setUser((prev) => {
+        if (!prev || prev?.isRestaurantOwner) return prev;
+        return { ...prev, isRestaurantOwner: IsOwner.true };
+      });
+      navigate(`/restaurants/owner/${data.id}?activeForm=address`);
       //no need to update query cache for restaurants as there is no address in it and all the query caches are with addresses
       //need to navigate to update restaurant address page "restaurant/owner/:restaurantId"
     },

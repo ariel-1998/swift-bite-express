@@ -9,7 +9,7 @@ type UpdateRestaurantAddressProps = {
 const UpdateRestaurantAddress: React.FC<UpdateRestaurantAddressProps> = ({
   restaurant,
 }) => {
-  return <RestaurantAddressForm restaurant={restaurant} />;
+  return <RestaurantAddressForm restaurant={restaurant} method="update" />;
 };
 
 export default UpdateRestaurantAddress;

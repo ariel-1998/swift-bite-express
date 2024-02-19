@@ -4,20 +4,26 @@ import { AddressFormData } from "../../models/Address";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { addressSchema } from "../../models/Address";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addressService } from "../../services/addressService";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
+import { updateRestaurantCache } from "../../utils/cacheUpdates";
+import useUserInfo from "../../hooks/useUserInfo";
+import { useNavigate } from "react-router-dom";
 
 type RestaurantAddressFormProps = {
-  restaurant?: NestedRestaurantAndAddress;
-  restaurantId?: number | null;
+  restaurant: NestedRestaurantAndAddress;
+  method: "update" | "create";
 };
 
 const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   restaurant,
-  restaurantId = null,
+  method,
 }) => {
+  const queryClient = useQueryClient();
+  const { address } = useUserInfo();
+  const navigate = useNavigate();
   const {
     register,
     formState: { errors },
@@ -29,12 +35,21 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   });
 
   const mutation = useMutation({
-    mutationFn: restaurant
-      ? addressService.updateAddress
-      : addressService.postAddress,
+    mutationFn:
+      method === "update"
+        ? addressService.updateAddress
+        : addressService.postAddress,
     onSuccess: (data) => {
-      //update restaurants caches
-      console.log(data);
+      const updatedRestaurant: NestedRestaurantAndAddress = {
+        ...restaurant,
+        address: data,
+      };
+      updateRestaurantCache.updateSingleRestaurantInCache(
+        updatedRestaurant,
+        queryClient,
+        address
+      );
+      navigate("/restaurants/owner");
     },
     onError(error) {
       console.log(error);
@@ -44,20 +59,23 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   const submitAddress = (data: AddressFormData) => {
     mutation.mutate({
       address: data,
-      restaurantId,
+      restaurantId: restaurant.id,
     });
     //if no user that means he inputs his own address so save it in the local storage
   };
 
   return (
-    <form onSubmit={handleSubmit(submitAddress)}>
+    <form
+      onSubmit={handleSubmit(submitAddress)}
+      className="flex flex-col gap-3 p-10"
+    >
       <Input
         label="Country:"
         errMessage={errors.country?.message}
         type="text"
         placeholder="Country..."
         {...register("country")}
-        defaultValue={restaurant?.address?.country}
+        defaultValue={restaurant.address?.country}
       />
       <Input
         label="State:"
@@ -65,7 +83,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
         type="text"
         placeholder="State..."
         {...register("state")}
-        defaultValue={restaurant?.address?.state}
+        defaultValue={restaurant.address?.state}
       />
       <Input
         label="City:"
@@ -73,7 +91,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
         type="text"
         placeholder="City..."
         {...register("city")}
-        defaultValue={restaurant?.address?.city}
+        defaultValue={restaurant.address?.city}
       />
       <Input
         label="Street:"
@@ -81,7 +99,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
         type="text"
         placeholder="Street..."
         {...register("street")}
-        defaultValue={restaurant?.address?.street}
+        defaultValue={restaurant.address?.street}
       />
       <Input
         label="Building:"
@@ -89,10 +107,15 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
         type="number"
         placeholder="Building..."
         {...register("building")}
-        defaultValue={restaurant?.address?.building}
+        defaultValue={restaurant.address?.building}
       />
 
-      <Button type="submit" size={"formBtn"} variant={"primary"}>
+      <Button
+        type="submit"
+        size={"formBtn"}
+        variant={"primary"}
+        disabled={mutation.isPending}
+      >
         Update
       </Button>
     </form>

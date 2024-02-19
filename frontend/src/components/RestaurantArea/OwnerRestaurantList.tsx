@@ -1,7 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
 import React from "react";
-import queryKeys from "../../utils/queryKeys";
-import { restaurantService } from "../../services/restaurantService";
 import RestaurantCard from "./RestaurantCard";
 import useOwnerRestaurants from "../../hooks/useOwnerRestaurants";
 
@@ -9,7 +6,7 @@ const OwnerRestaurantList: React.FC = () => {
   const { data, isLoading, isError } = useOwnerRestaurants();
 
   return (
-    <div className="flex flex-wrap gap-4 p-2 ">
+    <div className="flex flex-wrap gap-4 p-2 justify-center">
       {isLoading && "loading..."}
       {isError && "error"}
       {data &&

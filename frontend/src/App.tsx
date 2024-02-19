@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Auth from "./pages/Auth";
 import Register from "./components/AuthArea/Register";
 import Login from "./components/AuthArea/Login";
@@ -8,6 +8,7 @@ import RestaurantPage from "./pages/RestaurantPage";
 import Layout from "./components/Layout/Layout";
 import OwnerRestaurantList from "./components/RestaurantArea/OwnerRestaurantList";
 import UpdateRestaurant from "./components/RestaurantArea/UpdateRestaurant/UpdateRestaurant";
+import CreateRestaurant from "./components/RestaurantArea/CreateRestaurant";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           </Route>
           {/** restaurant route*/}
           <Route path="restaurants">
+            <Route path="create" Component={CreateRestaurant} />
             {
               <>
                 <Route path="owner" Component={OwnerRestaurantList} />

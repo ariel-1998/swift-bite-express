@@ -29,10 +29,14 @@ const btnStyles = cva(["rounded-full", "transition-colors"], {
         "w-full",
       ],
     },
+    disabledBtn: {
+      default: ["bg-secondary", "cursor-default"],
+    },
   },
   defaultVariants: {
     size: "default",
     variant: "default",
+    disabledBtn: "default",
   },
 });
 
@@ -41,13 +45,21 @@ type ButtonProps = VariantProps<typeof btnStyles> & ComponentProps<"button">;
 const Button: React.FC<ButtonProps> = ({
   size,
   variant,
+  disabledBtn,
   className,
   ...rest
 }) => {
   return (
     <button
       {...rest}
-      className={twMerge(btnStyles({ variant, size }), className)}
+      className={twMerge(
+        btnStyles({
+          variant,
+          size,
+          disabledBtn: rest.disabled ? disabledBtn : null,
+        }),
+        className
+      )}
     />
   );
 };

@@ -50,9 +50,8 @@ const RestaurantCardList: React.FC = () => {
     },
     [fetchNextPage, hasNextPage, isError, isFetchingNextPage]
   );
-
   return (
-    <div className="flex flex-wrap gap-4 p-2 ">
+    <div className="flex flex-wrap gap-4 p-2 justify-center">
       {data?.pages.map((page) =>
         page.map((restaurant, i) => {
           if (page.length === i + 1) {
@@ -65,7 +64,13 @@ const RestaurantCardList: React.FC = () => {
               />
             );
           }
-          return <RestaurantCard restaurant={restaurant} key={restaurant.id} />;
+          return (
+            <RestaurantCard
+              navigateOnClick={`/restaurants/${restaurant.id}`}
+              restaurant={restaurant}
+              key={restaurant.id}
+            />
+          );
         })
       )}
     </div>
