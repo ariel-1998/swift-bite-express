@@ -1,11 +1,17 @@
 import { PoolConnection } from "mysql2/promise";
 import { Address } from "../../models/Address";
 import { AuthProvider } from "../../models/AuthProvider";
-import { MenuItem } from "../../models/MenuItem";
 import { Restaurant } from "../../models/Restaurant";
 import { User } from "../../models/User";
 import { executeQuery, pool } from "./dbConfig";
 import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddressTable";
+import {
+  Category,
+  Meal,
+  MealCategoryTable,
+  Extra,
+  Sauce,
+} from "../../models/Meal";
 
 type SQLTableNames =
   | "auth_provider"
@@ -13,7 +19,13 @@ type SQLTableNames =
   | "addresses"
   | "menu_items"
   | "restaurants"
-  | "restaurant_owner_address";
+  | "restaurant_owner_address"
+  //trying, check if works ///////////////////////////////////
+  | "categories"
+  | "meals"
+  | "sauces"
+  | "extras"
+  | "meal_category";
 
 export class SqlTable<T> {
   constructor(public tableName: SQLTableNames, public columns: Columns<T>) {}
@@ -27,9 +39,16 @@ type Tables = {
   auth_provider: SqlTable<Required<AuthProvider>>;
   users: SqlTable<Required<User>>;
   addresses: SqlTable<Required<Address>>;
-  menu_items: SqlTable<Required<MenuItem>>;
   restaurant_owner_address: SqlTable<Required<RestauransOwnerAddressTable>>;
   restaurants: SqlTable<Required<Restaurant>>;
+
+  //trying, check if works ///////////////////////////////////
+
+  categories: SqlTable<Required<Category>>;
+  meals: SqlTable<Required<Meal>>;
+  sauces: SqlTable<Required<Sauce>>;
+  extras: SqlTable<Required<Extra>>;
+  meal_category: SqlTable<Required<MealCategoryTable>>;
 };
 
 class DBTables {
@@ -76,13 +95,6 @@ DB.addTable("addresses", {
   longitude: "longitude",
   latitude: "latitude",
 });
-DB.addTable("menu_items", {
-  id: "id",
-  restaurantId: "restaurantId",
-  name: "name",
-  description: "description",
-  publicId: "publicId",
-});
 
 DB.addTable("restaurant_owner_address", {
   addressId: "addressId",
@@ -97,6 +109,40 @@ DB.addTable("restaurants", {
   logoPublicId: "logoPublicId",
 });
 
+//trying, check if works ///////////////////////////////////
+DB.addTable("categories", {
+  id: "id",
+  restaurantId: "restaurantId",
+  description: "description",
+  name: "name",
+});
+DB.addTable("meals", {
+  id: "id",
+  name: "name",
+  description: "description",
+  imgPublicId: "imgPublicId",
+  extrasAmount: "extrasAmount",
+  showSouces: "showSouces",
+});
+DB.addTable("sauces", {
+  id: "id",
+  restaurantId: "restaurantId",
+  name: "name",
+});
+
+DB.addTable("extras", {
+  id: "id",
+  mealId: "mealId",
+  name: "name",
+  type: "type",
+  extraPrice: "extraPrice",
+});
+
+DB.addTable("meal_category", {
+  mealId: "mealId",
+  categotyId: "categotyId",
+});
+
 async function create_auth_provider_table(connection: PoolConnection) {
   const { columns, tableName } = DB.tables.auth_provider;
   const { id, provider, providerUserId } = columns;
@@ -107,7 +153,9 @@ async function create_auth_provider_table(connection: PoolConnection) {
     ${providerUserId} VARCHAR(90) NOT NULL,
     PRIMARY KEY (${provider}, ${providerUserId})
 )`;
-  await executeQuery(connection, { query, params: [] });
+  await createTable(connection, query);
+
+  // await executeQuery(connection, { query, params: [] });
 }
 
 async function create_addresses_table(connection: PoolConnection) {
@@ -137,7 +185,9 @@ async function create_addresses_table(connection: PoolConnection) {
     ${longitude} DECIMAL(20, 17) NOT NULL,
     ${latitude} DECIMAL(20, 17) NOT NULL
     )`;
-  await executeQuery(connection, { query, params: [] });
+  await createTable(connection, query);
+
+  // await executeQuery(connection, { query, params: [] });
 }
 
 async function create_users_table(connection: PoolConnection) {
@@ -166,19 +216,9 @@ async function create_users_table(connection: PoolConnection) {
     FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}) ON DELETE CASCADE,
     FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}) ON DELETE SET NULL
     )`;
-  // const query = `
-  // CREATE TABLE IF NOT EXISTS ${tableName} (
-  //   ${id} INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-  //   ${authProviderId} VARCHAR(100) DEFAULT NULL,
-  //   ${primaryAddressId} INT DEFAULT NULL,
-  //   ${fullName} VARCHAR(100) NOT NULL,
-  //   ${password} VARCHAR(90) DEFAULT NULL,
-  //   ${email} VARCHAR(90) UNIQUE NOT NULL,
-  //   ${isRestaurantOwner} TINYINT NOT NULL DEFAULT 0,
-  //   FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}),
-  //   FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id})
-  //   )`;
-  await executeQuery(connection, { query, params: [] });
+  await createTable(connection, query);
+
+  // await executeQuery(connection, { query, params: [] });
 }
 
 //check if right table
@@ -192,7 +232,9 @@ async function create_restaurants_table(connection: PoolConnection) {
     ${imgPublicId} VARCHAR(20) DEFAULT NULL,
     ${logoPublicId} VARCHAR(20) DEFAULT NULL
   )`;
-  await executeQuery(connection, { query, params: [] });
+  await createTable(connection, query);
+
+  // await executeQuery(connection, { query, params: [] });
 }
 
 //check if right table
@@ -216,22 +258,92 @@ async function create_restaurant_owner_address_table(
     FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants.tableName}(${restaurants.columns.id}) ON DELETE CASCADE,
     FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id}) ON DELETE CASCADE
   )`;
-
-  // const query = `
-  // CREATE TABLE IF NOT EXISTS ${tableName} (
-  //   ${addressId} INT DEFAULT NULL,
-  //   ${restaurantId} INT NOT NULL,
-  //   ${userId} INT NOT NULL,
-  //   PRIMARY KEY (${restaurantId}, ${userId}),
-  //   FOREIGN KEY (${addressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}),
-  //   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants.tableName}(${restaurants.columns.id}),
-  //   FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id})
-  // )`;
-
-  await executeQuery(connection, { query, params: [] });
+  await createTable(connection, query);
+  // await executeQuery(connection, { query, params: [] });
 }
 
-//check if right table
+//trying, check if works ///////////////////////////////////
+async function create_categories_table(connection: PoolConnection) {
+  const { tables } = DB;
+  const { columns, tableName } = tables.categories;
+  const { id, restaurantId, name, description } = columns;
+  const { columns: restaurantCols, tableName: restaurants } =
+    tables.restaurants;
+
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+  ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  ${restaurantId} INT NOT NULL,
+  ${name} VARCHAR(45) NOT NULL,
+  ${description} VARCHAR(500) DEFAULT NULL,
+  FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
+  )`;
+  await createTable(connection, query);
+}
+
+async function create_meals_table(connection: PoolConnection) {
+  const { columns, tableName } = DB.tables.meals;
+  const { id, name, description, extrasAmount, imgPublicId, showSouces } =
+    columns;
+  const query = `
+   CREATE TABLE IF NOT EXISTS ${tableName} (
+  ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  ${name} VARCHAR(45) NOT NULL,
+  ${description} VARCHAR(500) DEFAULT NULL,
+  ${extrasAmount} INT DEFAULT NULL,
+  ${showSouces} TINYINT NOT NULL DEFAULT 0,
+  ${imgPublicId} VARCHAR(500) DEFAULT NULL
+  )`;
+  await createTable(connection, query);
+}
+
+async function create_sauces_table(connection: PoolConnection) {
+  const { tables } = DB;
+  const { columns, tableName } = tables.sauces;
+  const { id, restaurantId, name } = columns;
+  const { columns: restaurantCols, tableName: restaurants } =
+    tables.restaurants;
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+  ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  ${restaurantId} INT NOT NULL,
+  ${name} VARCHAR(45) NOT NULL,
+  FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
+  )`;
+  await createTable(connection, query);
+}
+
+async function create_extras_table(connection: PoolConnection) {
+  const { tables } = DB;
+  const { columns, tableName } = tables.extras;
+  const { id, mealId, name, type, extraPrice } = columns;
+  const { columns: mealCols, tableName: meals } = tables.meals;
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+  ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  ${mealId} INT NOT NULL,
+  ${name} VARCHAR(45) NOT NULL,
+  ${type} ENUM('drink', 'extra') NOT NULL,
+  ${extraPrice} INT DEFAULT NULL,
+  FOREIGN KEY (${mealId}) REFERENCES ${meals}(${mealCols.id}) ON DELETE CASCADE
+  )`;
+  await createTable(connection, query);
+}
+async function create_meal_category_table(connection: PoolConnection) {
+  const { tables } = DB;
+  const { columns, tableName } = tables.meal_category;
+  const { categotyId, mealId } = columns;
+  const { columns: mealCols, tableName: meals } = tables.meals;
+  const { columns: categoryCols, tableName: categories } = tables.categories;
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+  ${mealId} INT NOT NULL,
+  ${categotyId} INT NOT NULL,
+  FOREIGN KEY (${mealId}) REFERENCES ${meals}(${mealCols.id}) ON DELETE CASCADE,
+  FOREIGN KEY (${categotyId}) REFERENCES ${categories}(${categoryCols.id}) ON DELETE CASCADE
+  )`;
+  await createTable(connection, query);
+}
 
 export async function createDBTables() {
   let connection: PoolConnection | undefined = undefined;
@@ -243,6 +355,15 @@ export async function createDBTables() {
     await create_users_table(connection);
     await create_restaurants_table(connection);
     await create_restaurant_owner_address_table(connection);
+
+    //trying, check if works ///////////////////////////////////
+    await create_categories_table(connection);
+    await create_meals_table(connection);
+    await create_sauces_table(connection);
+    await create_extras_table(connection);
+    await create_meal_category_table(connection);
+    //trying, check if works ///////////////////////////////////
+
     await connection.commit();
   } catch (error) {
     await connection?.rollback();
@@ -250,4 +371,8 @@ export async function createDBTables() {
   } finally {
     connection?.release();
   }
+}
+
+async function createTable(connection: PoolConnection, query: string) {
+  await executeQuery(connection, { query, params: [] });
 }
