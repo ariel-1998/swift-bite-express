@@ -27,9 +27,7 @@ import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwn
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
 import { Coordinates } from "../models/Address";
-// import { verifyOwnershipByRestaurantIdAndUserId } from "../middleware/isRestaurantOwner";
 
-//need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
 export async function getSingleRestaurantById(
   req: getSingleRestaurantReq,
@@ -254,12 +252,6 @@ export async function updateRestaurant(
       );
     }
     connection = await pool.getConnection();
-    //instead i created a middleware that does the same
-    // await verifyOwnershipByRestaurantIdAndUserId(
-    //   connection,
-    //   +restaurantId,
-    //   user.id
-    // );
 
     let updateQuery: TransactionQuery;
     ////

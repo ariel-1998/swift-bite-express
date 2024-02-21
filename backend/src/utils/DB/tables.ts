@@ -140,7 +140,7 @@ DB.addTable("extras", {
 
 DB.addTable("menu_items_category", {
   menuItemId: "menuItemId",
-  categotyId: "categotyId",
+  categoryId: "categoryId",
 });
 
 async function create_auth_provider_table(connection: PoolConnection) {
@@ -342,15 +342,15 @@ async function create_extras_table(connection: PoolConnection) {
 async function create_menu_items_category_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.menu_items_category;
-  const { categotyId, menuItemId } = columns;
+  const { categoryId, menuItemId } = columns;
   const { columns: itemCols, tableName: menuItems } = tables.menu_items;
   const { columns: categoryCols, tableName: categories } = tables.categories;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
   ${menuItemId} INT NOT NULL,
-  ${categotyId} INT NOT NULL,
+  ${categoryId} INT NOT NULL,
   FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE,
-  FOREIGN KEY (${categotyId}) REFERENCES ${categories}(${categoryCols.id}) ON DELETE CASCADE
+  FOREIGN KEY (${categoryId}) REFERENCES ${categories}(${categoryCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
 }

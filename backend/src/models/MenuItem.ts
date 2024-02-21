@@ -14,6 +14,7 @@ export type Category = {
   description: string | undefined | null;
   restaurantId: number; //refers to restaurants
 };
+
 export type MenuItem = {
   id: number;
   name: string;
@@ -54,5 +55,5 @@ export type Extra = {
 // no need for delete as i set it to cascade no matter if category/menuItem gets deleted this row will be deleted with them
 export type MenuItemCategoryTable = {
   menuItemId: number; //refers to MenuItem
-  categotyId: number; //refers to Category
+  categoryId: number; //refers to Category
 };

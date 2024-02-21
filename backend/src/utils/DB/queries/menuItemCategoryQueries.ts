@@ -3,7 +3,7 @@ import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
 const {
-  columns: { categotyId, menuItemId },
+  columns: { categoryId, menuItemId },
   tableName,
 } = DB.tables.menu_items_category;
 
@@ -21,7 +21,7 @@ class MenuItemCategoryQueries {
       DB.tables.categories;
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
     const query = `INSERT INTO ${tableName} 
-    (${categotyId}, ${menuItemId})
+    (${categoryId}, ${menuItemId})
     SELECT ?, ?
     FROM ${categories}
     JOIN ${menuItems} 
@@ -31,10 +31,10 @@ class MenuItemCategoryQueries {
     AND ${menuItems}.${itemCols.id} = ?
     `;
     const params: MixedArray = [
-      row.categotyId,
+      row.categoryId,
       row.menuItemId,
       row.restaurantId,
-      row.categotyId,
+      row.categoryId,
       row.menuItemId,
     ];
     return { params, query };
@@ -49,16 +49,16 @@ class MenuItemCategoryQueries {
     const query = `
     UPDATE ${tableName}
     JOIN ${categories} 
-    ON ${categories}.${categoryCols.id} = ${tableName}.${categotyId}
+    ON ${categories}.${categoryCols.id} = ${tableName}.${categoryId}
     JOIN ${menuItems}
     ON ${menuItems}.${itemCols.id} = ${tableName}.${menuItemId}
-    SET ${tableName}.${categotyId} = ?
+    SET ${tableName}.${categoryId} = ?
     WHERE ${categories}.${categoryCols.restaurantId} = ?
     AND ${menuItems}.${itemCols.restaurantId} = ?
-    AND ${tableName}.${categotyId} = ?
+    AND ${tableName}.${categoryId} = ?
     AND ${tableName}.${menuItemId} = ?`;
     const params: MixedArray = [
-      row.categotyId,
+      row.categoryId,
       row.restaurantId,
       row.restaurantId,
       row.oldCategoryId,

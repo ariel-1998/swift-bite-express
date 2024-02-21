@@ -12,6 +12,11 @@ import { addressRouter } from "./routes/addressRouter";
 import { createDBTables } from "./utils/DB/tables";
 import { restaurantRouter } from "./routes/restaurantRouter";
 import fileUpload from "express-fileupload";
+import { categoryRouter } from "./routes/categoryRouter";
+import { menuItemRouter } from "./routes/menuItemRouter";
+import { sauceRouter } from "./routes/sauceRouter";
+import { extraRouter } from "./routes/extraRouter";
+import { menuItemCategoryRouter } from "./routes/menuItemCategoryRouter";
 
 const app = express();
 
@@ -33,6 +38,11 @@ app.use(passport.session());
 app.use("/api/auth", authRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/restaurant", restaurantRouter);
+app.use("/api/category", categoryRouter);
+app.use("/api/menu-item", menuItemRouter);
+app.use("/api/sauce", sauceRouter);
+app.use("/api/extra", extraRouter);
+app.use("/api/menu-item-category", menuItemCategoryRouter);
 
 app.use(errorHandler);
 
