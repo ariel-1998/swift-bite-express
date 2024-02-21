@@ -2,6 +2,7 @@ import { RestauransOwnerAddressTable } from "../../../models/RestauransOwnerAddr
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
+//might need to change as i made the table with of cascade and set null on delete
 const { columns, tableName } = DB.tables.restaurant_owner_address;
 class RestauransOwnerAddressQueries {
   getRowByUserIdAndRestaurantId(

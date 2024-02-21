@@ -7,25 +7,24 @@ import { executeQuery, pool } from "./dbConfig";
 import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddressTable";
 import {
   Category,
-  Meal,
-  MealCategoryTable,
+  MenuItem,
+  MenuItemCategoryTable,
   Extra,
   Sauce,
-} from "../../models/Meal";
+} from "../../models/MenuItem";
 
 type SQLTableNames =
   | "auth_provider"
   | "users"
   | "addresses"
-  | "menu_items"
   | "restaurants"
   | "restaurant_owner_address"
   //trying, check if works ///////////////////////////////////
   | "categories"
-  | "meals"
+  | "menu_items"
   | "sauces"
   | "extras"
-  | "meal_category";
+  | "menu_items_category";
 
 export class SqlTable<T> {
   constructor(public tableName: SQLTableNames, public columns: Columns<T>) {}
@@ -45,10 +44,10 @@ type Tables = {
   //trying, check if works ///////////////////////////////////
 
   categories: SqlTable<Required<Category>>;
-  meals: SqlTable<Required<Meal>>;
+  menu_items: SqlTable<Required<MenuItem>>;
   sauces: SqlTable<Required<Sauce>>;
   extras: SqlTable<Required<Extra>>;
-  meal_category: SqlTable<Required<MealCategoryTable>>;
+  menu_items_category: SqlTable<Required<MenuItemCategoryTable>>;
 };
 
 class DBTables {
@@ -116,12 +115,13 @@ DB.addTable("categories", {
   description: "description",
   name: "name",
 });
-DB.addTable("meals", {
+DB.addTable("menu_items", {
   id: "id",
   name: "name",
   description: "description",
   imgPublicId: "imgPublicId",
   extrasAmount: "extrasAmount",
+  restaurantId: "restaurantId",
   showSouces: "showSouces",
 });
 DB.addTable("sauces", {
@@ -132,14 +132,14 @@ DB.addTable("sauces", {
 
 DB.addTable("extras", {
   id: "id",
-  mealId: "mealId",
+  menuItemId: "menuItemId",
   name: "name",
   type: "type",
   extraPrice: "extraPrice",
 });
 
-DB.addTable("meal_category", {
-  mealId: "mealId",
+DB.addTable("menu_items_category", {
+  menuItemId: "menuItemId",
   categotyId: "categotyId",
 });
 
@@ -269,7 +269,6 @@ async function create_categories_table(connection: PoolConnection) {
   const { id, restaurantId, name, description } = columns;
   const { columns: restaurantCols, tableName: restaurants } =
     tables.restaurants;
-
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -281,18 +280,29 @@ async function create_categories_table(connection: PoolConnection) {
   await createTable(connection, query);
 }
 
-async function create_meals_table(connection: PoolConnection) {
-  const { columns, tableName } = DB.tables.meals;
-  const { id, name, description, extrasAmount, imgPublicId, showSouces } =
-    columns;
+async function create_menu_items_table(connection: PoolConnection) {
+  const { columns, tableName } = DB.tables.menu_items;
+  const {
+    id,
+    name,
+    description,
+    extrasAmount,
+    imgPublicId,
+    showSouces,
+    restaurantId,
+  } = columns;
+  const { columns: restaurantCols, tableName: restaurants } =
+    DB.tables.restaurants;
   const query = `
    CREATE TABLE IF NOT EXISTS ${tableName} (
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  ${restaurantId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
   ${description} VARCHAR(500) DEFAULT NULL,
   ${extrasAmount} INT DEFAULT NULL,
   ${showSouces} TINYINT NOT NULL DEFAULT 0,
-  ${imgPublicId} VARCHAR(500) DEFAULT NULL
+  ${imgPublicId} VARCHAR(500) DEFAULT NULL,
+  FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
 }
@@ -316,30 +326,30 @@ async function create_sauces_table(connection: PoolConnection) {
 async function create_extras_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.extras;
-  const { id, mealId, name, type, extraPrice } = columns;
-  const { columns: mealCols, tableName: meals } = tables.meals;
+  const { id, menuItemId, name, type, extraPrice } = columns;
+  const { columns: itemCols, tableName: menuItems } = tables.menu_items;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-  ${mealId} INT NOT NULL,
+  ${menuItemId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
   ${type} ENUM('drink', 'extra') NOT NULL,
   ${extraPrice} INT DEFAULT NULL,
-  FOREIGN KEY (${mealId}) REFERENCES ${meals}(${mealCols.id}) ON DELETE CASCADE
+  FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
 }
-async function create_meal_category_table(connection: PoolConnection) {
+async function create_menu_items_category_table(connection: PoolConnection) {
   const { tables } = DB;
-  const { columns, tableName } = tables.meal_category;
-  const { categotyId, mealId } = columns;
-  const { columns: mealCols, tableName: meals } = tables.meals;
+  const { columns, tableName } = tables.menu_items_category;
+  const { categotyId, menuItemId } = columns;
+  const { columns: itemCols, tableName: menuItems } = tables.menu_items;
   const { columns: categoryCols, tableName: categories } = tables.categories;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
-  ${mealId} INT NOT NULL,
+  ${menuItemId} INT NOT NULL,
   ${categotyId} INT NOT NULL,
-  FOREIGN KEY (${mealId}) REFERENCES ${meals}(${mealCols.id}) ON DELETE CASCADE,
+  FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE,
   FOREIGN KEY (${categotyId}) REFERENCES ${categories}(${categoryCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
@@ -358,10 +368,10 @@ export async function createDBTables() {
 
     //trying, check if works ///////////////////////////////////
     await create_categories_table(connection);
-    await create_meals_table(connection);
+    await create_menu_items_table(connection);
     await create_sauces_table(connection);
     await create_extras_table(connection);
-    await create_meal_category_table(connection);
+    await create_menu_items_category_table(connection);
     //trying, check if works ///////////////////////////////////
 
     await connection.commit();

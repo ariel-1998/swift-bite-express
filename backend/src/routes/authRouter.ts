@@ -21,3 +21,7 @@ authRouter.post("/local/register", handleLocalAuth("signup"), userInfoResponse);
 authRouter.post("/local/login", handleLocalAuth("login"), userInfoResponse);
 //logout all strategies
 authRouter.post("/logout", logout);
+//delete user route need to check if has authProviderId
+//if does then delete the auth_provider row witht the same id  and it will automatically delete the user
+// as i set user table fk authProviderId to cascade on delete
+//need to check what to do about the restaurants and addresses

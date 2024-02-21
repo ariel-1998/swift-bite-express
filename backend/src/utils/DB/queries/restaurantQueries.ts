@@ -1,13 +1,11 @@
+import { Restaurant } from "../../../models/Restaurant";
+import { TurnUndefinedToNullInObj } from "../../helperFunctions";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
 const { columns, tableName } = DB.tables.restaurants;
 
-type RestaurantWithoutId = {
-  name: string;
-  imgPublicId: string | null;
-  logoPublicId: string | null;
-};
+type RestaurantWithoutId = TurnUndefinedToNullInObj<Omit<Restaurant, "id">>;
 
 const DISTANCE = 20;
 const PAGE_LIMIT = 30;

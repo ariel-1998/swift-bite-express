@@ -9,7 +9,7 @@ import {
 import { verifyUser } from "../middleware/verifyAuth";
 import { restaurantQueries } from "../utils/DB/queries/restaurantQueries";
 import {
-  ReplaceUndefinedWithNull,
+  TurnUndefinedToNullInObj,
   rearrangeRestaurantAddressDataArray,
 } from "../utils/helperFunctions";
 import { parseSchemaThrowZodErrors } from "../models/Errors/ZodErrors";
@@ -27,7 +27,7 @@ import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwn
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
 import { Coordinates } from "../models/Address";
-import { verifyOwnershipByRestaurantIdAndUserId } from "../middleware/isRestaurantOwner";
+// import { verifyOwnershipByRestaurantIdAndUserId } from "../middleware/isRestaurantOwner";
 
 //need to add jooins to join address to restaurants!!!!!!!!!!!!!
 type getSingleRestaurantReq = Request<{ restaurantId: string }>;
@@ -177,11 +177,11 @@ export async function addRestaurant(
       const logoResponse = await cloudinary.uploadImage(logoImage.tempFilePath);
       logoPublicId = logoResponse.public_id;
     }
-    const restaurant = {
+    const restaurant: TurnUndefinedToNullInObj<Omit<Restaurant, "id">> = {
       ...req.body,
       imgPublicId,
       logoPublicId,
-    } satisfies ReplaceUndefinedWithNull<Omit<Restaurant, "id">>;
+    };
     parseSchemaThrowZodErrors(restaurantSchema, restaurant);
     const addRestaurantQuery = restaurantQueries.addRestaurant(restaurant);
     connection = await pool.getConnection();
@@ -244,7 +244,6 @@ export async function updateRestaurant(
     verifyUser(req);
     const {
       query,
-      user,
       params: { restaurantId },
     } = req;
     //check that query was sent as its required
@@ -255,11 +254,12 @@ export async function updateRestaurant(
       );
     }
     connection = await pool.getConnection();
-    await verifyOwnershipByRestaurantIdAndUserId(
-      connection,
-      +restaurantId,
-      user.id
-    );
+    //instead i created a middleware that does the same
+    // await verifyOwnershipByRestaurantIdAndUserId(
+    //   connection,
+    //   +restaurantId,
+    //   user.id
+    // );
 
     let updateQuery: TransactionQuery;
     ////
@@ -293,17 +293,13 @@ export async function updateRestaurant(
         updateArg,
         image.tempFilePath
       );
-      console.log(query);
       if (query.image) {
-        console.log("image");
         updateQuery = restaurantQueries.updateRestaurantImgPublicId(
           +restaurantId,
           imageResponse.public_id
         );
         rearrangedData.imgPublicId = imageResponse.public_id;
       } else {
-        console.log("logo");
-
         updateQuery = restaurantQueries.updateRestaurantlogoPublicId(
           +restaurantId,
           imageResponse.public_id
@@ -327,13 +323,9 @@ export async function getOwnerRestaurants(
   next: NextFunction
 ) {
   try {
-    console.log("starting");
-
     verifyUser(req);
     const { user } = req;
     const { params, query } = restaurantQueries.getAllOwnerRestaurants(user.id);
-    console.log(query);
-    console.log(params);
     const [rows] = await executeSingleQuery<RestaurantJoinedWithAddress[]>(
       query,
       params

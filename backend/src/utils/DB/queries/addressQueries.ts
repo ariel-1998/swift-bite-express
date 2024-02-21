@@ -5,6 +5,7 @@ import { DB } from "../tables";
 type AddressObjArg = Awaited<
   ReturnType<typeof getCoordsAndturnUndefinedToNull>
 >;
+
 class AddressQueries {
   getAddressByIdQuery(addressId: number): TransactionQuery {
     const { columns, tableName } = DB.tables.addresses;

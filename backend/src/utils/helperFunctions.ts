@@ -3,6 +3,10 @@ import {
   RestaurantJoinedWithAddress,
 } from "../models/Restaurant";
 
+export type TurnUndefinedToNullInObj<T> = {
+  [P in keyof T]: ReplaceUndefinedWithNull<T[P]>;
+};
+
 export type ReplaceUndefinedWithNull<T> = T extends undefined
   ? NonNullable<T> | null
   : T;
@@ -10,20 +14,13 @@ export type ReplaceUndefinedWithNull<T> = T extends undefined
 export function turnUndefinedToNull<
   T extends Record<string, unknown>,
   K extends keyof T
->(
-  obj: T,
-  ...keys: K[]
-): {
-  [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
-} {
+>(obj: T, ...keys: K[]): TurnUndefinedToNullInObj<T> {
   keys.forEach((key) => {
     if (obj[key] === undefined) {
       obj[key] = null as T[K];
     }
   });
-  return { ...obj } as {
-    [P in keyof T]: P extends K ? ReplaceUndefinedWithNull<T[P]> : T[P];
-  };
+  return { ...obj } as TurnUndefinedToNullInObj<T>;
 }
 
 export function rearrangeRestaurantAddressDataArray(
