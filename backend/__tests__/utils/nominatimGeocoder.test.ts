@@ -1,6 +1,6 @@
 import { describe, it, expect, jest } from "@jest/globals";
 import { testGeocoder } from "../../__mocks__/utils/nominatimGeocoding";
-import { Address } from "../../src/models/Address";
+import { AddressSchema } from "../../src/models/Address";
 import { FunctionError } from "../../src/models/Errors/ErrorConstructor";
 
 const longitude = "45.2131";
@@ -29,7 +29,7 @@ describe("geocoder", () => {
   describe("convertAddressObjToString", () => {
     it("should return object with no nullish values", () => {
       const addressString = `31 Jaffa, jerusalem, israel, `;
-      const address: Partial<Address> = {
+      const address: Partial<AddressSchema> = {
         country: "israel",
         city: "jerusalem",
         state: null,
@@ -44,7 +44,7 @@ describe("geocoder", () => {
   describe("geocode", () => {
     it("should throw 404 error if no address found", async () => {
       try {
-        await testGeocoder.geocode("string Address" as Partial<Address>);
+        await testGeocoder.geocode("string Address" as Partial<AddressSchema>);
       } catch (error) {
         const err = error as FunctionError;
         expect(err).toBeDefined();
@@ -55,7 +55,7 @@ describe("geocoder", () => {
     });
     it("should throw 404 error if no address found", async () => {
       try {
-        await testGeocoder.geocode(12 as Partial<Address>);
+        await testGeocoder.geocode(12 as Partial<AddressSchema>);
       } catch (error) {
         const err = error as FunctionError;
         expect(err).toBeDefined();

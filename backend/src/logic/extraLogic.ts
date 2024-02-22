@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { Extra } from "../models/Extra";
+import { Extra, extraSchema } from "../models/Extra";
 
 type DefaultParams = { menuItemId: string };
 export function getAllExtrasByMenuItemId(
@@ -14,7 +14,15 @@ export function createExtra(
   req: CreateExtraReq,
   res: Response<Extra>,
   next: NextFunction
-) {}
+) {
+  try {
+    const data = extraSchema.parse({ ...req.params, ...req.body });
+    res.json(data as Extra);
+  } catch (error) {
+    next(error);
+    console.log(error);
+  }
+}
 
 type UpdateExtraBody = CreateExtraBody;
 type UpdateExtraParams = DefaultParams & { id: string };

@@ -6,6 +6,7 @@ import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTab
 import { executeQuery, executeSingleQuery } from "../utils/DB/dbConfig";
 import { PoolConnection } from "mysql2/promise";
 import { verifyUser } from "./verifyAuth";
+import { restaurantIdSchema } from "../models/Restaurant";
 
 export function isRestaurantOwner(
   req: Request,
@@ -21,7 +22,7 @@ export function isRestaurantOwner(
   );
 }
 type RestaurantIdKeyInReq = "body" | "query" | "params";
-type RestaurantId = string | number | undefined;
+type RestaurantId = string | number | undefined | null;
 export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
   key: RestaurantIdKeyInReq
 ) {
@@ -29,16 +30,11 @@ export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
     verifyUser(req);
     try {
       const restaurantId = req[key].restaurantId as RestaurantId;
-      if (!restaurantId) {
-        throw new FunctionError("ResaturantId was not sent in req", 400);
-      }
-      //check if needs to change the check cuz +restaurantId could throw an unknown error
-      if (isNaN(+restaurantId)) {
-        throw new FunctionError("Invalid resaturantId", 400);
-      }
+      const parsedId = restaurantIdSchema.parse(restaurantId);
+
       const userId = req.user.id;
       const query = restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
-        +restaurantId,
+        parsedId,
         userId
       );
       const [rows] = await executeSingleQuery<RestauransOwnerAddressTable[]>(
@@ -53,6 +49,7 @@ export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
       }
       next();
     } catch (error) {
+      console.log(error);
       next(error);
     }
   };

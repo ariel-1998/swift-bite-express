@@ -1,10 +1,12 @@
-import { getCoordsAndturnUndefinedToNull } from "../../nominatimGeocoding";
+import { AddressSchema } from "../../../models/Address";
+// import { getCoordsAndturnUndefinedToNull } from "../../nominatimGeocoding";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
-type AddressObjArg = Awaited<
-  ReturnType<typeof getCoordsAndturnUndefinedToNull>
->;
+type AddressObjArg = Omit<AddressSchema, "id">;
+// type AddressObjArg = Awaited<
+//   ReturnType<typeof getCoordsAndturnUndefinedToNull>
+// >;
 
 class AddressQueries {
   getAddressByIdQuery(addressId: number): TransactionQuery {

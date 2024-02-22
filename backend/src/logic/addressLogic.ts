@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import { executeQuery, executeSingleQuery, pool } from "../utils/DB/dbConfig";
-import { Address } from "../models/Address";
+import { Address, AddressSchema } from "../models/Address";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { getCoordsAndturnUndefinedToNull } from "../utils/nominatimGeocoding";
+import { getCoordsAndParseAddress } from "../utils/nominatimGeocoding";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { verifyUser } from "../middleware/verifyAuth";
 import { userQueries } from "../utils/DB/queries/userQueries";
@@ -19,13 +19,13 @@ type GetAddressByIdParams = {
 
 export const getAddressById = async (
   req: Request<GetAddressByIdParams>,
-  res: Response<Address>,
+  res: Response<AddressSchema>,
   next: NextFunction
 ) => {
   try {
     const { addressId } = req.params;
     const { params, query } = addressQueries.getAddressByIdQuery(+addressId);
-    const [rows] = await executeSingleQuery<Address[]>(query, params);
+    const [rows] = await executeSingleQuery<AddressSchema[]>(query, params);
     const address = rows[0];
     if (!address) res.sendStatus(404);
     res.status(200).json(address);
@@ -45,7 +45,7 @@ export type AddAddressReq = Request<
 >;
 export const addAddress = async (
   req: AddAddressReq,
-  res: Response<Address>,
+  res: Response<AddressSchema>,
   next: NextFunction
 ) => {
   //create transaction, add address, after that add addressId to user/restaurant
@@ -56,7 +56,7 @@ export const addAddress = async (
     const restaurantId = req.query.restaurantId;
     if (restaurantId) verifyIsOwner(req);
     const { user } = req;
-    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    const addressWithoutId = await getCoordsAndParseAddress(req.body);
     const addressParams = addressQueries.AddAddressQuery(addressWithoutId);
     connection = await pool.getConnection();
     await connection.beginTransaction();
@@ -120,13 +120,13 @@ export const addAddress = async (
 
 type UpdateAddressReq = Request<
   unknown,
-  Address,
+  unknown,
   AddressReqBody,
   AddressReqQuery
 >;
 export async function updateAddress(
   req: UpdateAddressReq,
-  res: Response<Address>,
+  res: Response<AddressSchema>,
   next: NextFunction
 ) {
   let connection: PoolConnection | undefined = undefined;
@@ -136,7 +136,7 @@ export async function updateAddress(
     const restaurantId = req.query.restaurantId;
     if (restaurantId) verifyIsOwner(req);
 
-    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    const addressWithoutId = await getCoordsAndParseAddress(req.body);
     connection = await pool.getConnection();
     await connection.beginTransaction();
     let updatedAddressId: number;
@@ -260,11 +260,11 @@ export async function updateAddress(
 type ConvertAddressToCoordsReq = Request<unknown, unknown, AddressReqBody>;
 export async function convertAddressToCoords(
   req: ConvertAddressToCoordsReq,
-  res: Response<Omit<Address, "id">>,
+  res: Response<Omit<AddressSchema, "id">>,
   next: NextFunction
 ) {
   try {
-    const addressWithoutId = await getCoordsAndturnUndefinedToNull(req);
+    const addressWithoutId = await getCoordsAndParseAddress(req.body);
     res.status(200).json(addressWithoutId);
   } catch (error) {
     next(error);

@@ -1,12 +1,12 @@
 import { PoolConnection } from "mysql2/promise";
-import { Address } from "../../models/Address";
+import { AddressSchema } from "../../models/Address";
 import { AuthProvider } from "../../models/AuthProvider";
-import { Restaurant } from "../../models/Restaurant";
+import { RestaurantSchema } from "../../models/Restaurant";
 import { User } from "../../models/User";
 import { executeQuery, pool } from "./dbConfig";
 import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddressTable";
 import { MenuItem } from "../../models/MenuItem";
-import { Category } from "../../models/Category";
+import { CategorySchema } from "../../models/Category";
 import { MenuItemCategoryTable } from "../../models/MenuItemCategoryTable";
 import { Extra } from "../../models/Extra";
 import { Sauce } from "../../models/Sauce";
@@ -34,10 +34,10 @@ type Columns<T> = {
 type Tables = {
   auth_provider: SqlTable<Required<AuthProvider>>;
   users: SqlTable<Required<User>>;
-  addresses: SqlTable<Required<Address>>;
+  addresses: SqlTable<Required<AddressSchema>>;
   restaurant_owner_address: SqlTable<Required<RestauransOwnerAddressTable>>;
-  restaurants: SqlTable<Required<Restaurant>>;
-  categories: SqlTable<Required<Category>>;
+  restaurants: SqlTable<Required<RestaurantSchema>>;
+  categories: SqlTable<Required<CategorySchema>>;
   menu_items: SqlTable<Required<MenuItem>>;
   sauces: SqlTable<Required<Sauce>>;
   extras: SqlTable<Required<Extra>>;

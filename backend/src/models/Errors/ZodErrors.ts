@@ -8,10 +8,7 @@ export class ZodErrors extends CustomError {
   }
 }
 
-export function parseSchemaThrowZodErrors<T>(
-  schema: ZodSchema<T>,
-  data: T
-): void {
+export function parseSchemaThrowZodErrors<T>(schema: ZodSchema<T>, data: T) {
   try {
     schema.parse(data);
   } catch (error) {

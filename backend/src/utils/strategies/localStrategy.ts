@@ -10,7 +10,6 @@ import {
 } from "../../models/User";
 import { hashPassword, verifyPassword } from "../bcrypt";
 import { FunctionError } from "../../models/Errors/ErrorConstructor";
-import { parseSchemaThrowZodErrors } from "../../models/Errors/ZodErrors";
 import { Request } from "express";
 import { handleErrorTypes } from "../../middleware/errorHandler";
 import { VerifyCallback } from "passport-google-oauth20";
@@ -63,9 +62,9 @@ export class LocalProvider {
     const usersTable = DB.tables.users;
     const { tableName, columns } = usersTable;
     console.log("start");
-    parseSchemaThrowZodErrors(userRegistrationSchema, userInfo);
-    const hashedPassword = await hashPassword(userInfo.password);
-    const newUser = this.createDefaultUserOBJ(userInfo, hashedPassword);
+    const parsedUserInfo = userRegistrationSchema.parse(userInfo);
+    const hashedPassword = await hashPassword(parsedUserInfo.password);
+    const newUser = this.createDefaultUserOBJ(parsedUserInfo, hashedPassword);
     const query = `
     INSERT INTO ${tableName} 
     (${columns.fullName}, ${columns.email}, ${columns.password}, ${columns.authProviderId}, ${columns.isRestaurantOwner}, ${columns.primaryAddressId}) 

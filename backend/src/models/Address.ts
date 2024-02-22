@@ -24,13 +24,17 @@ export const addressSchema = z.object({
     })
     .trim()
     .max(45, "Invalid Country")
-    .min(1, "Country is Required"),
+    .min(1, "Country is Required")
+    .transform((arg) => arg.trim()),
+
   state: z
     .string({ invalid_type_error: "State is Optional or String" })
     .trim()
     .max(45, "Invalid State")
     .nullable()
-    .optional(),
+    .optional()
+    .transform((val) => (val ? val.trim() : null)),
+
   city: z
     .string({
       invalid_type_error: "City Must be String",
@@ -38,7 +42,9 @@ export const addressSchema = z.object({
     })
     .trim()
     .max(90, "Invalid City")
-    .min(1, "City is required"),
+    .min(1, "City is required")
+    .transform((val) => val.trim()),
+
   street: z
     .string({
       invalid_type_error: "Street Must be String",
@@ -46,19 +52,59 @@ export const addressSchema = z.object({
     })
     .trim()
     .max(90, "Invalid Street")
-    .min(1, "Street is required"),
-  building: z.number({
-    invalid_type_error: "Building Must be Number",
-    required_error: "Building is Required",
-  }),
+    .min(1, "Street is required")
+    .transform((val) => val.trim()),
+
+  building: z.union(
+    [
+      z.number().min(1, "Building needs to be greater then 0"),
+      z
+        .string()
+        .refine((arg) => !isNaN(+arg), "Building must be a number")
+        .refine(
+          (arg) => !isNaN(+arg) && +arg > 0,
+          "Building needs to be greater then 0"
+        )
+        .transform((arg) => +arg),
+    ],
+    {
+      errorMap: () => ({
+        message: "Building is Required",
+      }),
+    }
+  ),
+
   entrance: z
-    .string({ invalid_type_error: "Entrance is Optional or String" })
-    .trim()
-    .max(4, "Invalid Entrance")
+    .union(
+      [
+        z
+          .number()
+          .refine((num) => num.toString().length <= 4, "Entrance too long"),
+        z.string().trim().max(4, "Entrance too long"),
+      ],
+      {
+        errorMap: () => ({ message: "Entrance should be string or a number" }),
+      }
+    )
     .nullable()
-    .optional(),
+    .optional()
+    .transform((val) => {
+      if (!val) return null;
+      if (typeof val === "string") {
+        return !val.trim() ? null : val.trim();
+      }
+      return val.toString();
+    }),
+
   apartment: z
     .number({ invalid_type_error: "Entrance is Optional or Number" })
     .nullable()
-    .optional(),
+    .optional()
+    .transform((val) => (val ? val : null)),
 });
+
+export type AddressSchema = z.infer<typeof addressSchema> & {
+  id: number;
+  longitude: number | string;
+  latitude: number | string;
+};

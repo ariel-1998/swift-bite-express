@@ -1,15 +1,13 @@
 import { AddressReqBody } from "../logic/addressLogic";
-import { Address, addressSchema } from "../models/Address";
+import { AddressSchema, addressSchema } from "../models/Address";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
 import NodeGeocoder from "node-geocoder";
-import { parseSchemaThrowZodErrors } from "../models/Errors/ZodErrors";
-import { turnUndefinedToNull } from "./helperFunctions";
 
 export const nodeGeocoder = NodeGeocoder({
   provider: "openstreetmap",
 });
 
-type AddressToConvert = Partial<Address>;
+type AddressToConvert = Partial<AddressSchema>;
 export class Geocoder {
   protected convertAddressObjToString = (address: AddressToConvert) => {
     const addressString = `${address.building ?? ""} ${address.street ?? ""}, ${
@@ -34,18 +32,8 @@ export class Geocoder {
 
 export const geocoder = new Geocoder();
 
-export async function getCoordsAndturnUndefinedToNull<
-  T extends { body: AddressReqBody }
->(req: T) {
-  const addressObj = turnUndefinedToNull(
-    req.body,
-    "state",
-    "entrance",
-    "apartment"
-  );
-  parseSchemaThrowZodErrors(addressSchema, {
-    ...addressObj,
-  });
-  const coordinates = await geocoder.geocode(req.body);
-  return { ...addressObj, ...coordinates };
+export async function getCoordsAndParseAddress(address: AddressReqBody) {
+  const data = addressSchema.parse(address);
+  const coordinates = await geocoder.geocode(data);
+  return { ...data, ...coordinates };
 }

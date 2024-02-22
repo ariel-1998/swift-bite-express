@@ -1,8 +1,4 @@
 import { v2 as cld } from "cloudinary";
-import { restaurantQueries } from "./DB/queries/restaurantQueries";
-import { executeQuery } from "./DB/dbConfig";
-import { Restaurant } from "../models/Restaurant";
-import { PoolConnection } from "mysql2/promise";
 
 cld.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,

@@ -1,5 +1,4 @@
-import { Category } from "../../../models/Category";
-import { TurnUndefinedToNullInObj } from "../../helperFunctions";
+import { CategorySchema } from "../../../models/Category";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
@@ -8,8 +7,6 @@ const {
   tableName,
 } = DB.tables.categories;
 
-type CategoryQuery = TurnUndefinedToNullInObj<Category>;
-
 class CategoryQueries {
   getAllCategoriesByRestaurantId(restId: number): TransactionQuery {
     const query = `SELECT * FROM ${tableName} WHERE ${restaurantId} = ?`;
@@ -17,7 +14,7 @@ class CategoryQueries {
     return { params, query };
   }
 
-  addCategory(category: Omit<CategoryQuery, "id">): TransactionQuery {
+  addCategory(category: Omit<CategorySchema, "id">): TransactionQuery {
     const query = `
     INSERT INTO ${tableName} 
     (${restaurantId}, ${name}, ${description})
@@ -31,7 +28,7 @@ class CategoryQueries {
     return { params, query };
   }
 
-  updateCategory(category: CategoryQuery): TransactionQuery {
+  updateCategory(category: CategorySchema): TransactionQuery {
     const query = `
     UPDATE ${tableName} 
     SET ${name} = ?,
@@ -48,7 +45,7 @@ class CategoryQueries {
   }
 
   deleteCategory(
-    ids: Pick<CategoryQuery, "id" | "restaurantId">
+    ids: Pick<CategorySchema, "id" | "restaurantId">
   ): TransactionQuery {
     const query = `DELETE FROM ${tableName} WHERE ${id} = ? AND ${restaurantId} = ?`;
     const params: MixedArray = [ids.id, ids.restaurantId];

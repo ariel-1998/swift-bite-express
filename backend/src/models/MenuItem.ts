@@ -1,3 +1,9 @@
+import { z } from "zod";
+import {
+  generateIdSchema,
+  publicIdSchema,
+  restaurantIdSchema,
+} from "./Restaurant";
 import { SQLBoolean } from "./SQLBoolean";
 
 export type MenuItem = {
@@ -9,3 +15,40 @@ export type MenuItem = {
   showSouces: SQLBoolean;
   imgPublicId: string | undefined | null;
 };
+
+export const menuItemIdSchema = generateIdSchema("MenuItemId");
+
+const menuItemSchema = z.object({
+  restaurantId: restaurantIdSchema,
+  name: z
+    .string({
+      required_error: "Name is required",
+      invalid_type_error: "Name must be a string",
+    })
+    .trim()
+    .min(2, "Name too short")
+    .max(45, "Name too long")
+    .transform((val) => val.trim()),
+  description: z
+    .string({ invalid_type_error: "Description must be a string" })
+    .trim()
+    .max(500, "Description too long")
+    .nullable()
+    .optional()
+    .transform((val) => (!val?.trim() ? null : val.trim())),
+  extrasAmount: z.union(
+    [
+      z.number().min(0, "Extras Amount must be a positive number"),
+      z
+        .string()
+        .refine(
+          (val) => !isNaN(+val) && +val > 0,
+          "Extras Amount must be a positive number"
+        ),
+    ],
+    { errorMap: () => ({ message: "Extras Amount must be a number" }) }
+  ),
+  //check if correctly implemented
+  showSouces: z.nativeEnum(SQLBoolean),
+  imgPublicId: publicIdSchema,
+});

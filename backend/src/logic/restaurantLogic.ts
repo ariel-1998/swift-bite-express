@@ -3,15 +3,13 @@ import {
   NestedRestaurantAndAddress,
   Restaurant,
   RestaurantJoinedWithAddress,
+  RestaurantSchema,
   imageSchema,
   restaurantSchema,
 } from "../models/Restaurant";
 import { verifyUser } from "../middleware/verifyAuth";
 import { restaurantQueries } from "../utils/DB/queries/restaurantQueries";
-import {
-  TurnUndefinedToNullInObj,
-  rearrangeRestaurantAddressDataArray,
-} from "../utils/helperFunctions";
+import { rearrangeRestaurantAddressDataArray } from "../utils/helperFunctions";
 import { parseSchemaThrowZodErrors } from "../models/Errors/ZodErrors";
 import {
   TransactionQuery,
@@ -108,7 +106,7 @@ type SearchRestaurants = Request<
 >;
 export async function searchRestaurants(
   req: SearchRestaurants,
-  res: Response<Restaurant[]>,
+  res: Response<RestaurantSchema[]>,
   next: NextFunction
 ) {
   let connection: PoolConnection | undefined = undefined;
@@ -137,7 +135,10 @@ export async function searchRestaurants(
       +coords.latitude,
       +page
     );
-    const [rows] = await executeQuery<Restaurant[]>(connection, searchQuery);
+    const [rows] = await executeQuery<RestaurantSchema[]>(
+      connection,
+      searchQuery
+    );
     res.status(200).json(rows);
   } catch (error) {
     next(error);
@@ -175,12 +176,12 @@ export async function addRestaurant(
       const logoResponse = await cloudinary.uploadImage(logoImage.tempFilePath);
       logoPublicId = logoResponse.public_id;
     }
-    const restaurant: TurnUndefinedToNullInObj<Omit<Restaurant, "id">> = {
+
+    const restaurant = restaurantSchema.parse({
       ...req.body,
       imgPublicId,
       logoPublicId,
-    };
-    parseSchemaThrowZodErrors(restaurantSchema, restaurant);
+    });
     const addRestaurantQuery = restaurantQueries.addRestaurant(restaurant);
     connection = await pool.getConnection();
     await connection.beginTransaction();

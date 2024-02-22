@@ -1,11 +1,10 @@
-import { Restaurant } from "../../../models/Restaurant";
-import { TurnUndefinedToNullInObj } from "../../helperFunctions";
+import { RestaurantSchema } from "../../../models/Restaurant";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
 const { columns, tableName } = DB.tables.restaurants;
 
-type RestaurantWithoutId = TurnUndefinedToNullInObj<Omit<Restaurant, "id">>;
+type RestaurantWithoutId = Omit<RestaurantSchema, "id">;
 
 const DISTANCE = 20;
 const PAGE_LIMIT = 30;
@@ -32,7 +31,6 @@ class RestaurantQueries {
     const addresses = DB.tables.addresses.tableName;
     const combineCols = DB.tables.restaurant_owner_address.columns;
     const combineTableName = DB.tables.restaurant_owner_address.tableName;
-    //NEED to add join statement
 
     const query = `
     SELECT ${tableName}.*, 

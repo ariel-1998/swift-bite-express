@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { restaurantIdSchema } from "./Restaurant";
 
 export type Category = {
   id: number;
@@ -15,15 +16,18 @@ export const categorySchema = z.object({
     })
     .trim()
     .min(1)
-    .max(45),
+    .max(45)
+    .transform((val) => val.trim()),
   description: z
     .string({ invalid_type_error: "Description needs to be a string." })
     .trim()
     .max(500)
     .optional()
-    .nullable(),
-  restaurantId: z.number({
-    invalid_type_error: "Restaurant id needs to be a number.",
-    required_error: "Restaurant id is required",
-  }),
+    .nullable()
+    .transform((val) => (val ? val.trim() : null)),
+  restaurantId: restaurantIdSchema.transform((val) =>
+    typeof val === "string" ? +val : val
+  ),
 });
+
+export type CategorySchema = z.infer<typeof categorySchema> & { id: number };

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Address } from "./Address";
+import { AddressSchema } from "./Address";
 
 export type Restaurant = {
   id: number;
@@ -8,19 +8,21 @@ export type Restaurant = {
   logoPublicId: string | undefined | null;
 };
 
-export type NestedRestaurantAndAddress = Restaurant & {
-  address: Partial<Address>;
+export type NestedRestaurantAndAddress = RestaurantSchema & {
+  address: Partial<AddressSchema>;
 };
-export type RestaurantJoinedWithAddress = Restaurant &
-  Partial<Omit<Address, "id"> & { addressId: number }>;
+export type RestaurantJoinedWithAddress = RestaurantSchema &
+  Partial<Omit<AddressSchema, "id"> & { addressId: number }>;
 
 const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
 
-const publickIdSchema = z
-  .string({ invalid_type_error: "image id must be a string" })
-  .max(50, "Invalid image id")
+export const doubleSpaceRegex = /\s{2,}/g;
+export const publicIdSchema = z
+  .string({ invalid_type_error: "public id must be a string" })
+  .max(50, "Invalid public id")
   .nullable()
-  .optional();
+  .optional()
+  .transform((val) => (val ? val : null));
 
 export const restaurantSchema = z.object({
   name: z
@@ -30,9 +32,10 @@ export const restaurantSchema = z.object({
     })
     .trim()
     .max(45, "Name is too long")
-    .min(1, "Name is required"),
-  imgPublicId: publickIdSchema,
-  logoPublicId: publickIdSchema,
+    .min(1, "Name is required")
+    .transform((val) => val.trim() && val.replace(doubleSpaceRegex, " ")),
+  imgPublicId: publicIdSchema,
+  logoPublicId: publicIdSchema,
 });
 
 export const imageSchema = z.object({
@@ -43,3 +46,29 @@ export const imageSchema = z.object({
     return true;
   }, "Must be a regular Image"),
 });
+
+export type RestaurantSchema = z.infer<typeof restaurantSchema> & {
+  id: number;
+};
+
+export const restaurantIdSchema = generateIdSchema("RestaurantId");
+
+export function generateIdSchema(fieldName: string) {
+  return z.union(
+    [
+      z.number().min(1, `${fieldName} Must be a positive number`),
+      z
+        .string()
+        .refine(
+          (arg) => !isNaN(+arg) && +arg > 0,
+          `${fieldName} Must be a positive number `
+        )
+        .transform((val) => +val),
+    ],
+    {
+      errorMap: () => ({
+        message: `${fieldName} is Required`,
+      }),
+    }
+  );
+}
