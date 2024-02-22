@@ -6,7 +6,7 @@ import { FunctionError } from "../../src/models/Errors/ErrorConstructor";
 const longitude = "45.2131";
 const latitude = "44.98564";
 
-const addressStringWithUndefined = `31 Jaffa, jerusalem, israel, undefined`;
+const addressStringWithUndefined = `31 Jaffa, jerusalem, israel, `;
 jest.mock("node-geocoder", () => () => {
   return {
     geocode: (address: string) => {
@@ -28,7 +28,7 @@ const validAddress = {
 describe("geocoder", () => {
   describe("convertAddressObjToString", () => {
     it("should return object with no nullish values", () => {
-      const addressString = `31 Jaffa, jerusalem, israel, null`;
+      const addressString = `31 Jaffa, jerusalem, israel, `;
       const address: Partial<Address> = {
         country: "israel",
         city: "jerusalem",

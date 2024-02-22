@@ -41,7 +41,7 @@ export const userRegistrationSchema = z.object({
     .string({ required_error: "Full name is required" })
     .trim()
     .min(2, "Full Name to short (min 2 chars)")
-    .max(20, "Full Name to long (max 20 chars)"),
+    .max(100, "Full Name to long (max 100 chars)"),
 });
 
 // export type User = z.infer<typeof userSchema>;

@@ -20,46 +20,42 @@ export function isRestaurantOwner(
     )
   );
 }
-
-export async function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
+type RestaurantIdKeyInReq = "body" | "query" | "params";
+type RestaurantId = string | number | undefined;
+export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
+  key: RestaurantIdKeyInReq
 ) {
-  verifyUser(req);
-  try {
-    let restaurantId: undefined | number = undefined;
-
-    if (req.body.restaurantId) restaurantId = +req.body.restaurantId;
-    if (!restaurantId && req.query.restaurantId)
-      restaurantId = +req.query.restaurantId;
-    if (!restaurantId && req.params.restaurantId)
-      restaurantId = +req.params.restaurantId;
-    if (!restaurantId) {
-      throw new FunctionError(
-        "Bad Request: RestaurantId was not sent in request.",
-        400
+  return async (req: Request, res: Response, next: NextFunction) => {
+    verifyUser(req);
+    try {
+      const restaurantId = req[key].restaurantId as RestaurantId;
+      if (!restaurantId) {
+        throw new FunctionError("ResaturantId was not sent in req", 400);
+      }
+      //check if needs to change the check cuz +restaurantId could throw an unknown error
+      if (isNaN(+restaurantId)) {
+        throw new FunctionError("Invalid resaturantId", 400);
+      }
+      const userId = req.user.id;
+      const query = restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
+        +restaurantId,
+        userId
       );
-    }
-    const userId = req.user.id;
-    const query = restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
-      restaurantId,
-      userId
-    );
-    const [rows] = await executeSingleQuery<RestauransOwnerAddressTable[]>(
-      query.query,
-      query.params
-    );
-    if (!rows[0]) {
-      throw new FunctionError(
-        "Premission Error: access denied, only The owner is Allowed.",
-        403
+      const [rows] = await executeSingleQuery<RestauransOwnerAddressTable[]>(
+        query.query,
+        query.params
       );
+      if (!rows[0]) {
+        throw new FunctionError(
+          "Premission Error: access denied, only The owner is Allowed.",
+          403
+        );
+      }
+      next();
+    } catch (error) {
+      next(error);
     }
-    next();
-  } catch (error) {
-    next(error);
-  }
+  };
 }
 
 export function verifyIsOwner<T extends { user: User }>(

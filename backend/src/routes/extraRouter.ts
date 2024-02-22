@@ -17,20 +17,20 @@ extraRouter.get("/", getAllExtrasByMenuItemId);
 extraRouter.post(
   "/",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createExtra
 );
 //verifyIsOwner and check if restaurantOwner middleware
 extraRouter.put(
-  "/",
+  "/:id([0-9]+)",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateExtra
 );
 //verifyIsOwner and check if restaurantOwner middleware
 extraRouter.delete(
-  "/",
+  "/:id([0-9]+)",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   deleteExtra
 );

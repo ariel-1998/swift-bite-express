@@ -23,7 +23,7 @@ restaurantRouter.post("/", addRestaurant);
 restaurantRouter.put(
   "/:restaurantId([0-9]+)",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   updateRestaurant
 );
 //need to check how to cascade all data on delete

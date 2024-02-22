@@ -12,33 +12,39 @@ import {
 } from "../logic/menuItemLogic";
 
 export const menuItemRouter = Router();
-//no need for any middlewares
-menuItemRouter.get("/", getMenuItemById);
+
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemRouter.post(
   "/",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createMenuItem
 );
+
+//no need for any middlewares
+menuItemRouter.get("/:menuItemId([0-9]+)", getMenuItemById);
+
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemRouter.put(
-  "/",
+  "/:menuItemId([0-9]+)",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
-  updateMenuItemImg
-);
-//verifyIsOwner and check if restaurantOwner middleware
-menuItemRouter.put(
-  "/",
-  isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateMenuItemApartFromImg
 );
+
 //verifyIsOwner and check if restaurantOwner middleware
-menuItemRouter.delete(
-  "/",
+menuItemRouter.put(
+  "/:menuItemId([0-9]+)/image",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
+  updateMenuItemImg
+);
+
+//verifyIsOwner and check if restaurantOwner middleware
+
+menuItemRouter.delete(
+  "/:menuItemId([0-9]+)/restaurant/:restaurantId([0-9]+)",
+  isRestaurantOwner,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   deleteMenuItem
 );

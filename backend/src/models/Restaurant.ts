@@ -18,7 +18,7 @@ const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
 
 const publickIdSchema = z
   .string({ invalid_type_error: "image id must be a string" })
-  .max(20, "Invalid image id")
+  .max(50, "Invalid image id")
   .nullable()
   .optional();
 
@@ -28,6 +28,7 @@ export const restaurantSchema = z.object({
       invalid_type_error: "Name must be a string",
       required_error: "Name is required",
     })
+    .trim()
     .max(45, "Name is too long")
     .min(1, "Name is required"),
   imgPublicId: publickIdSchema,
@@ -42,8 +43,3 @@ export const imageSchema = z.object({
     return true;
   }, "Must be a regular Image"),
 });
-
-/**
- * a table for addressId, restaurantId and userId was created
- * for many to many relationship
- */

@@ -18,9 +18,9 @@ jest.mock("mysql2/promise", () => {
 
 describe("dbConfig", () => {
   describe("executeQuery", () => {
-    it("should call execute with right params", () => {
+    it("should call execute with right params", async () => {
       const query: TransactionQuery = { params: [], query: "" };
-      executeQuery(mockConnection, query);
+      await executeQuery(mockConnection, query);
       expect(mockConnection.execute).toHaveBeenCalled();
       expect(mockConnection.execute).toHaveBeenCalledWith(
         query.query,

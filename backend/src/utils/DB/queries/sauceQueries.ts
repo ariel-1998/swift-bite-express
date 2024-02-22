@@ -1,4 +1,4 @@
-import { Sauce } from "../../../models/MenuItem";
+import { Sauce } from "../../../models/Sauce";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 

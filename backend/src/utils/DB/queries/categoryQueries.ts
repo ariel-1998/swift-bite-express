@@ -1,4 +1,4 @@
-import { Category } from "../../../models/MenuItem";
+import { Category } from "../../../models/Category";
 import { TurnUndefinedToNullInObj } from "../../helperFunctions";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";

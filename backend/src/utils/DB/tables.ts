@@ -5,13 +5,11 @@ import { Restaurant } from "../../models/Restaurant";
 import { User } from "../../models/User";
 import { executeQuery, pool } from "./dbConfig";
 import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddressTable";
-import {
-  Category,
-  MenuItem,
-  MenuItemCategoryTable,
-  Extra,
-  Sauce,
-} from "../../models/MenuItem";
+import { MenuItem } from "../../models/MenuItem";
+import { Category } from "../../models/Category";
+import { MenuItemCategoryTable } from "../../models/MenuItemCategoryTable";
+import { Extra } from "../../models/Extra";
+import { Sauce } from "../../models/Sauce";
 
 type SQLTableNames =
   | "auth_provider"
@@ -19,7 +17,6 @@ type SQLTableNames =
   | "addresses"
   | "restaurants"
   | "restaurant_owner_address"
-  //trying, check if works ///////////////////////////////////
   | "categories"
   | "menu_items"
   | "sauces"
@@ -40,9 +37,6 @@ type Tables = {
   addresses: SqlTable<Required<Address>>;
   restaurant_owner_address: SqlTable<Required<RestauransOwnerAddressTable>>;
   restaurants: SqlTable<Required<Restaurant>>;
-
-  //trying, check if works ///////////////////////////////////
-
   categories: SqlTable<Required<Category>>;
   menu_items: SqlTable<Required<MenuItem>>;
   sauces: SqlTable<Required<Sauce>>;
@@ -108,7 +102,6 @@ DB.addTable("restaurants", {
   logoPublicId: "logoPublicId",
 });
 
-//trying, check if works ///////////////////////////////////
 DB.addTable("categories", {
   id: "id",
   restaurantId: "restaurantId",
@@ -136,11 +129,13 @@ DB.addTable("extras", {
   name: "name",
   type: "type",
   extraPrice: "extraPrice",
+  restaurantId: "restaurantId",
 });
 
 DB.addTable("menu_items_category", {
   menuItemId: "menuItemId",
   categoryId: "categoryId",
+  restaurantId: "restaurantId",
 });
 
 async function create_auth_provider_table(connection: PoolConnection) {
@@ -150,12 +145,10 @@ async function create_auth_provider_table(connection: PoolConnection) {
   CREATE TABLE IF NOT EXISTS ${tableName} (
     ${id} VARCHAR(100) NOT NULL UNIQUE,
     ${provider} ENUM('facebook', 'google') NOT NULL,
-    ${providerUserId} VARCHAR(90) NOT NULL,
+    ${providerUserId} VARCHAR(100) NOT NULL,
     PRIMARY KEY (${provider}, ${providerUserId})
 )`;
   await createTable(connection, query);
-
-  // await executeQuery(connection, { query, params: [] });
 }
 
 async function create_addresses_table(connection: PoolConnection) {
@@ -186,8 +179,6 @@ async function create_addresses_table(connection: PoolConnection) {
     ${latitude} DECIMAL(20, 17) NOT NULL
     )`;
   await createTable(connection, query);
-
-  // await executeQuery(connection, { query, params: [] });
 }
 
 async function create_users_table(connection: PoolConnection) {
@@ -217,11 +208,8 @@ async function create_users_table(connection: PoolConnection) {
     FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}) ON DELETE SET NULL
     )`;
   await createTable(connection, query);
-
-  // await executeQuery(connection, { query, params: [] });
 }
 
-//check if right table
 async function create_restaurants_table(connection: PoolConnection) {
   const { columns, tableName } = DB.tables.restaurants;
   const { id, name, imgPublicId, logoPublicId } = columns;
@@ -229,15 +217,12 @@ async function create_restaurants_table(connection: PoolConnection) {
   CREATE TABLE IF NOT EXISTS ${tableName} (
     ${id} INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     ${name} VARCHAR(45) NOT NULL UNIQUE,
-    ${imgPublicId} VARCHAR(20) DEFAULT NULL,
-    ${logoPublicId} VARCHAR(20) DEFAULT NULL
+    ${imgPublicId} VARCHAR(50) DEFAULT NULL,
+    ${logoPublicId} VARCHAR(50) DEFAULT NULL
   )`;
   await createTable(connection, query);
-
-  // await executeQuery(connection, { query, params: [] });
 }
 
-//check if right table
 async function create_restaurant_owner_address_table(
   connection: PoolConnection
 ) {
@@ -259,10 +244,8 @@ async function create_restaurant_owner_address_table(
     FOREIGN KEY (${userId}) REFERENCES ${users.tableName}(${users.columns.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
-  // await executeQuery(connection, { query, params: [] });
 }
 
-//trying, check if works ///////////////////////////////////
 async function create_categories_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.categories;
@@ -326,8 +309,9 @@ async function create_sauces_table(connection: PoolConnection) {
 async function create_extras_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.extras;
-  const { id, menuItemId, name, type, extraPrice } = columns;
+  const { id, menuItemId, name, type, extraPrice, restaurantId } = columns;
   const { columns: itemCols, tableName: menuItems } = tables.menu_items;
+  const { columns: restCols, tableName: restaurants } = tables.restaurants;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -335,22 +319,28 @@ async function create_extras_table(connection: PoolConnection) {
   ${name} VARCHAR(45) NOT NULL,
   ${type} ENUM('drink', 'extra') NOT NULL,
   ${extraPrice} INT DEFAULT NULL,
-  FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE
+  ${restaurantId} INT NOT NULL,
+  FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE,
+  FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
 }
 async function create_menu_items_category_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.menu_items_category;
-  const { categoryId, menuItemId } = columns;
+  const { categoryId, menuItemId, restaurantId } = columns;
   const { columns: itemCols, tableName: menuItems } = tables.menu_items;
   const { columns: categoryCols, tableName: categories } = tables.categories;
+  const { columns: restCols, tableName: restaurants } = tables.restaurants;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
   ${menuItemId} INT NOT NULL,
   ${categoryId} INT NOT NULL,
+  ${restaurantId} INT NOT NULL,
+  PRIMARY KEY (${categoryId}, ${menuItemId}),
   FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE,
-  FOREIGN KEY (${categoryId}) REFERENCES ${categories}(${categoryCols.id}) ON DELETE CASCADE
+  FOREIGN KEY (${categoryId}) REFERENCES ${categories}(${categoryCols.id}) ON DELETE CASCADE,
+  FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
 }
@@ -365,15 +355,11 @@ export async function createDBTables() {
     await create_users_table(connection);
     await create_restaurants_table(connection);
     await create_restaurant_owner_address_table(connection);
-
-    //trying, check if works ///////////////////////////////////
     await create_categories_table(connection);
     await create_menu_items_table(connection);
     await create_sauces_table(connection);
     await create_extras_table(connection);
     await create_menu_items_category_table(connection);
-    //trying, check if works ///////////////////////////////////
-
     await connection.commit();
   } catch (error) {
     await connection?.rollback();

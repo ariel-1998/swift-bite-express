@@ -18,20 +18,20 @@ sauceRouter.get("/", getAllSacesByRestaurantId);
 sauceRouter.post(
   "/",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   createSauce
 );
 //verifyIsOwner and check if restaurantOwner middleware
 sauceRouter.put(
-  "/",
+  "/:id([0-9]+)",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   updateSauce
 );
 //verifyIsOwner and check if restaurantOwner middleware
 sauceRouter.delete(
-  "/",
+  "/:id([0-9]+)",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   deleteSauce
 );

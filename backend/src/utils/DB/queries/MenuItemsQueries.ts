@@ -37,21 +37,18 @@ class MenuItemsQueries {
   }
 
   updateMenuItemImg(
-    publicId: string,
-    menuItemId: number,
-    restId: number
+    item: Pick<MenuItemQuery, "id" | "imgPublicId" | "restaurantId">
   ): TransactionQuery {
     const query = `
     UPDATE ${tableName} 
     SET ${imgPublicId} = ?
     WHERE ${id} = ? AND ${restaurantId} = ?`;
-    const params: MixedArray = [publicId, menuItemId, restId];
+    const params: MixedArray = [item.imgPublicId, item.id, item.restaurantId];
     return { params, query };
   }
 
   updateMenuItemApartFromImg(
-    menuItem: Omit<MenuItemQuery, "id" | "imgPublicId">,
-    menuItemId: number
+    menuItem: Omit<MenuItemQuery, "imgPublicId">
   ): TransactionQuery {
     const query = `
     UPDATE ${tableName} 
@@ -66,7 +63,7 @@ class MenuItemsQueries {
       menuItem.description,
       menuItem.extrasAmount,
       menuItem.showSouces,
-      menuItemId,
+      menuItem.id,
       menuItem.restaurantId,
     ];
     return { params, query };

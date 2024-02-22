@@ -14,13 +14,13 @@ export const menuItemCategoryRouter = Router();
 menuItemCategoryRouter.post(
   "/",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createMenuItemCategoryRef
 );
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemCategoryRouter.put(
-  "/",
+  "/:oldCategoryId",
   isRestaurantOwner,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware,
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateMenuItemCategoryRef
 );

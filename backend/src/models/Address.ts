@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-// export type AddressOptionals =["state"]
 export type Address = {
   id: number;
   country: string;
@@ -13,7 +12,6 @@ export type Address = {
   longitude: string | number;
   latitude: string | number;
 };
-//no foreign keys
 
 export type Coordinates = { longitude: number; latitude: number };
 
@@ -24,10 +22,12 @@ export const addressSchema = z.object({
       required_error: "Coutry is Required",
       invalid_type_error: "Country Must be string",
     })
+    .trim()
     .max(45, "Invalid Country")
     .min(1, "Country is Required"),
   state: z
     .string({ invalid_type_error: "State is Optional or String" })
+    .trim()
     .max(45, "Invalid State")
     .nullable()
     .optional(),
@@ -36,6 +36,7 @@ export const addressSchema = z.object({
       invalid_type_error: "City Must be String",
       required_error: "City is Required",
     })
+    .trim()
     .max(90, "Invalid City")
     .min(1, "City is required"),
   street: z
@@ -43,14 +44,17 @@ export const addressSchema = z.object({
       invalid_type_error: "Street Must be String",
       required_error: "Street is Required",
     })
+    .trim()
     .max(90, "Invalid Street")
-    .min(1, "Street is required"), //check if need to be longer than 90
+    .min(1, "Street is required"),
   building: z.number({
     invalid_type_error: "Building Must be Number",
     required_error: "Building is Required",
   }),
   entrance: z
     .string({ invalid_type_error: "Entrance is Optional or String" })
+    .trim()
+    .max(4, "Invalid Entrance")
     .nullable()
     .optional(),
   apartment: z
@@ -58,5 +62,3 @@ export const addressSchema = z.object({
     .nullable()
     .optional(),
 });
-
-// export type AddressSchema = z.infer<typeof addressSchema>;

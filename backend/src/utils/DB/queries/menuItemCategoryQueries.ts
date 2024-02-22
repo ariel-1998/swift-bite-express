@@ -1,28 +1,24 @@
-import { MenuItemCategoryTable } from "../../../models/MenuItem";
+import { MenuItemCategoryTable } from "../../../models/MenuItemCategoryTable";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
 const {
-  columns: { categoryId, menuItemId },
+  columns: { categoryId, menuItemId, restaurantId },
   tableName,
 } = DB.tables.menu_items_category;
 
-type MenuItemCategoryInsertQuery = MenuItemCategoryTable & {
-  restaurantId: number;
-};
-type MenuItemCategoryUpdateQuery = MenuItemCategoryInsertQuery & {
+type MenuItemCategoryUpdateQuery = MenuItemCategoryTable & {
   oldCategoryId: number;
 };
+
 class MenuItemCategoryQueries {
-  createMenuItemCategoryRef(
-    row: MenuItemCategoryInsertQuery
-  ): TransactionQuery {
+  createMenuItemCategoryRef(row: MenuItemCategoryTable): TransactionQuery {
     const { columns: categoryCols, tableName: categories } =
       DB.tables.categories;
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
     const query = `INSERT INTO ${tableName} 
-    (${categoryId}, ${menuItemId})
-    SELECT ?, ?
+    (${categoryId}, ${menuItemId}, ${restaurantId})
+    SELECT ?, ?, ?
     FROM ${categories}
     JOIN ${menuItems} 
     ON ${categories}.${categoryCols.restaurantId} = ${menuItems}.${itemCols.restaurantId}
@@ -34,6 +30,7 @@ class MenuItemCategoryQueries {
       row.categoryId,
       row.menuItemId,
       row.restaurantId,
+      row.restaurantId,
       row.categoryId,
       row.menuItemId,
     ];
@@ -43,26 +40,17 @@ class MenuItemCategoryQueries {
   updateMenuItemCategoryRef(
     row: MenuItemCategoryUpdateQuery
   ): TransactionQuery {
-    const { columns: categoryCols, tableName: categories } =
-      DB.tables.categories;
-    const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
     const query = `
     UPDATE ${tableName}
-    JOIN ${categories} 
-    ON ${categories}.${categoryCols.id} = ${tableName}.${categoryId}
-    JOIN ${menuItems}
-    ON ${menuItems}.${itemCols.id} = ${tableName}.${menuItemId}
-    SET ${tableName}.${categoryId} = ?
-    WHERE ${categories}.${categoryCols.restaurantId} = ?
-    AND ${menuItems}.${itemCols.restaurantId} = ?
-    AND ${tableName}.${categoryId} = ?
-    AND ${tableName}.${menuItemId} = ?`;
+    SET ${categoryId} = ?
+    WHERE ${categoryId} = ?
+    AND ${menuItemId} = ?
+    AND ${restaurantId} = ?`;
     const params: MixedArray = [
       row.categoryId,
-      row.restaurantId,
-      row.restaurantId,
       row.oldCategoryId,
       row.menuItemId,
+      row.restaurantId,
     ];
     return { params, query };
   }

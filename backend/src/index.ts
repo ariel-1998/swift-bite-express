@@ -38,10 +38,10 @@ app.use(passport.session());
 app.use("/api/auth", authRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/restaurant", restaurantRouter);
+app.use("/api/restaurant/:restaurantId([0-9]+)/sauce", sauceRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/menu-item", menuItemRouter);
-app.use("/api/sauce", sauceRouter);
-app.use("/api/extra", extraRouter);
+app.use("/api/menu-item/:menuItemId([0-9]+)/extra", extraRouter);
 app.use("/api/menu-item-category", menuItemCategoryRouter);
 
 app.use(errorHandler);
