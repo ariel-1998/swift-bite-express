@@ -18,7 +18,7 @@ export type MenuItem = {
 
 export const menuItemIdSchema = generateIdSchema("MenuItemId");
 
-const menuItemSchema = z.object({
+export const menuItemSchema = z.object({
   restaurantId: restaurantIdSchema,
   name: z
     .string({
