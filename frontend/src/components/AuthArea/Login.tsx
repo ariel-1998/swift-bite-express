@@ -1,5 +1,5 @@
 import React from "react";
-import AuthForm from "./UserAddressForm";
+import AuthForm from "./AuthForm";
 import Button from "../Customs/Button";
 import Input from "../Customs/Input";
 import { Link, useNavigate } from "react-router-dom";
@@ -61,8 +61,8 @@ const Login: React.FC = () => {
       </Button>
       <hr />
       <div className="flex flex-col gap-1">
-        <AuthProviderBtn provider="Google" auth="login" />
-        <AuthProviderBtn provider="Facebook" auth="login" />
+        <AuthProviderBtn provider="Google" />
+        <AuthProviderBtn provider="Facebook" />
       </div>
       <div className="flex flex-col items-center">
         Don't have an account?

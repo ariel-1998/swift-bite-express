@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 type ProtectedComponentProps = {

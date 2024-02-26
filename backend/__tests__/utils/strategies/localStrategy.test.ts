@@ -12,7 +12,7 @@ import {
   registrationData,
 } from "../../../__mocks__/models/User";
 import { MixedArray, TransactionQuery } from "../../../src/utils/DB/dbConfig";
-import { IsOwner, User } from "../../../src/models/User";
+import { Role, User } from "../../../src/models/User";
 import { FunctionError } from "../../../src/models/Errors/ErrorConstructor";
 import * as bcrypt from "../../../src/utils/bcrypt";
 import { ZodErrors } from "../../../src/models/Errors/ZodErrors";
@@ -129,7 +129,7 @@ describe("localProvider", () => {
         email: registrationData.email,
         password: hashedPassword,
         authProviderId: null,
-        isRestaurantOwner: IsOwner.false,
+        role: Role.user,
         primaryAddressId: null,
       };
       expect(res).toStrictEqual(expectedRes);

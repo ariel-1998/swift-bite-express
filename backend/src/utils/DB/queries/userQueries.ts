@@ -1,4 +1,4 @@
-import { IsOwner, User } from "../../../models/User";
+import { Role, User } from "../../../models/User";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
@@ -16,12 +16,12 @@ class UserQueries {
     return { params, query };
   }
 
-  updateUserIsRestaurantOwner(isOwner: IsOwner): TransactionQuery {
+  updateUserRole(role: Role): TransactionQuery {
     const query = `
     UPDATE ${tableName} 
-    SET ${columns.isRestaurantOwner} = ? 
+    SET ${columns.role} = ? 
     `;
-    const params: MixedArray = [isOwner];
+    const params: MixedArray = [role];
     return { params, query };
   }
 }

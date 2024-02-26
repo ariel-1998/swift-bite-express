@@ -4,6 +4,7 @@ import useUserInfo from "../../../hooks/useUserInfo";
 import { Link } from "react-router-dom";
 import useScreenSize from "../../../hooks/useScreenSize";
 import { FaHamburger } from "react-icons/fa";
+import { Role } from "../../../models/User";
 
 const HeaderMenu: React.FC = () => {
   // const isMobile = useIsMobile();
@@ -34,18 +35,18 @@ const HeaderMenu: React.FC = () => {
             </>
           )}
 
-          {user?.isRestaurantOwner && (
+          {user?.role === Role.owner && (
             <>
               <Link to={"/restaurants/owner"} className="hover:text-orange">
                 My Restaurants
+              </Link>
+              <Link to="/restaurants/create" className="hover:text-orange">
+                Create Restaurant
               </Link>
             </>
           )}
           {user && (
             <>
-              <Link to="/restaurants/create" className="hover:text-orange">
-                Create Restaurant
-              </Link>
               <Link to={"/auth/logout"} className="hover:text-error">
                 Logout
               </Link>

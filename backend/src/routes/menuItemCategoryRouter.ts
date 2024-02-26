@@ -4,23 +4,23 @@ import {
   updateMenuItemCategoryRef,
 } from "../logic/menuItemCategoryTable";
 import {
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware,
-} from "../middleware/isRestaurantOwner";
+} from "../middleware/isOwnerRole";
 
 export const menuItemCategoryRouter = Router();
 
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemCategoryRouter.post(
   "/",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createMenuItemCategoryRef
 );
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemCategoryRouter.put(
   "/:oldCategoryId",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateMenuItemCategoryRef
 );

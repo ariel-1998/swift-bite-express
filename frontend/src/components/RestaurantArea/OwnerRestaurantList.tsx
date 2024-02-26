@@ -14,7 +14,7 @@ const OwnerRestaurantList: React.FC = () => {
           <RestaurantCard
             restaurant={restaurant}
             key={restaurant.id}
-            navigateOnClick={`/restaurants/owner/${restaurant.id}`}
+            navigateOnClick={`/restaurants/${restaurant.id}`}
           />
         ))}
     </div>

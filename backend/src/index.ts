@@ -17,6 +17,7 @@ import { menuItemRouter } from "./routes/menuItemRouter";
 import { sauceRouter } from "./routes/sauceRouter";
 import { extraRouter } from "./routes/extraRouter";
 import { menuItemCategoryRouter } from "./routes/menuItemCategoryRouter";
+import { userRouter } from "./routes/userRouter";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use(passport.session());
 
 //routes
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 app.use("/api/address", addressRouter);
 app.use("/api/restaurant", restaurantRouter);
 app.use("/api/restaurant/:restaurantId([0-9]+)/sauce", sauceRouter);

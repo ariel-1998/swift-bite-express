@@ -1,12 +1,12 @@
 import { Profile } from "passport-google-oauth20";
-import { Credentials, IsOwner, RegistrationData } from "../../src/models/User";
+import { Credentials, Role, RegistrationData } from "../../src/models/User";
 
 export const mockUser = {
   id: 1,
   authProviderId: "someId",
   email: "someEmail@gmail.com",
   fullName: "someName",
-  isRestaurantOwner: IsOwner.false,
+  role: Role.user,
   password: null,
   primaryAddressId: null,
 };
@@ -24,5 +24,6 @@ export const credentials: Credentials = {
 };
 export const registrationData: RegistrationData = {
   ...credentials,
+  role: Role.user,
   fullName: "ariel",
 };

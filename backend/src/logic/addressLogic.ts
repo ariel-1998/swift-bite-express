@@ -11,7 +11,7 @@ import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwn
 import {
   verifyIsOwner,
   verifyOwnershipByRestaurantIdAndUserId,
-} from "../middleware/isRestaurantOwner";
+} from "../middleware/isOwnerRole";
 
 type GetAddressByIdParams = {
   addressId: string;
@@ -214,9 +214,9 @@ export async function updateAddress(
 //       await executeQuery(connection, updateAddressIdQuery);
 //       /////////////////
 //     } else {
-//       //check if isRestaurantOwner
+//       //check if isOwnerRole
 //       const errMsg = `You do not have permission to modify the address of this restaurant.`;
-//       if (!user.isRestaurantOwner) throw new FunctionError(errMsg, 403);
+//       if (!user.isOwnerRole) throw new FunctionError(errMsg, 403);
 //       //check if owner of this specific restaurant with db query
 //       const isOwnerQuery =
 //         restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(

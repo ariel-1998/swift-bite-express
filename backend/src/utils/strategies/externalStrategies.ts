@@ -1,6 +1,6 @@
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { AuthProvider, ProviderLiterals } from "../../models/AuthProvider";
-import { IsOwner, User } from "../../models/User";
+import { Role, User } from "../../models/User";
 import { Profile, VerifyCallback } from "passport-google-oauth20";
 import { executeQuery, pool } from "../DB/dbConfig";
 import { DB } from "../DB/tables";
@@ -85,7 +85,7 @@ export class ExternalAuthProvider {
       authProviderId: dbRowId,
       primaryAddressId: null,
       password: null,
-      isRestaurantOwner: IsOwner.false,
+      role: Role.user,
       email: jsonData.email!,
     };
   };
@@ -98,12 +98,12 @@ export class ExternalAuthProvider {
     try {
       const { columns, tableName } = DB.tables.users;
       const newUser = this.createDefaultUserOBJ(profile, providerRowId);
-      const query = `INSERT INTO ${tableName} (${columns.authProviderId}, ${columns.primaryAddressId},  ${columns.fullName}, ${columns.isRestaurantOwner}, ${columns.email}) VALUES (?, ?, ?, ?, ?)`;
+      const query = `INSERT INTO ${tableName} (${columns.authProviderId}, ${columns.primaryAddressId},  ${columns.fullName}, ${columns.role}, ${columns.email}) VALUES (?, ?, ?, ?, ?)`;
       const params = [
         newUser.authProviderId,
         newUser.primaryAddressId,
         newUser.fullName,
-        newUser.isRestaurantOwner,
+        newUser.role,
         newUser.email,
       ];
       const [results] = await executeQuery<ResultSetHeader>(connection, {

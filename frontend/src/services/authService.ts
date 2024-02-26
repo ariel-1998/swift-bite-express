@@ -1,4 +1,4 @@
-import { User, UserCredentials, UserRegisterForm } from "../models/User";
+import { Role, User, UserCredentials, UserRegisterForm } from "../models/User";
 import { credentialsAxios } from "../utils/axiosConfig";
 import { CONSTANTS } from "../utils/constants";
 
@@ -21,6 +21,7 @@ class AuthService {
   localRegistration = async (
     registratioData: Omit<UserRegisterForm, "confirmPassword">
   ) => {
+    // registratioData.role = Role.user;
     const { data } = await credentialsAxios.post<User>(
       "/auth/local/register",
       registratioData

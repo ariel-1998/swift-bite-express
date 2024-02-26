@@ -41,6 +41,14 @@ class RestauransOwnerAddressQueries {
     const params: MixedArray = [restaurantId, userId];
     return { params, query };
   }
+
+  //created for user role update to check if there are any restaurants that owned by the user
+  //before updating from role "owner" to role "user"
+  getRowsByUserId(userId: number): TransactionQuery {
+    const query = `SELECT * FROM ${tableName} WHERE ${columns.userId} = ?`;
+    const params: MixedArray = [userId];
+    return { params, query };
+  }
 }
 
 export const restauransOwnerAddressQueries =

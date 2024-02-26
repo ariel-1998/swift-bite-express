@@ -11,7 +11,7 @@ import {
   AuthProvider,
   ProviderLiterals,
 } from "../../../src/models/AuthProvider";
-import { IsOwner, User } from "../../../src/models/User";
+import { Role, User } from "../../../src/models/User";
 import { FunctionError } from "../../../src/models/Errors/ErrorConstructor";
 import { mockProfile, mockUser } from "../../../__mocks__/models/User";
 import { mockProviderData } from "../../../__mocks__/models/AuthProvider";
@@ -188,7 +188,7 @@ describe("externalAuthProvider", () => {
         authProviderId: id,
         primaryAddressId: null,
         password: null,
-        isRestaurantOwner: IsOwner.false,
+        role: Role.user,
         email: mockProfile._json.email!,
       };
       expect(userObj).toStrictEqual(expectedData);

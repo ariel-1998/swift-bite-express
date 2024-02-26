@@ -1,5 +1,5 @@
 import React, { ReactNode, createContext, useEffect, useState } from "react";
-import { User } from "../models/User";
+import { Role, User } from "../models/User";
 import { authService } from "../services/authService";
 import { Address } from "../models/Address";
 import { useQuery } from "@tanstack/react-query";
@@ -33,7 +33,8 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
         .getLogin()
         .then((data) => {
           setUser(data);
-          if (!data.primaryAddressId) setLoadingUser(false);
+          if (!data.primaryAddressId || data.role !== Role.user)
+            setLoadingUser(false);
           return data;
         })
         .catch((err) => {
@@ -57,7 +58,8 @@ const UserInfoProvider: React.FC<UserInfoProviderProps> = ({ children }) => {
           setLoadingUser(false);
         });
     },
-    enabled: !!user?.primaryAddressId,
+    //enable get address only if its user, otherwize there is no need for address as the owner cannot access restaurants
+    enabled: !!user?.primaryAddressId && user.role === Role.user,
   });
 
   useEffect(() => {

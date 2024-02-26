@@ -20,7 +20,6 @@ const RestaurantSearchResultCard = forwardRef<
   );
   return (
     <Link
-      className=""
       ref={(e) => {
         if (typeof ref === "function") {
           ref(e);

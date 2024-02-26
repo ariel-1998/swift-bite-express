@@ -2,7 +2,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { Address, AddressFormData, addressSchema } from "../../models/Address";
 import { zodResolver } from "@hookform/resolvers/zod";
-import AuthForm from "../AuthArea/UserAddressForm";
+import AuthForm from "../AuthArea/AuthForm";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import { useMutation } from "@tanstack/react-query";

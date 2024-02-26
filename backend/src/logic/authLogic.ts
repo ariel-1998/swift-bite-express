@@ -24,13 +24,14 @@ export const userInfoResponse = (
   next: NextFunction
 ) => {
   const user = req.user;
+  console.log(req.user);
   if (!user) return next(new FunctionError("UnAutorized!", 401));
   const userInfo: Omit<User, "password"> = {
     authProviderId: user.authProviderId,
     email: user.email,
     fullName: user.fullName,
     id: user.id,
-    isRestaurantOwner: user.isRestaurantOwner,
+    role: user.role,
     primaryAddressId: user.primaryAddressId,
   };
   res.status(200).json(userInfo);

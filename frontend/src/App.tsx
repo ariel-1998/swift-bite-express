@@ -6,11 +6,13 @@ import Logout from "./components/AuthArea/Logout";
 import HomePage from "./pages/HomePage";
 import RestaurantPage from "./pages/RestaurantPage";
 import Layout from "./components/Layout/Layout";
-import OwnerRestaurantList from "./components/RestaurantArea/OwnerRestaurantList";
-import UpdateRestaurant from "./components/RestaurantArea/UpdateRestaurant/UpdateRestaurant";
 import CreateRestaurant from "./components/RestaurantArea/CreateRestaurant";
+import useUserInfo from "./hooks/useUserInfo";
+import { Role } from "./models/User";
+// import useUserInfo from "./hooks/useUserInfo";
 
 function App() {
+  const { user } = useUserInfo();
   return (
     <BrowserRouter>
       <Routes>
@@ -27,17 +29,13 @@ function App() {
           </Route>
           {/** restaurant route*/}
           <Route path="restaurants">
-            <Route path="create" Component={CreateRestaurant} />
-            {
-              <>
-                <Route path="owner" Component={OwnerRestaurantList} />
-                <Route
-                  path="owner/:restaurantId"
-                  Component={UpdateRestaurant}
-                />
-              </>
-            }
-            <Route path=":restaurantId" Component={RestaurantPage} />
+            <>
+              {user?.role === Role.owner && (
+                <Route path="create" Component={CreateRestaurant} />
+              )}
+              <Route path=":restaurantId" Component={RestaurantPage} />
+            </>
+            {/**only user or guest can access */}
           </Route>
         </Route>
       </Routes>

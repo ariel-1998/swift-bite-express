@@ -1,14 +1,15 @@
 import { z } from "zod";
 
-export enum IsOwner {
-  false = 0,
-  true = 1,
+export enum Role {
+  user = "user",
+  owner = "owner",
 }
+//need to send role in local signup in request
 export type User = {
   id: number;
   authProviderId: string | null;
   primaryAddressId: number | null;
-  isRestaurantOwner: IsOwner;
+  role: Role;
   fullName: string;
   password: string | null;
   email: string;
@@ -37,6 +38,11 @@ export const userRegistrationSchema = z.object({
     .min(2, "Full Name to short (min 2 chars)")
     .max(100, "Full Name to long (max 100 chars)")
     .transform((val) => val.trim()),
+  role: z
+    .nativeEnum(Role)
+    .nullable()
+    .optional()
+    .transform((val) => (!val ? Role.user : val)),
 });
 
 export type RegistrationData = z.infer<typeof userRegistrationSchema>;

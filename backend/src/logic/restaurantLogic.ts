@@ -19,8 +19,8 @@ import {
 } from "../utils/DB/dbConfig";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { userQueries } from "../utils/DB/queries/userQueries";
-import { IsOwner } from "../models/User";
+// import { userQueries } from "../utils/DB/queries/userQueries";
+// import { IsOwner } from "../models/User";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
@@ -198,14 +198,6 @@ export async function addRestaurant(
       throw new FunctionError("Restaurant name already exist.", 409);
     }
 
-    //if user is not owner of nothing yet then update isRestauranOwner to isOwner.True
-    if (!user.isRestaurantOwner) {
-      //update isRestauranOuwner to isOwner.True
-      const updateIsOwnerQuery = userQueries.updateUserIsRestaurantOwner(
-        IsOwner.true
-      );
-      await executeQuery(connection, updateIsOwnerQuery);
-    }
     //add new row to restauransOwnerAddress
     const addRestauransOwnerAddressQuery = restauransOwnerAddressQueries.addRow(
       {
@@ -218,8 +210,12 @@ export async function addRestaurant(
     await connection.commit();
     res.status(201).json({ ...restaurant, id: restaurantId, address: {} });
   } catch (error) {
-    if (imgPublicId) await cloudinary.deleteImage(imgPublicId);
-    if (logoPublicId) await cloudinary.deleteImage(logoPublicId);
+    try {
+      if (imgPublicId) await cloudinary.deleteImage(imgPublicId);
+      if (logoPublicId) await cloudinary.deleteImage(logoPublicId);
+    } catch (error) {
+      console.log(error);
+    }
     await connection?.rollback();
     next(error);
   } finally {

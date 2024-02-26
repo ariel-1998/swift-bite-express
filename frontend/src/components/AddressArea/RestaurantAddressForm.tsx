@@ -9,7 +9,6 @@ import { addressService } from "../../services/addressService";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import { updateRestaurantCache } from "../../utils/cacheUpdates";
-import useUserInfo from "../../hooks/useUserInfo";
 import { useNavigate } from "react-router-dom";
 
 type RestaurantAddressFormProps = {
@@ -22,7 +21,6 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   method,
 }) => {
   const queryClient = useQueryClient();
-  const { address } = useUserInfo();
   const navigate = useNavigate();
   const {
     register,
@@ -46,10 +44,9 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
       };
       updateRestaurantCache.updateSingleRestaurantInCache(
         updatedRestaurant,
-        queryClient,
-        address
+        queryClient
       );
-      navigate("/restaurants/owner");
+      navigate("/");
     },
     onError(error) {
       console.log(error);

@@ -3,8 +3,8 @@ import { DB } from "../DB/tables";
 import { executeQuery, pool } from "../DB/dbConfig";
 import {
   Credentials,
-  IsOwner,
   RegistrationData,
+  Role,
   User,
   userRegistrationSchema,
 } from "../../models/User";
@@ -50,7 +50,7 @@ export class LocalProvider {
       email: email,
       password: hashedPassword,
       authProviderId: null,
-      isRestaurantOwner: IsOwner.false,
+      role: Role.user,
       primaryAddressId: null,
     };
   };
@@ -67,7 +67,7 @@ export class LocalProvider {
     const newUser = this.createDefaultUserOBJ(parsedUserInfo, hashedPassword);
     const query = `
     INSERT INTO ${tableName} 
-    (${columns.fullName}, ${columns.email}, ${columns.password}, ${columns.authProviderId}, ${columns.isRestaurantOwner}, ${columns.primaryAddressId}) 
+    (${columns.fullName}, ${columns.email}, ${columns.password}, ${columns.authProviderId}, ${columns.role}, ${columns.primaryAddressId}) 
     values (?, ?, ?, ?, ?, ?)
     `;
     const params = [
@@ -75,7 +75,7 @@ export class LocalProvider {
       newUser.email,
       newUser.password,
       newUser.authProviderId,
-      newUser.isRestaurantOwner,
+      newUser.role,
       newUser.primaryAddressId,
     ];
 
@@ -105,6 +105,7 @@ export const localSignupStrategy = async (
     email,
     password,
     fullName: req.body.fullName,
+    role: req.body.role,
   };
   try {
     connection = await pool.getConnection();

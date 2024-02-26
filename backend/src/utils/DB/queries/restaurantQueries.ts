@@ -9,7 +9,7 @@ type RestaurantWithoutId = Omit<RestaurantSchema, "id">;
 const DISTANCE = 20;
 const PAGE_LIMIT = 30;
 const SEARCH_LIMIT = 15;
-const generateOffset = (page: number) => (page - 1) * PAGE_LIMIT;
+const generateOffset = (page: number, limit: number) => (page - 1) * limit;
 
 class RestaurantQueries {
   addRestaurant(restaurant: RestaurantWithoutId): TransactionQuery {
@@ -62,7 +62,7 @@ class RestaurantQueries {
     const { columns: combinedCols, tableName: combined } =
       DB.tables.restaurant_owner_address;
     const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
-    const offset = generateOffset(page);
+    const offset = generateOffset(page, SEARCH_LIMIT);
 
     const query = `
     SELECT ${tableName}.*
@@ -78,6 +78,8 @@ class RestaurantQueries {
     ) <= ${DISTANCE} AND ${tableName}.${columns.name} LIKE ?
     LIMIT ${SEARCH_LIMIT} OFFSET ${offset}
     `;
+    console.log("PAGE_LIMIT", SEARCH_LIMIT);
+    console.log("offset", offset);
     const params: MixedArray = [latitude, longitude, latitude, `%${search}%`];
     return { params, query };
   }
@@ -91,7 +93,7 @@ class RestaurantQueries {
     const { columns: combinedCols, tableName: combined } =
       DB.tables.restaurant_owner_address;
     const { columns: addressCols, tableName: addresses } = DB.tables.addresses;
-    const offset = generateOffset(page);
+    const offset = generateOffset(page, PAGE_LIMIT);
     const query = `
     SELECT ${tableName}.*, 
     ${addresses}.${addressCols.id} as addressId, 

@@ -19,6 +19,7 @@ export function errorHandler(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction
 ) {
+  console.log(error);
   const err = handleErrorTypes(error);
   res.status(err.code).json(err.message);
 }

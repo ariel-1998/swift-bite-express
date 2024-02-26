@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import ProtectedComponent from "./ProtectedComponent";
 import useUserInfo from "../../hooks/useUserInfo";
+import { Role } from "../../models/User";
 
 type ProtectedRestaurantOwnerComponentProps = {
   element: ReactNode;
@@ -14,7 +15,7 @@ const ProtectedRestaurantOwnerComponent: React.FC<
   return (
     <ProtectedComponent
       element={element}
-      condition={!!user?.isRestaurantOwner}
+      condition={user?.role === Role.owner}
       redirect={redirect ?? "/"}
     />
   );

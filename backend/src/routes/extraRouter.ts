@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware,
-} from "../middleware/isRestaurantOwner";
+} from "../middleware/isOwnerRole";
 import {
   getAllExtrasByMenuItemId,
   createExtra,
@@ -16,21 +16,21 @@ extraRouter.get("/", getAllExtrasByMenuItemId);
 //verifyIsOwner and check if restaurantOwner middleware
 extraRouter.post(
   "/",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createExtra
 );
 //verifyIsOwner and check if restaurantOwner middleware
 extraRouter.put(
   "/:id([0-9]+)",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateExtra
 );
 //verifyIsOwner and check if restaurantOwner middleware
 extraRouter.delete(
   "/:id([0-9]+)",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   deleteExtra
 );

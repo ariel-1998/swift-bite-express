@@ -9,20 +9,20 @@ import {
   updateRestaurant,
 } from "../logic/restaurantLogic";
 import {
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware,
-} from "../middleware/isRestaurantOwner";
+} from "../middleware/isOwnerRole";
 
 export const restaurantRouter = Router();
 
 restaurantRouter.get("/", getRestaurantsByPage);
-restaurantRouter.get("/owner", isRestaurantOwner, getOwnerRestaurants);
+restaurantRouter.get("/owner", isOwnerRole, getOwnerRestaurants);
 restaurantRouter.get("/:restaurantId([0-9]+)", getSingleRestaurantById);
 restaurantRouter.get("/search/:search", searchRestaurants);
-restaurantRouter.post("/", addRestaurant);
+restaurantRouter.post("/", isOwnerRole, addRestaurant);
 restaurantRouter.put(
   "/:restaurantId([0-9]+)",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   updateRestaurant
 );

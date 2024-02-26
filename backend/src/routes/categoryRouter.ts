@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware,
-} from "../middleware/isRestaurantOwner";
+} from "../middleware/isOwnerRole";
 import {
   addCategory,
   deleteCategory,
@@ -17,14 +17,14 @@ categoryRouter.get("/:restaurantId([0-9]+)", getAllCategoriesByRestaurantId);
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.post(
   "/",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   addCategory
 );
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.put(
   "/",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateCategory
 );
@@ -32,7 +32,7 @@ categoryRouter.put(
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.delete(
   "/:categoryId([0-9]+)/restaurant/:restaurantId([0-9]+)",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   deleteCategory
 );

@@ -4,6 +4,8 @@ import HeaderMenu from "./HeaderMenu";
 import CurrentAddress from "./CurrentAddress";
 import RestaurantSearch from "../../RestaurantArea/RestaurantSearch";
 import useScreenSize from "../../../hooks/useScreenSize";
+import useUserInfo from "../../../hooks/useUserInfo";
+import { Role } from "../../../models/User";
 
 const Header: React.FC = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -12,7 +14,7 @@ const Header: React.FC = () => {
     setShowAddressForm(!showAddressForm);
   };
   const isSmaller = useScreenSize("lg");
-
+  const { user } = useUserInfo();
   const toggleOpenSearch = () => {
     if (isSmaller) setOpenSearch((prev) => !prev);
   };
@@ -29,19 +31,25 @@ const Header: React.FC = () => {
             </span>
             <span className="text-lg font-bold leading-none">express</span>
           </div>
-          {!isSmaller && <CurrentAddress onClick={toggleAddressForm} />}
+          {!isSmaller && (user?.role === Role.user || !user) && (
+            <CurrentAddress onClick={toggleAddressForm} />
+          )}
         </div>
       )}
       <div
-        className={`flex justify-around gap-6 lg:gap-10 ${isSmaller && "grow"}`}
+        className={`flex justify-around gap-6 lg:gap-10 ${
+          isSmaller && openSearch && "grow"
+        }`}
       >
+        {/* {(user?.role === Role.user || !user) && ( */}
         <RestaurantSearch
           openSearch={openSearch}
           toggleOpenSearch={toggleOpenSearch}
         />
+        {/* )} */}
         {isSmaller && openSearch ? null : <HeaderMenu />}
       </div>
-      {showAddressForm && (
+      {showAddressForm && (user?.role === Role.user || !user) && (
         <AddressFormToShow toggleAddressForm={toggleAddressForm} />
       )}
     </div>

@@ -1,5 +1,4 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { restaurantService } from "../../services/restaurantService";
 import Input from "../Customs/Input";
 import useUserInfo from "../../hooks/useUserInfo";
@@ -10,6 +9,13 @@ import useScreenSize from "../../hooks/useScreenSize";
 import { FaSearch } from "react-icons/fa";
 import { FaWindowClose } from "react-icons/fa";
 import useDebounce from "../../hooks/useDebounce";
+import useScrollFetch from "../../hooks/useScrollFetch";
+import {
+  NestedRestaurantAndAddress,
+  Restaurant,
+} from "../../models/Restaurant";
+import { Role } from "../../models/User";
+import useOwnerRestaurants from "../../hooks/useOwnerRestaurants";
 
 type RestaurantSearchProps = {
   openSearch: boolean;
@@ -20,65 +26,16 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({
   openSearch,
   toggleOpenSearch,
 }) => {
+  const { user } = useUserInfo();
   const [search, setSearch] = useState("");
-  const { address } = useUserInfo();
-  const observerRef = useRef<IntersectionObserver | null>(null);
   const isSmaller = useScreenSize("lg");
+
   const { loading, debounce: debounceSearch } = useDebounce({
     wait: 500,
     fn: updateSeach,
   });
-  const {
-    data,
-    hasNextPage,
-    isFetchingNextPage,
-    fetchNextPage,
-    isError,
-    isLoading,
-  } = useInfiniteQuery({
-    //need to check if another key is required to remember the page number
-    queryKey: queryKeys.restaurants.searchRestaurantsByName(search, address),
-    queryFn: ({ pageParam }) =>
-      restaurantService.searchRestaurantsByName(search!, pageParam, {
-        latitude: address?.latitude,
-        longitude: address?.longitude,
-      }),
-    getNextPageParam: (lastPage, allPages) => {
-      if (lastPage.length === CONSTANTS.RESTAURANT_SEARCH_PAGE_LIMIT) {
-        return allPages.length + 1;
-      }
-      return undefined;
-    },
-    initialPageParam: 1,
-    enabled: !!search,
-  });
-
-  const observer = useCallback(
-    (node: HTMLAnchorElement) => {
-      if (isFetchingNextPage) return;
-      if (observerRef.current && isError) {
-        return observerRef.current.disconnect();
-      }
-      if (observerRef.current) observerRef.current.disconnect();
-
-      observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasNextPage) fetchNextPage();
-      });
-
-      if (node) observerRef.current.observe(node);
-
-      return () => {
-        if (observerRef.current) {
-          observerRef.current.disconnect();
-          observerRef.current = null;
-        }
-      };
-    },
-    [fetchNextPage, hasNextPage, isError, isFetchingNextPage]
-  );
 
   function updateSeach(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log("asdlknasdlnalskdnalskdndlkasndlkansdlknasdlkasndlkasnlksan");
     setSearch(e.target.value);
   }
   return (
@@ -112,6 +69,57 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({
           </div>
         )}
       </div>
+
+      {user?.role === Role.user && (
+        <UserRestaurantSearch
+          loading={loading}
+          search={search}
+          openSearch={openSearch}
+          toggleOpenSearch={toggleOpenSearch}
+        />
+      )}
+      {user?.role === Role.owner && (
+        <OwnerRestaurantSearch
+          loading={loading}
+          search={search}
+          openSearch={openSearch}
+          toggleOpenSearch={toggleOpenSearch}
+        />
+      )}
+    </div>
+  );
+};
+
+export default RestaurantSearch;
+
+type UserRestaurantSearchProps = {
+  loading: boolean;
+  search: string;
+} & RestaurantSearchProps;
+function UserRestaurantSearch({
+  openSearch,
+  toggleOpenSearch,
+  loading,
+  search,
+}: UserRestaurantSearchProps) {
+  const { address } = useUserInfo();
+
+  const {
+    dataObj: { isLoading, isError, data },
+    observer,
+  } = useScrollFetch<Restaurant>({
+    queryKey: queryKeys.restaurants.searchRestaurantsByName(search, address),
+    pageLimit: CONSTANTS.RESTAURANT_SEARCH_PAGE_LIMIT,
+    enabled: !!search,
+    queryFn: ({ pageParam }) =>
+      restaurantService.searchRestaurantsByName(search!, pageParam, {
+        latitude: address?.latitude,
+        longitude: address?.longitude,
+      }),
+  });
+
+  return (
+    <>
       {(isLoading || loading) && "loading..."}
       {isError && "error"}
       {search && data && openSearch && (
@@ -120,30 +128,68 @@ const RestaurantSearch: React.FC<RestaurantSearchProps> = ({
             onClick={toggleOpenSearch}
             className="absolute top-0 w-full bg-white"
           >
-            {data?.pages.map((page) =>
-              page.map((restaurant, i) => {
-                if (page.length === i + 1) {
-                  return (
-                    <RestaurantSearchResultCard
-                      restaurant={restaurant}
-                      key={restaurant.id}
-                      ref={observer}
-                    />
-                  );
-                }
-                return (
-                  <RestaurantSearchResultCard
-                    restaurant={restaurant}
-                    key={restaurant.id}
-                  />
-                );
-              })
-            )}
+            {data?.pages.map((page, i) => (
+              <DisplaySearchResults data={page} observer={observer} key={i} />
+            ))}
           </div>
         </div>
       )}
-    </div>
+    </>
   );
-};
+}
 
-export default RestaurantSearch;
+function OwnerRestaurantSearch({
+  loading,
+  openSearch,
+  search,
+  toggleOpenSearch,
+}: UserRestaurantSearchProps) {
+  const { data, isLoading, isError } = useOwnerRestaurants();
+  const filteredData = useMemo(() => {
+    return data?.filter((restaurant) => restaurant.name.includes(search)) || [];
+  }, [data, search]);
+  return (
+    <>
+      {search && data && openSearch && (
+        <div className="relative">
+          <div
+            onClick={toggleOpenSearch}
+            className="absolute top-0 w-full bg-white"
+          >
+            {(isLoading || loading) && "loading..."}
+            {isError && "error"}
+            {filteredData && <DisplaySearchResults data={filteredData} />}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+type DisplaySearchResultsProps = {
+  data: (Restaurant | NestedRestaurantAndAddress)[];
+  observer?: (node: HTMLAnchorElement) => void;
+};
+function DisplaySearchResults({ data, observer }: DisplaySearchResultsProps) {
+  return (
+    <>
+      {data.map((restaurant, i) => {
+        if (data.length === i + 1 && observer) {
+          return (
+            <RestaurantSearchResultCard
+              restaurant={restaurant}
+              key={restaurant.id}
+              ref={observer}
+            />
+          );
+        }
+        return (
+          <RestaurantSearchResultCard
+            restaurant={restaurant}
+            key={restaurant.id}
+          />
+        );
+      })}
+    </>
+  );
+}

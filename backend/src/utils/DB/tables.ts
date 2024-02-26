@@ -2,7 +2,7 @@ import { PoolConnection } from "mysql2/promise";
 import { AddressSchema } from "../../models/Address";
 import { AuthProvider } from "../../models/AuthProvider";
 import { RestaurantSchema } from "../../models/Restaurant";
-import { User } from "../../models/User";
+import { Role, User } from "../../models/User";
 import { executeQuery, pool } from "./dbConfig";
 import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddressTable";
 import { MenuItem } from "../../models/MenuItem";
@@ -73,7 +73,7 @@ DB.addTable("users", {
   password: "password",
   authProviderId: "authProviderId",
   primaryAddressId: "primaryAddressId",
-  isRestaurantOwner: "isRestaurantOwner",
+  role: "role",
 });
 
 DB.addTable("addresses", {
@@ -189,7 +189,7 @@ async function create_users_table(connection: PoolConnection) {
     password,
     fullName,
     authProviderId,
-    isRestaurantOwner,
+    role,
     primaryAddressId,
   } = columns;
   const auth_provider = DB.tables.auth_provider;
@@ -203,7 +203,7 @@ async function create_users_table(connection: PoolConnection) {
     ${fullName} VARCHAR(100) NOT NULL,
     ${password} VARCHAR(90) DEFAULT NULL,
     ${email} VARCHAR(90) UNIQUE NOT NULL,
-    ${isRestaurantOwner} TINYINT NOT NULL DEFAULT 0,
+    ${role} ENUM('${Role.user}', '${Role.owner}') NOT NULL DEFAULT '${Role.user}',
     FOREIGN KEY (${authProviderId}) REFERENCES ${auth_provider.tableName}(${auth_provider.columns.id}) ON DELETE CASCADE,
     FOREIGN KEY (${primaryAddressId}) REFERENCES ${addresses.tableName}(${addresses.columns.id}) ON DELETE SET NULL
     )`;

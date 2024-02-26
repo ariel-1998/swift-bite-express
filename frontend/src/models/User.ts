@@ -1,25 +1,27 @@
 import { z } from "zod";
-export enum IsOwner {
-  false = 0,
-  true = 1,
+export enum Role {
+  user = "user",
+  owner = "owner",
 }
+
 export type User = {
   id: number;
   authProviderId: string | null | undefined;
   primaryAddressId: number | null | undefined;
-  isRestaurantOwner: IsOwner;
+  role: Role;
   fullName: string;
   email: string;
+  password: string | null | undefined;
 };
-export const userSchema = z.object({
-  id: z.number(), //sql autoIncrement
-  authProviderId: z.string().nullable(), //sql default value set to null
-  primaryAddressId: z.number().nullable(), //sql default value set to null
-  isRestaurantOwner: z.nativeEnum(IsOwner),
-  fullName: z.string(), //sql varchar
-  password: z.string().nullable(), //sql varchar
-  email: z.string().email(),
-});
+// export const userSchema = z.object({
+//   id: z.number(), //sql autoIncrement
+//   authProviderId: z.string().nullable(), //sql default value set to null
+//   primaryAddressId: z.number().nullable(), //sql default value set to null
+//   role: z.nativeEnum(Role),
+//   fullName: z.string(), //sql varchar
+//   password: z.string().nullable(), //sql varchar
+//   email: z.string().email(),
+// });
 
 const passwordSchema = z
   .string()
@@ -40,6 +42,7 @@ export const userRegisterFormSchema = userLoginFormSchema
       .trim()
       .min(2, "Full Name to short (min 2 chars)")
       .max(20, "Full Name to long (max 20 chars)"),
+    role: z.nativeEnum(Role).optional(),
   })
   .refine(
     ({ password, confirmPassword }) => {

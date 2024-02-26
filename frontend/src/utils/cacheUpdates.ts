@@ -48,14 +48,9 @@ class UpdateRestaurantCache {
   }
   updateSingleRestaurantInCache(
     data: NestedRestaurantAndAddress,
-    queryClient: QueryClient,
-    address: Address | undefined
+    queryClient: QueryClient
   ) {
-    //invalidate restaurant queries that depend on address so if there is no address the user cannot get it from db
-    if (data.address) {
-      this.invalidateRestaurantSearchQueries(queryClient, address);
-      this.invalidateGetNearRestaurantsByPage(queryClient, address);
-    }
+    //invalidate restaurants owner queries
     this.updateGetSingleRestaurantById(queryClient, data);
     this.updateGetOwnerRestaurants(queryClient, data);
   }

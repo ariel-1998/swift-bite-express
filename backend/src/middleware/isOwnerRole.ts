@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { IsOwner, User } from "../models/User";
+import { Role, User } from "../models/User";
 import { restauransOwnerAddressQueries } from "../utils/DB/queries/restauransOwnerAddressQueries";
 import { RestauransOwnerAddressTable } from "../models/RestauransOwnerAddressTable";
 import { executeQuery, executeSingleQuery } from "../utils/DB/dbConfig";
@@ -8,12 +8,8 @@ import { PoolConnection } from "mysql2/promise";
 import { verifyUser } from "./verifyAuth";
 import { restaurantIdSchema } from "../models/Restaurant";
 
-export function isRestaurantOwner(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  if (req.user?.isRestaurantOwner) return next();
+export function isOwnerRole(req: Request, res: Response, next: NextFunction) {
+  if (req.user?.role === Role.owner) return next();
   return next(
     new FunctionError(
       "Premission Error: access denied, only The owner is Allowed.",
@@ -58,9 +54,9 @@ export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
 export function verifyIsOwner<T extends { user: User }>(
   req: T
 ): asserts req is T & {
-  user: Omit<User, "isRestaurantOwner"> & { isRestaurantOwner: IsOwner.true };
+  user: Omit<User, "role"> & { role: Role.owner };
 } {
-  if (!req.user.isRestaurantOwner) {
+  if (req.user.role !== Role.owner) {
     throw new FunctionError(
       "Premission Error: access denied, only The owner is Allowed.",
       403

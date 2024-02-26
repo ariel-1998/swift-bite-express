@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware,
-} from "../middleware/isRestaurantOwner";
+} from "../middleware/isOwnerRole";
 import {
   getMenuItemById,
   createMenuItem,
@@ -16,7 +16,7 @@ export const menuItemRouter = Router();
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemRouter.post(
   "/",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createMenuItem
 );
@@ -27,7 +27,7 @@ menuItemRouter.get("/:menuItemId([0-9]+)", getMenuItemById);
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemRouter.put(
   "/:menuItemId([0-9]+)",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateMenuItemApartFromImg
 );
@@ -35,7 +35,7 @@ menuItemRouter.put(
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemRouter.put(
   "/:menuItemId([0-9]+)/image",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateMenuItemImg
 );
@@ -44,7 +44,7 @@ menuItemRouter.put(
 
 menuItemRouter.delete(
   "/:menuItemId([0-9]+)/restaurant/:restaurantId([0-9]+)",
-  isRestaurantOwner,
+  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   deleteMenuItem
 );
