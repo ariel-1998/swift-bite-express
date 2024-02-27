@@ -1,19 +1,17 @@
 import React, { ReactNode } from "react";
-import ProtectedComponent from "./ProtectedComponent";
+import ProtectedRoute from "./ProtectedRoute";
 import useUserInfo from "../../hooks/useUserInfo";
 import { Role } from "../../models/User";
 
-type ProtectedRestaurantOwnerComponentProps = {
+type OwnerRouteProps = {
   element: ReactNode;
   redirect?: string;
 };
 
-const ProtectedRestaurantOwnerComponent: React.FC<
-  ProtectedRestaurantOwnerComponentProps
-> = ({ element, redirect = "/" }) => {
+const OwnerRoute: React.FC<OwnerRouteProps> = ({ element, redirect = "/" }) => {
   const { user } = useUserInfo();
   return (
-    <ProtectedComponent
+    <ProtectedRoute
       element={element}
       condition={user?.role === Role.owner}
       redirect={redirect ?? "/"}
@@ -21,4 +19,4 @@ const ProtectedRestaurantOwnerComponent: React.FC<
   );
 };
 
-export default ProtectedRestaurantOwnerComponent;
+export default OwnerRoute;

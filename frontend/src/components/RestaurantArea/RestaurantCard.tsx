@@ -37,7 +37,7 @@ const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
             ref.current = e;
           }
         }}
-        className="bg-white rounded transition-shadow hover:shadow-md min-w-72 max-w-80 flex 
+        className="bg-white rounded transition-shadow hover:shadow-md min-w-64 max-w-80 flex 
         overflow-hidden flex-col cursor-pointer grow h-fit pb-1"
       >
         <AdvancedImage cldImg={img} />

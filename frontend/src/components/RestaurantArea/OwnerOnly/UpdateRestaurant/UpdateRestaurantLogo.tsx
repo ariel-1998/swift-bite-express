@@ -2,14 +2,13 @@ import React, { FormEvent, useRef } from "react";
 import {
   NestedRestaurantAndAddress,
   updateRestaurantSchema,
-} from "../../../models/Restaurant";
-import Button from "../../Customs/Button";
-import Input from "../../Customs/Input";
+} from "../../../../models/Restaurant";
+import Button from "../../../Customs/Button";
+import Input from "../../../Customs/Input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { restaurantService } from "../../../services/restaurantService";
+import { restaurantService } from "../../../../services/restaurantService";
 import { ZodError } from "zod";
-import { updateRestaurantCache } from "../../../utils/cacheUpdates";
-import useUserInfo from "../../../hooks/useUserInfo";
+import { updateRestaurantCache } from "../../../../utils/cacheUpdates";
 import { useNavigate } from "react-router-dom";
 
 type UpdateRestaurantLogoProps = {
@@ -20,18 +19,13 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
   restaurant,
 }) => {
   const logoRef = useRef<HTMLInputElement | null>(null);
-  const { address } = useUserInfo();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const mutation = useMutation({
     mutationFn: restaurantService.updateRestaurant,
     //onSuccess: update restaurant queries
     onSuccess(data) {
-      updateRestaurantCache.updateSingleRestaurantInCache(
-        data,
-        queryClient,
-        address
-      );
+      updateRestaurantCache.updateSingleRestaurantInCache(data, queryClient);
       navigate("/restaurants/owner");
     },
     onError(error) {

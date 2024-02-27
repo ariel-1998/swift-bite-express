@@ -1,7 +1,7 @@
 import React from "react";
-import useUserInfo from "../../../hooks/useUserInfo";
-import UserUpdateAddressForm from "../../AddressArea/UserUpdateAddressForm";
-import UserAddAddressForm from "../../AddressArea/UserAddAddressForm";
+import useUserInfo from "../../../../hooks/useUserInfo";
+import UserUpdateAddressForm from "../../../AddressArea/UserUpdateAddressForm";
+import UserAddAddressForm from "../../../AddressArea/UserAddAddressForm";
 
 type AddressFormToShowProps = {
   toggleAddressForm: () => void;

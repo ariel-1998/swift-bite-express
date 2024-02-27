@@ -4,8 +4,8 @@ import UpdateRestaurantAddress from "./UpdateRestaurantAddress";
 import UpdateRestaurantLogo from "./UpdateRestaurantLogo";
 import UpdateRestaurantImage from "./UpdateRestaurantImage";
 import UpdateRestaurantName from "./UpdateRestaurantName";
-import AddRestaurantAddress from "../AddRestaurantAddress";
-import { NestedRestaurantAndAddress } from "../../../models/Restaurant";
+import AddRestaurantAddress from "./AddRestaurantAddress";
+import { NestedRestaurantAndAddress } from "../../../../models/Restaurant";
 
 type FormNames = "name" | "logo" | "image" | "address";
 export type UpdateRestaurantLocationState = { activeForm?: FormNames };
@@ -43,7 +43,7 @@ const UpdateRestaurant: React.FC<UpdateRestaurantProps> = ({ data }) => {
             Logo
           </li>
           <li
-            onClick={() => setActiveForm("logo")}
+            onClick={() => setActiveForm("image")}
             className="cursor-pointer grow hover:bg-secondary p-2 transition-colors text-center"
           >
             Image

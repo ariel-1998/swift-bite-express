@@ -6,20 +6,19 @@ import Logout from "./components/AuthArea/Logout";
 import HomePage from "./pages/HomePage";
 import RestaurantPage from "./pages/RestaurantPage";
 import Layout from "./components/Layout/Layout";
-import CreateRestaurant from "./components/RestaurantArea/CreateRestaurant";
-import useUserInfo from "./hooks/useUserInfo";
-import { Role } from "./models/User";
+import CreateRestaurant from "./components/RestaurantArea/OwnerOnly/CreateRestaurant";
+import OwnerRoute from "./components/ProtectedRoutes/OwnerRoute";
+import OwnerUserRoute from "./components/ProtectedRoutes/OwnerUserRoute";
+import UpdateRole from "./components/UserInfoArea/UpdateRole";
 // import useUserInfo from "./hooks/useUserInfo";
 
 function App() {
-  const { user } = useUserInfo();
   return (
     <BrowserRouter>
       <Routes>
-        {/** home route */}
         <Route path="/" Component={Layout}>
           <Route path="" Component={HomePage} />
-          {/** auth routes */}
+
           <Route path="auth/" element={<Auth />}>
             <Route path="register" Component={Register} />
             <Route path="register" Component={Register} />
@@ -27,14 +26,21 @@ function App() {
             <Route path="logout" Component={Logout} />
             {/* <Route path="*" element={<Navigate to={"/auth/login"} />} /> */}
           </Route>
-          {/** restaurant route*/}
+
+          <Route path="/user/update" Component={Auth}>
+            <Route
+              path="membership"
+              element={<OwnerUserRoute element={<UpdateRole />} />}
+            />
+          </Route>
+
           <Route path="restaurants">
-            <>
-              {user?.role === Role.owner && (
-                <Route path="create" Component={CreateRestaurant} />
-              )}
-              <Route path=":restaurantId" Component={RestaurantPage} />
-            </>
+            <Route
+              path="create"
+              element={<OwnerRoute element={<CreateRestaurant />} />}
+            />
+
+            <Route path=":restaurantId" Component={RestaurantPage} />
             {/**only user or guest can access */}
           </Route>
         </Route>

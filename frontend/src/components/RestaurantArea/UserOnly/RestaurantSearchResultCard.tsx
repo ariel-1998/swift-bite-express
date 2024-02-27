@@ -1,8 +1,8 @@
 import { forwardRef } from "react";
-import { Restaurant } from "../../models/Restaurant";
+import { Restaurant } from "../../../models/Restaurant";
 import { Link } from "react-router-dom";
 import { AdvancedImage } from "@cloudinary/react";
-import { generateCldResizedImage } from "../../utils/cloudinaryConfig";
+import { generateCldResizedImage } from "../../../utils/cloudinaryConfig";
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
 
 type RestaurantSearchResultCardProps = {

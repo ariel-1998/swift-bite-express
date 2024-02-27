@@ -1,6 +1,6 @@
 import React from "react";
-import RestaurantAddressForm from "../AddressArea/RestaurantAddressForm";
-import { NestedRestaurantAndAddress } from "../../models/Restaurant";
+import RestaurantAddressForm from "../../../AddressArea/RestaurantAddressForm";
+import { NestedRestaurantAndAddress } from "../../../../models/Restaurant";
 
 type AddRestaurantAddressProps = {
   restaurant: NestedRestaurantAndAddress;

@@ -1,24 +1,24 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-type ProtectedComponentProps = {
+type ProtectedRouteProps = {
   element: ReactNode;
   condition: boolean;
   redirect: string;
 };
-
-const ProtectedComponent = ({
+//might add a lazy load from react
+const ProtectedRoute = ({
   element,
   condition,
   redirect = "/",
-}: ProtectedComponentProps) => {
+}: ProtectedRouteProps) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    navigate(redirect);
-  }, [navigate, redirect]);
+    if (!condition) navigate(redirect);
+  }, [navigate, redirect, condition]);
 
-  return condition ? element : null;
+  return element;
 };
 
-export default ProtectedComponent;
+export default ProtectedRoute;

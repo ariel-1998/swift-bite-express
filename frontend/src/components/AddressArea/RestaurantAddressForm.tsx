@@ -10,6 +10,7 @@ import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import { updateRestaurantCache } from "../../utils/cacheUpdates";
 import { useNavigate } from "react-router-dom";
+import { toastifyService } from "../../services/toastifyService";
 
 type RestaurantAddressFormProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -49,7 +50,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
       navigate("/");
     },
     onError(error) {
-      console.log(error);
+      toastifyService.error(error);
     },
   });
 

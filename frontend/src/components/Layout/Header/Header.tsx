@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import AddressFormToShow from "./AddressFormToShow";
+import AddressFormToShow from "./UserOnly/AddressFormToShow";
 import HeaderMenu from "./HeaderMenu";
-import CurrentAddress from "./CurrentAddress";
-import RestaurantSearch from "../../RestaurantArea/RestaurantSearch";
+import CurrentAddress from "./UserOnly/CurrentAddress";
+import RestaurantSearch from "../../RestaurantArea/UserOnly/RestaurantSearch";
 import useScreenSize from "../../../hooks/useScreenSize";
 import useUserInfo from "../../../hooks/useUserInfo";
 import { Role } from "../../../models/User";
+import ProtectedComp from "../../ProtectedComponent.tsx/ProtectedComp";
+import { Link } from "react-router-dom";
 
 const Header: React.FC = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -25,15 +27,16 @@ const Header: React.FC = () => {
     >
       {isSmaller && openSearch ? null : (
         <div className="flex justify-around gap-6 lg:gap-10 text-secondary">
-          <div className="flex flex-col gap-0 items-center px-3  ">
+          <Link to="/" className="flex flex-col gap-0 items-center px-3  ">
             <span className="lg:text-lg text-lg font-extrabold mb-0 leading-none">
               SwiftBite
             </span>
             <span className="text-lg font-bold leading-none">express</span>
-          </div>
-          {!isSmaller && (user?.role === Role.user || !user) && (
-            <CurrentAddress onClick={toggleAddressForm} />
-          )}
+          </Link>
+
+          <ProtectedComp condition={user?.role === Role.user || !user}>
+            {!isSmaller && <CurrentAddress onClick={toggleAddressForm} />}
+          </ProtectedComp>
         </div>
       )}
       <div
@@ -41,17 +44,21 @@ const Header: React.FC = () => {
           isSmaller && openSearch && "grow"
         }`}
       >
-        {/* {(user?.role === Role.user || !user) && ( */}
-        <RestaurantSearch
-          openSearch={openSearch}
-          toggleOpenSearch={toggleOpenSearch}
-        />
-        {/* )} */}
+        <ProtectedComp condition={user?.role === Role.user || !user}>
+          <RestaurantSearch
+            openSearch={openSearch}
+            toggleOpenSearch={toggleOpenSearch}
+          />
+        </ProtectedComp>
+
         {isSmaller && openSearch ? null : <HeaderMenu />}
       </div>
-      {showAddressForm && (user?.role === Role.user || !user) && (
-        <AddressFormToShow toggleAddressForm={toggleAddressForm} />
-      )}
+
+      <ProtectedComp condition={user?.role === Role.user || !user}>
+        {showAddressForm && (
+          <AddressFormToShow toggleAddressForm={toggleAddressForm} />
+        )}
+      </ProtectedComp>
     </div>
   );
 };

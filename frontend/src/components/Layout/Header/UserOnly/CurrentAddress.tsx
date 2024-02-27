@@ -1,5 +1,5 @@
 import React from "react";
-import useUserInfo from "../../../hooks/useUserInfo";
+import useUserInfo from "../../../../hooks/useUserInfo";
 import { FaLocationDot } from "react-icons/fa6";
 
 type CurrentAddressProps = {

@@ -1,13 +1,13 @@
 import React from "react";
-import AuthForm from "../AuthArea/AuthForm";
-import Input from "../Customs/Input";
+import AuthForm from "../../AuthArea/AuthForm";
+import Input from "../../Customs/Input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { restaurantService } from "../../services/restaurantService";
-import Button from "../Customs/Button";
+import { restaurantService } from "../../../services/restaurantService";
+import Button from "../../Customs/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RestaurantSchema, restaurantSchema } from "../../models/Restaurant";
-import { updateRestaurantCache } from "../../utils/cacheUpdates";
+import { RestaurantSchema, restaurantSchema } from "../../../models/Restaurant";
+import { updateRestaurantCache } from "../../../utils/cacheUpdates";
 import { useNavigate } from "react-router-dom";
 
 const CreateRestaurant: React.FC = () => {

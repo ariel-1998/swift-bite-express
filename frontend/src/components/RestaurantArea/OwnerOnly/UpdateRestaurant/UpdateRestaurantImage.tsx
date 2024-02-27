@@ -2,13 +2,13 @@ import React, { FormEvent, useRef } from "react";
 import {
   NestedRestaurantAndAddress,
   updateRestaurantSchema,
-} from "../../../models/Restaurant";
+} from "../../../../models/Restaurant";
 import { ZodError } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { restaurantService } from "../../../services/restaurantService";
-import Input from "../../Customs/Input";
-import Button from "../../Customs/Button";
-import { updateRestaurantCache } from "../../../utils/cacheUpdates";
+import { restaurantService } from "../../../../services/restaurantService";
+import Input from "../../../Customs/Input";
+import Button from "../../../Customs/Button";
+import { updateRestaurantCache } from "../../../../utils/cacheUpdates";
 import { useNavigate } from "react-router-dom";
 
 type UpdateRestaurantImageProps = {
@@ -25,7 +25,7 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
     mutationFn: restaurantService.updateRestaurant,
     onSuccess(data) {
       updateRestaurantCache.updateSingleRestaurantInCache(data, queryClient);
-      navigate("/restaurants/owner");
+      navigate("/");
     },
     onError(error) {
       console.log(error);
