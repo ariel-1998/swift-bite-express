@@ -8,8 +8,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../../services/restaurantService";
 import Input from "../../../Customs/Input";
 import Button from "../../../Customs/Button";
-import { updateRestaurantCache } from "../../../../utils/cacheUpdates";
+import { updateRestaurantCache } from "../../../../utils/queryCacheUpdates/updateRestaurantCache";
 import { useNavigate } from "react-router-dom";
+import UpdateForm from "../UpdateForm";
+import { toastifyService } from "../../../../services/toastifyService";
 
 type UpdateRestaurantImageProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -42,14 +44,11 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
         .parse({ image });
       mutation.mutate({ restaurantId: restaurant.id, image: image! });
     } catch (error) {
-      if (error instanceof ZodError) {
-        const messageArray = error.issues.map((e) => e.message);
-        console.log(messageArray);
-      }
+      toastifyService.error(error as Error);
     }
   };
   return (
-    <form onSubmit={submitUpdate} className="flex flex-col gap-3 p-10">
+    <UpdateForm onSubmit={submitUpdate}>
       <Input label="Restaurant Image:" type="file" ref={imageRef} />
       <Button
         type="submit"
@@ -59,7 +58,7 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
       >
         Update
       </Button>
-    </form>
+    </UpdateForm>
   );
 };
 

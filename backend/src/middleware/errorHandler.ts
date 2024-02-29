@@ -21,5 +21,5 @@ export function errorHandler(
 ) {
   console.log(error);
   const err = handleErrorTypes(error);
-  res.status(err.code).json(err.message);
+  res.status(err.code).json({ message: err.message });
 }

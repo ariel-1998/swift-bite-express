@@ -8,9 +8,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { addressService } from "../../services/addressService";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
-import { updateRestaurantCache } from "../../utils/cacheUpdates";
+import { updateRestaurantCache } from "../../utils/queryCacheUpdates/updateRestaurantCache";
 import { useNavigate } from "react-router-dom";
 import { toastifyService } from "../../services/toastifyService";
+import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
 
 type RestaurantAddressFormProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -63,10 +64,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(submitAddress)}
-      className="flex flex-col gap-3 p-10"
-    >
+    <UpdateForm onSubmit={handleSubmit(submitAddress)}>
       <Input
         label="Country:"
         errMessage={errors.country?.message}
@@ -116,7 +114,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
       >
         Update
       </Button>
-    </form>
+    </UpdateForm>
   );
 };
 

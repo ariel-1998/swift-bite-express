@@ -8,6 +8,7 @@ const btnStyles = cva(["rounded-full", "transition-colors"], {
       default: ["bg-secondary", "hover:bg-secondary-hover"],
       ghost: ["hover:bg-gray-100"],
       primary: ["bg-primary"],
+      error: ["bg-orange"],
     },
     size: {
       default: ["rounded", "p-2"],
@@ -27,6 +28,7 @@ const btnStyles = cva(["rounded-full", "transition-colors"], {
         "rounded-br-full",
         "font-semibold",
         "w-full",
+        "shadow-sm",
       ],
     },
     disabledBtn: {

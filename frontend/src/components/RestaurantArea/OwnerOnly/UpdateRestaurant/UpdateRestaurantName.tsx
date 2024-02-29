@@ -7,9 +7,10 @@ import Input from "../../../Customs/Input";
 import Button from "../../../Customs/Button";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../../services/restaurantService";
-import { ZodError } from "zod";
-import { updateRestaurantCache } from "../../../../utils/cacheUpdates";
+import { updateRestaurantCache } from "../../../../utils/queryCacheUpdates/updateRestaurantCache";
 import { useNavigate } from "react-router-dom";
+import UpdateForm from "../UpdateForm";
+import { toastifyService } from "../../../../services/toastifyService";
 
 type UpdateRestaurantNameProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -26,7 +27,7 @@ const UpdateRestaurantName: React.FC<UpdateRestaurantNameProps> = ({
     mutationFn: restaurantService.updateRestaurant,
     onSuccess(data) {
       updateRestaurantCache.updateSingleRestaurantInCache(data, queryClient);
-      navigate("/restaurants/owner");
+      navigate("/");
     },
   });
 
@@ -36,16 +37,13 @@ const UpdateRestaurantName: React.FC<UpdateRestaurantNameProps> = ({
     try {
       updateRestaurantSchema.pick({ name: true }).parse({ name });
     } catch (error) {
-      if (error instanceof ZodError) {
-        const messageArray = error.issues.map((e) => e.message);
-        console.log(messageArray);
-      }
+      toastifyService.error(error as Error);
     }
     mutation.mutate({ restaurantId: restaurant.id, name });
   };
 
   return (
-    <form onSubmit={submitUpdate} className="flex flex-col gap-3 p-10">
+    <UpdateForm onSubmit={submitUpdate}>
       <Input label="Restaurant Name:" type="text" ref={nameRef} />
       <Button
         type="submit"
@@ -56,7 +54,7 @@ const UpdateRestaurantName: React.FC<UpdateRestaurantNameProps> = ({
       >
         Update Name
       </Button>
-    </form>
+    </UpdateForm>
   );
 };
 

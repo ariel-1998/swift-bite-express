@@ -258,6 +258,7 @@ async function create_categories_table(connection: PoolConnection) {
   ${restaurantId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
   ${description} VARCHAR(500) DEFAULT NULL,
+  UNIQUE (${restaurantId}, ${name}),
   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);

@@ -7,9 +7,10 @@ import Button from "../../../Customs/Button";
 import Input from "../../../Customs/Input";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../../services/restaurantService";
-import { ZodError } from "zod";
-import { updateRestaurantCache } from "../../../../utils/cacheUpdates";
+import { updateRestaurantCache } from "../../../../utils/queryCacheUpdates/updateRestaurantCache";
 import { useNavigate } from "react-router-dom";
+import UpdateForm from "../UpdateForm";
+import { toastifyService } from "../../../../services/toastifyService";
 
 type UpdateRestaurantLogoProps = {
   restaurant: NestedRestaurantAndAddress;
@@ -26,7 +27,7 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
     //onSuccess: update restaurant queries
     onSuccess(data) {
       updateRestaurantCache.updateSingleRestaurantInCache(data, queryClient);
-      navigate("/restaurants/owner");
+      navigate("/");
     },
     onError(error) {
       console.log(error);
@@ -43,14 +44,11 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
         .parse({ logoImage });
       mutation.mutate({ restaurantId: restaurant.id, logoImage: logoImage! });
     } catch (error) {
-      if (error instanceof ZodError) {
-        const messageArray = error.issues.map((e) => e.message);
-        console.log(messageArray);
-      }
+      toastifyService.error(error as Error);
     }
   };
   return (
-    <form onSubmit={submitUpdate} className="flex flex-col gap-3 p-10">
+    <UpdateForm onSubmit={submitUpdate}>
       <Input label="Restaurant Logo:" type="file" ref={logoRef} />
       <Button
         type="submit"
@@ -60,7 +58,7 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
       >
         Update
       </Button>
-    </form>
+    </UpdateForm>
   );
 };
 

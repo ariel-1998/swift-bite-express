@@ -18,6 +18,7 @@ export async function updateUserRole(
   //update isRestauranOuwner to isOwner.True
   let connection: undefined | PoolConnection = undefined;
   try {
+    console.log(req.body);
     verifyUser(req);
     const { user } = req;
     const parsedData = userRegistrationSchema
@@ -33,7 +34,7 @@ export async function updateUserRole(
       const getRestaurantsQuery = restauransOwnerAddressQueries.getRowsByUserId(
         user.id
       );
-      const restaurants = await executeQuery<RestauransOwnerAddressTable[]>(
+      const [restaurants] = await executeQuery<RestauransOwnerAddressTable[]>(
         connection,
         getRestaurantsQuery
       );

@@ -7,13 +7,14 @@ import {
   addCategory,
   deleteCategory,
   getAllCategoriesByRestaurantId,
+  getSingleCategoryById,
   updateCategory,
 } from "../logic/categoryLogic";
 
 export const categoryRouter = Router();
+//check
+categoryRouter.use(isOwnerRole);
 
-//no middleware needed
-categoryRouter.get("/:restaurantId([0-9]+)", getAllCategoriesByRestaurantId);
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.post(
   "/",
@@ -23,10 +24,19 @@ categoryRouter.post(
 );
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.put(
-  "/",
+  "/:categoryId([0-9]+)",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateCategory
+);
+
+//verifyIsOwner and check if restaurantOwner middleware
+categoryRouter.get("/:categoryId([0-9]+)", getSingleCategoryById);
+
+//no middleware needed// might add middleware thatCheck if role === Role.Admin
+categoryRouter.get(
+  "/restaurant/:restaurantId([0-9]+)",
+  getAllCategoriesByRestaurantId
 );
 
 //verifyIsOwner and check if restaurantOwner middleware

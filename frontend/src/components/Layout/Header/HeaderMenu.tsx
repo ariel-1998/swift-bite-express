@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-// import useIsMobile from "../../../hooks/useIsMobile";
 import useUserInfo from "../../../hooks/useUserInfo";
 import { Link } from "react-router-dom";
 import useScreenSize from "../../../hooks/useScreenSize";
@@ -26,11 +25,20 @@ const HeaderMenu: React.FC = () => {
       {open && (
         <div className="absolute top-10 right-0 p-2 bg-white flex flex-col gap-1 rounded divide-y divide-solid ">
           <ProtectedComp condition={!user}>
+            <Link to={"/"} className="hover:text-orange">
+              Restaurants
+            </Link>
             <Link className="hover:text-orange" to={"/auth/login"}>
               Login
             </Link>
             <Link className="hover:text-orange" to={"/auth/register"}>
               Register
+            </Link>
+          </ProtectedComp>
+
+          <ProtectedComp condition={user?.role === Role.user}>
+            <Link to={"/"} className="hover:text-orange">
+              Restaurants
             </Link>
           </ProtectedComp>
 

@@ -3,6 +3,7 @@ import { Address } from "../models/Address";
 const restaurants = "restaurants";
 const user = "user";
 const addresses = "addresses";
+const categories = "categories";
 
 class QueryKeys {
   auth = {
@@ -15,15 +16,22 @@ class QueryKeys {
     getSingleRestaurantById(restaurantId: number) {
       return [restaurants, "byId", restaurantId];
     },
-    //infinite query check if valid or need to add another variable for page
     searchRestaurantsByName(search: string, address: Address | undefined) {
       return [restaurants, address, "search", search];
     },
-    //infinite query check if valid or need to add another variable for page
     getNearRestaurantsByPage(address: Address | undefined) {
       return [restaurants, address, "pages"];
     },
     getOwnerRestaurants: [restaurants, "owner"],
+  };
+  categories = {
+    //need to check if cahched in object
+    getAllCategoriesByRestaurantId(restaurantId: number) {
+      return [categories, { restaurantId }];
+    },
+    getSingleCategoryById(categoryId: number) {
+      return [categories, { categoryId }];
+    },
   };
 }
 

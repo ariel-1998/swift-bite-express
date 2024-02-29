@@ -1,16 +1,19 @@
 import { toast } from "react-toastify";
+import { ZodError } from "zod";
 
-type ResponseError = {
+export type ResponseError = {
   response: { data?: { message?: string | string[] } };
 };
-type FrontError = {
-  message: string;
+export type FrontError = {
+  message: string | string[];
 };
+
+const defaultErr = "Unknown Error has accured!";
+
 class ToastifyService {
-  error(msg: ResponseError | FrontError) {
-    const message = this.errorMessageExtractor(msg);
-    if (Array.isArray(message)) message.forEach((err) => toast.error(err));
-    else toast.error(message);
+  error(err: ResponseError | FrontError | ZodError) {
+    const message = this.errorMessageExtractor(err);
+    toast.error(message);
   }
 
   success(msg: string) {
@@ -21,12 +24,31 @@ class ToastifyService {
     toast.info(msg);
   }
 
-  private errorMessageExtractor(err: ResponseError | FrontError) {
-    let message: string | string[] = "Unknown Error has accured!";
+  private valideAndExtractError(error: string | string[] | unknown) {
+    if (!Array.isArray(error)) {
+      if (typeof error !== "string") return defaultErr;
+      return error;
+    }
+    if (typeof error[0] !== "string") return defaultErr;
+    return error[0];
+  }
+
+  private errorMessageExtractor(
+    err: ResponseError | FrontError | ZodError | Error
+  ) {
+    if (typeof err !== "object") return defaultErr;
+    if (err instanceof ZodError) {
+      return err.issues[0]?.message || "Invalid Input Data";
+    }
+
     if ("response" in err) {
-      if (err.response.data?.message) message = err.response.data?.message;
-    } else if (err.message) message = err.message;
-    return message;
+      if (err.response.data?.message) {
+        return this.valideAndExtractError(err.response.data?.message);
+      }
+    }
+    if ("message" in err) return this.valideAndExtractError(err.message);
+
+    return defaultErr;
   }
 }
 

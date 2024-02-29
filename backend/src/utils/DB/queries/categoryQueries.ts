@@ -14,6 +14,12 @@ class CategoryQueries {
     return { params, query };
   }
 
+  getSingleCategoryById(categoryId: number): TransactionQuery {
+    const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
+    const params: MixedArray = [categoryId];
+    return { params, query };
+  }
+
   addCategory(category: Omit<CategorySchema, "id">): TransactionQuery {
     const query = `
     INSERT INTO ${tableName} 

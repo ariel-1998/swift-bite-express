@@ -1,10 +1,13 @@
 import { useCallback, useRef } from "react";
-import { QueryFunction, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  QueryFunction,
+  QueryKey,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
 
 type UseScrollFetchProps<Data> = {
-  queryKey: unknown[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  queryFn: QueryFunction<Data[], any, number> | undefined;
+  queryKey: QueryKey;
+  queryFn: QueryFunction<Data[], QueryKey, number> | undefined;
   pageLimit: number;
   enabled: boolean;
 };

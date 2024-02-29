@@ -7,7 +7,7 @@ import Button from "../../Customs/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RestaurantSchema, restaurantSchema } from "../../../models/Restaurant";
-import { updateRestaurantCache } from "../../../utils/cacheUpdates";
+import { updateRestaurantCache } from "../../../utils/queryCacheUpdates/updateRestaurantCache";
 import { useNavigate } from "react-router-dom";
 
 const CreateRestaurant: React.FC = () => {
@@ -24,7 +24,7 @@ const CreateRestaurant: React.FC = () => {
     onSuccess(data) {
       updateRestaurantCache.updateSingleRestaurantInCache(data, queryClient);
 
-      navigate(`/restaurants/owner/${data.id}?activeForm=address`);
+      navigate(`/restaurants/${data.id}?activeForm=address`);
       //no need to update query cache for restaurants as there is no address in it and all the query caches are with addresses
       //need to navigate to update restaurant address page "restaurant/owner/:restaurantId"
     },

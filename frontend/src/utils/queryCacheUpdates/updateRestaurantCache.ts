@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
-import { NestedRestaurantAndAddress } from "../models/Restaurant";
-import queryKeys from "./queryKeys";
-import { Address } from "../models/Address";
+import { NestedRestaurantAndAddress } from "../../models/Restaurant";
+import queryKeys from "../queryKeys";
+import { Address } from "../../models/Address";
 
 class UpdateRestaurantCache {
   private invalidateRestaurantSearchQueries(

@@ -4,7 +4,8 @@ import { credentialsAxios } from "../utils/axiosConfig";
 const userRoute = "/user";
 class UserService {
   async updateRole(role: Role) {
-    await credentialsAxios.put(userRoute, role);
+    console.log(role);
+    await credentialsAxios.put(userRoute, { role });
   }
 }
 

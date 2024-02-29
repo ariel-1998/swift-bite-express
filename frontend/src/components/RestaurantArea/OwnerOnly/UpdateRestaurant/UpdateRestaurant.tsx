@@ -6,8 +6,10 @@ import UpdateRestaurantImage from "./UpdateRestaurantImage";
 import UpdateRestaurantName from "./UpdateRestaurantName";
 import AddRestaurantAddress from "./AddRestaurantAddress";
 import { NestedRestaurantAndAddress } from "../../../../models/Restaurant";
+import AddCategory from "../../../CategoryArea/AddCategory";
+import CategoryForm from "../../../CategoryArea/CategoryForm";
 
-type FormNames = "name" | "logo" | "image" | "address";
+type FormNames = "name" | "logo" | "image" | "address" | "category";
 export type UpdateRestaurantLocationState = { activeForm?: FormNames };
 const searchParam = "activeForm";
 
@@ -54,11 +56,30 @@ const UpdateRestaurant: React.FC<UpdateRestaurantProps> = ({ data }) => {
           >
             Address
           </li>
+          <li
+            onClick={() => setActiveForm("category")}
+            className="cursor-pointer grow hover:bg-secondary p-2 transition-colors text-center"
+          >
+            Category
+          </li>
         </ul>
 
         <h1 className="text-center font-bold text-2xl ">Update {activeForm}</h1>
 
-        {activeForm === "image" ? (
+        {activeForm === "image" && <UpdateRestaurantImage restaurant={data} />}
+
+        {activeForm === "logo" && <UpdateRestaurantLogo restaurant={data} />}
+
+        {activeForm === "address" &&
+          (data.address.id ? (
+            <UpdateRestaurantAddress restaurant={data} />
+          ) : (
+            <AddRestaurantAddress restaurant={data} />
+          ))}
+
+        {activeForm === "name" && <UpdateRestaurantName restaurant={data} />}
+        {activeForm === "category" && <CategoryForm restaurantId={data.id} />}
+        {/* {activeForm === "image" ? (
           <UpdateRestaurantImage restaurant={data} />
         ) : activeForm === "logo" ? (
           <UpdateRestaurantLogo restaurant={data} />
@@ -70,7 +91,7 @@ const UpdateRestaurant: React.FC<UpdateRestaurantProps> = ({ data }) => {
           )
         ) : (
           <UpdateRestaurantName restaurant={data} />
-        )}
+        )} */}
       </div>
     </>
   );

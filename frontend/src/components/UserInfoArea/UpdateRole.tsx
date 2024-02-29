@@ -52,7 +52,7 @@ const UpdateRole: React.FC = () => {
       return toastifyService.error({ message: "Select checkbox to confirm" });
     }
 
-    if (inputNum.value === randomNum.join("")) {
+    if (inputNum.value !== randomNum.join("")) {
       return toastifyService.error({
         message: "Incorrect number. Please try again.",
       });
