@@ -71,8 +71,7 @@ export async function updateCategory(
     await executeSingleQuery(query, params);
     res.status(200).json(category);
   } catch (error) {
-    console.log(error);
-    next(error);
+    next(new FunctionError("Category Name already exist", 409));
   }
 }
 

@@ -4,7 +4,7 @@ import { toastifyService } from "../../services/toastifyService";
 import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCategoryCache } from "../../utils/queryCacheUpdates/updateCategoryCache";
 import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
-import { Category, CategoryForm, categorySchema } from "../../models/Category";
+import { CategoryForm, categorySchema } from "../../models/Category";
 import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import useCustomQuery from "../../hooks/useCustomQuery";
@@ -85,12 +85,13 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
   return (
     <UpdateForm onSubmit={updateCategory}>
       <select
+        defaultValue={""}
         onChange={(e) => {
           console.log(e.target.value);
           setSelectedCategoryId(e.target.value);
         }}
       >
-        <option disabled selected>
+        <option disabled value={""}>
           Select Category
         </option>
         {data?.map((c) => (
