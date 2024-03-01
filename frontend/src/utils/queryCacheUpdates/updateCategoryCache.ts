@@ -33,8 +33,8 @@ function updateSingleCategory(category: Category, queryClient: QueryClient) {
   const key = queryKeys.categories.getSingleCategoryById(category.id);
   queryClient.setQueryData<Category>(key, category);
 }
-function getSingleCategory(category: Category, queryClient: QueryClient) {
-  const key = queryKeys.categories.getSingleCategoryById(category.id);
+function getSingleCategory(categoryId: number, queryClient: QueryClient) {
+  const key = queryKeys.categories.getSingleCategoryById(categoryId);
   const oldData = queryClient.getQueryData<Category>(key);
   return oldData;
 }
@@ -108,7 +108,7 @@ class UpdateCategoryCache {
       if (oldArr) {
         updateCategoryInArr(queryClient, queryKey, category);
       }
-      const oldSingleCategoty = getSingleCategory(category, queryClient);
+      const oldSingleCategoty = getSingleCategory(category.id, queryClient);
       updateSingleCategory(category, queryClient);
 
       return { oldSingleCategoty, oldArr };
@@ -133,8 +133,56 @@ class UpdateCategoryCache {
   };
 
   deleteCategory = {
-    onMutate() {},
-    onerror() {},
+    onMutate(
+      queryClient: QueryClient,
+      categoryId: number,
+      restaurantId: number
+    ) {
+      //arr key
+      const queryKey =
+        queryKeys.categories.getAllCategoriesByRestaurantId(restaurantId);
+      //singleKey
+      const singleQueryKey =
+        queryKeys.categories.getSingleCategoryById(categoryId);
+      //store both old vals
+      const oldCategoryArr = getCategoryArray(queryKey, queryClient);
+      const oldSingleCategory = getSingleCategory(categoryId, queryClient);
+
+      //update val if exist
+      if (oldCategoryArr) {
+        queryClient.setQueryData<Category[]>(queryKey, (old) => {
+          if (!old) return;
+          return old.filter((c) => c.id !== categoryId);
+        });
+      }
+      //update val if exist
+      if (oldSingleCategory) {
+        queryClient.invalidateQueries({
+          exact: true,
+          queryKey: singleQueryKey,
+        });
+      }
+      return { oldCategoryArr, oldSingleCategory };
+    },
+    onerror<T extends ResponseError | FrontError>(
+      error: T,
+      queryClient: QueryClient,
+      restaurantId: number,
+      context: ReturnType<typeof this.onMutate> | undefined
+    ) {
+      toastifyService.error(error);
+      if (!context) return;
+      const { oldCategoryArr, oldSingleCategory } = context;
+      //arr key
+      const queryKey =
+        queryKeys.categories.getAllCategoriesByRestaurantId(restaurantId);
+
+      if (oldCategoryArr)
+        addCategoryToArr(queryClient, queryKey, undefined, oldCategoryArr);
+
+      if (oldSingleCategory)
+        updateSingleCategory(oldSingleCategory, queryClient);
+    },
   };
 }
 

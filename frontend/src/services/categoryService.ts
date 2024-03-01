@@ -44,6 +44,15 @@ class CategoryService {
     );
     return data;
   }
+
+  async deleteCategory({
+    id,
+    restaurantId,
+  }: Pick<Category, "id" | "restaurantId">) {
+    await credentialsAxios.delete(
+      `${categoryRoute}/${id}/restaurant/${restaurantId}`
+    );
+  }
 }
 
 export const categoryService = new CategoryService();

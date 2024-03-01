@@ -81,4 +81,17 @@ export async function deleteCategory(
   req: DeleteCategoryReq,
   res: Response<undefined>,
   next: NextFunction
-) {}
+) {
+  try {
+    const restaurantId = +req.params.restaurantId;
+    const id = +req.params.categoryId;
+    const { query, params } = categoryQueries.deleteCategory({
+      id,
+      restaurantId,
+    });
+    await executeSingleQuery(query, params);
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
+  }
+}

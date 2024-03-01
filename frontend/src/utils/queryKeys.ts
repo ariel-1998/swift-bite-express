@@ -24,6 +24,7 @@ class QueryKeys {
     },
     getOwnerRestaurants: [restaurants, "owner"],
   };
+
   categories = {
     //need to check if cahched in object
     getAllCategoriesByRestaurantId(restaurantId: number) {

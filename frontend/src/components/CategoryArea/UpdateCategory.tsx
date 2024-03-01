@@ -9,6 +9,7 @@ import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import queryKeys from "../../utils/queryKeys";
+import RemoveCategory from "./RemoveCategory";
 
 type UpdateCategoryProps = {
   restaurantId: number;
@@ -23,9 +24,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
   const queryClient = useQueryClient();
   const nameRef = useRef<HTMLInputElement | null>(null);
   const descriptionRef = useRef<HTMLInputElement | null>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
-    null
-  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
 
   const { data, isLoading, isError } = useCustomQuery({
     queryKey,
@@ -47,7 +46,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
     },
     enabled: !!selectedCategoryId,
   });
-  console.log(selectedCategoryId);
+
   const { mutate } = useMutation({
     mutationFn: categoryService.updateCategory,
     onMutate(variables) {
@@ -85,7 +84,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
   return (
     <UpdateForm onSubmit={updateCategory}>
       <select
-        defaultValue={""}
+        value={selectedCategoryId}
         onChange={(e) => {
           console.log(e.target.value);
           setSelectedCategoryId(e.target.value);
@@ -112,7 +111,17 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
         type="text"
         ref={descriptionRef}
       />
-      <Button type="submit" size={"formBtn"} variant={"primary"}>
+      <RemoveCategory
+        category={category}
+        restaurantId={restaurantId}
+        setSelectedCategory={setSelectedCategoryId}
+      />
+      <Button
+        type="submit"
+        disabled={!category}
+        size={"formBtn"}
+        variant={"primary"}
+      >
         Update
       </Button>
     </UpdateForm>
