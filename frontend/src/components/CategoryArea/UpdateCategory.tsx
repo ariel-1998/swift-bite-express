@@ -5,11 +5,12 @@ import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCategoryCache } from "../../utils/queryCacheUpdates/updateCategoryCache";
 import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
 import { CategoryForm, categorySchema } from "../../models/Category";
-import Input from "../Customs/Input";
 import Button from "../Customs/Button";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import queryKeys from "../../utils/queryKeys";
 import RemoveCategory from "./RemoveCategory";
+import Select from "../Customs/Select";
+import LoadingInput from "../Customs/LoadingInput";
 
 type UpdateCategoryProps = {
   restaurantId: number;
@@ -36,8 +37,8 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
 
   const {
     data: category,
-    isLoading: loadingState,
-    isError: errorState,
+    isLoading: loadingCategory,
+    isError: errorCategory,
   } = useCustomQuery({
     queryKey: queryKeys.categories.getSingleCategoryById(+selectedCategoryId!),
     queryFn: () => categoryService.getSingleCategoryById(+selectedCategoryId!),
@@ -47,7 +48,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
     enabled: !!selectedCategoryId,
   });
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: categoryService.updateCategory,
     onMutate(variables) {
       return updateCategoryCache.updateCategory.onMutate(
@@ -83,7 +84,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
 
   return (
     <UpdateForm onSubmit={updateCategory}>
-      <select
+      <Select
         value={selectedCategoryId}
         onChange={(e) => {
           console.log(e.target.value);
@@ -91,21 +92,27 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
         }}
       >
         <option disabled value={""}>
-          Select Category
+          {isLoading && "Loading Categories..."}
+          {isError && "ERROR, Try refresh page"}
+          {data && "Select Catregory"}
         </option>
         {data?.map((c) => (
           <option value={c.id} key={c.id}>
             {c.name}
           </option>
         ))}
-      </select>
-      <Input
+      </Select>
+      <LoadingInput
+        disabled={isPending}
+        loading={loadingCategory}
         defaultValue={category?.name}
         label="Category Name:"
         type="text"
         ref={nameRef}
       />
-      <Input
+      <LoadingInput
+        disabled={isPending}
+        loading={loadingCategory}
         defaultValue={category?.description || undefined}
         label="Desctiption:"
         type="text"
@@ -118,7 +125,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
       />
       <Button
         type="submit"
-        disabled={!category}
+        disabled={!category || isPending}
         size={"formBtn"}
         variant={"primary"}
       >

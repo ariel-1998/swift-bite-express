@@ -5,17 +5,24 @@ import useUserInfo from "../../hooks/useUserInfo";
 import { Role } from "../../models/User";
 import { useMutation } from "@tanstack/react-query";
 import { userService } from "../../services/userService";
-import useOwnerRestaurants from "../../hooks/useOwnerRestaurants";
 import ProtectedComp from "../ProtectedComponent.tsx/ProtectedComp";
 import Button from "../Customs/Button";
 import { FaArrowRotateRight } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { toastifyService } from "../../services/toastifyService";
+import useCustomQuery from "../../hooks/useCustomQuery";
+import queryKeys from "../../utils/queryKeys";
+import { restaurantService } from "../../services/restaurantService";
 
 const UpdateRole: React.FC = () => {
   const { user, setUser } = useUserInfo();
-  const { data } = useOwnerRestaurants();
   const navigate = useNavigate();
+
+  const { data, isLoading, isError } = useCustomQuery({
+    queryKey: queryKeys.restaurants.getOwnerRestaurants,
+    queryFn: restaurantService.getOwnerRestaurants,
+  });
+
   const [randomNum, setRandomNum] = useState(generateRandomNum());
   const randomNumRef = useRef<HTMLInputElement | null>(null);
   const checkboxRef = useRef<HTMLInputElement | null>(null);

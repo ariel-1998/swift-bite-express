@@ -34,7 +34,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
     ),
   });
 
-  const mutation = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn:
       method === "update"
         ? addressService.updateAddress
@@ -56,11 +56,10 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   });
 
   const submitAddress = (data: AddressFormData) => {
-    mutation.mutate({
+    mutate({
       address: data,
       restaurantId: restaurant.id,
     });
-    //if no user that means he inputs his own address so save it in the local storage
   };
 
   return (
@@ -110,7 +109,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
         type="submit"
         size={"formBtn"}
         variant={"primary"}
-        disabled={mutation.isPending}
+        disabled={isPending}
       >
         Update
       </Button>

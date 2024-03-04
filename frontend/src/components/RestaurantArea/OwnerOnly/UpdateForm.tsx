@@ -1,12 +1,16 @@
-import React, { ComponentProps, ReactNode } from "react";
+import React, { ComponentProps } from "react";
+import { twMerge } from "tailwind-merge";
 
-type UpdateFormProps = {
-  children: ReactNode;
-} & ComponentProps<"form">;
+type UpdateFormProps = ComponentProps<"form">;
 
-const UpdateForm: React.FC<UpdateFormProps> = ({ children, ...rest }) => {
+const classes = "flex flex-col gap-3 p-10";
+const UpdateForm: React.FC<UpdateFormProps> = ({
+  children,
+  className,
+  ...rest
+}) => {
   return (
-    <form {...rest} className="flex flex-col gap-3 p-10">
+    <form className={twMerge(classes, className)} {...rest}>
       {children}
     </form>
   );

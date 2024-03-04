@@ -44,7 +44,7 @@ function invalidateSingleTempCacheQuery(
   oldId: number
 ) {
   const queryKey = queryKeys.categories.getSingleCategoryById(oldId);
-  queryClient.invalidateQueries({ exact: true, queryKey });
+  queryClient.removeQueries({ exact: true, queryKey });
 }
 
 function updateCategoryInArr(
@@ -157,14 +157,14 @@ class UpdateCategoryCache {
       }
       //update val if exist
       if (oldSingleCategory) {
-        queryClient.invalidateQueries({
+        queryClient.removeQueries({
           exact: true,
           queryKey: singleQueryKey,
         });
       }
       return { oldCategoryArr, oldSingleCategory };
     },
-    onerror<T extends ResponseError | FrontError>(
+    onError<T extends ResponseError | FrontError>(
       error: T,
       queryClient: QueryClient,
       restaurantId: number,

@@ -33,7 +33,7 @@ const RemoveCategory: React.FC<RemoveCategoryProps> = ({
       );
     },
     onError(error, _, context) {
-      updateCategoryCache.deleteCategory.onerror(
+      updateCategoryCache.deleteCategory.onError(
         error,
         queryClient,
         restaurantId,

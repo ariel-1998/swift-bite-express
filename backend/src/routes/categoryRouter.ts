@@ -18,14 +18,12 @@ categoryRouter.use(isOwnerRole);
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.post(
   "/",
-  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   addCategory
 );
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.put(
   "/:categoryId([0-9]+)",
-  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateCategory
 );
@@ -42,7 +40,6 @@ categoryRouter.get(
 //verifyIsOwner and check if restaurantOwner middleware
 categoryRouter.delete(
   "/:categoryId([0-9]+)/restaurant/:restaurantId([0-9]+)",
-  isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   deleteCategory
 );

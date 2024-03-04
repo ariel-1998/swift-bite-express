@@ -27,7 +27,7 @@ const inputStyles = cva(
   }
 );
 
-type InputProps = {
+export type InputProps = {
   errMessage?: string;
   label?: string;
 } & VariantProps<typeof inputStyles> &

@@ -1,26 +1,8 @@
 import { QueryClient } from "@tanstack/react-query";
 import { NestedRestaurantAndAddress } from "../../models/Restaurant";
 import queryKeys from "../queryKeys";
-import { Address } from "../../models/Address";
 
 class UpdateRestaurantCache {
-  private invalidateRestaurantSearchQueries(
-    queryClient: QueryClient,
-    address: Address | undefined
-  ) {
-    queryClient.invalidateQueries({
-      queryKey: ["restaurants", address, "search"],
-    });
-  }
-  private invalidateGetNearRestaurantsByPage(
-    queryClient: QueryClient,
-    address: Address | undefined
-  ) {
-    queryClient.invalidateQueries({
-      queryKey: queryKeys.restaurants.getNearRestaurantsByPage(address),
-    });
-  }
-
   private updateGetSingleRestaurantById(
     queryClient: QueryClient,
     data: NestedRestaurantAndAddress

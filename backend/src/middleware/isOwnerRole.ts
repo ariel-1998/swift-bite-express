@@ -8,7 +8,9 @@ import { PoolConnection } from "mysql2/promise";
 import { verifyUser } from "./verifyAuth";
 import { restaurantIdSchema } from "../models/Restaurant";
 
-export function isOwnerRole(req: Request, res: Response, next: NextFunction) {
+export function isOwnerRole<
+  T extends Request<unknown, unknown, unknown, unknown>
+>(req: T, res: Response, next: NextFunction) {
   if (req.user?.role === Role.owner) return next();
   return next(
     new FunctionError(
@@ -17,6 +19,7 @@ export function isOwnerRole(req: Request, res: Response, next: NextFunction) {
     )
   );
 }
+
 type RestaurantIdKeyInReq = "body" | "query" | "params";
 type RestaurantId = string | number | undefined | null;
 export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(

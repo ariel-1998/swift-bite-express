@@ -1,10 +1,16 @@
 import React, { useMemo, useState } from "react";
 import RestaurantCard from "../RestaurantCard";
-import useOwnerRestaurants from "../../../hooks/useOwnerRestaurants";
 import Input from "../../Customs/Input";
+import useCustomQuery from "../../../hooks/useCustomQuery";
+import queryKeys from "../../../utils/queryKeys";
+import { restaurantService } from "../../../services/restaurantService";
 
 const OwnerRestaurantList: React.FC = () => {
-  const { data, isLoading, isError } = useOwnerRestaurants();
+  const { data, isLoading, isError } = useCustomQuery({
+    queryKey: queryKeys.restaurants.getOwnerRestaurants,
+    queryFn: restaurantService.getOwnerRestaurants,
+  });
+
   const [search, setSearch] = useState("");
   const filteredData = useMemo(() => {
     return data?.filter((rest) => rest.name.includes(search));
