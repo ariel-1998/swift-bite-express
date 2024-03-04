@@ -13,7 +13,7 @@ export type NestedRestaurantAndAddress = Restaurant & {
 };
 
 const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
-const optionalImageSchema = z.instanceof(FileList).refine((files) => {
+export const optionalImageSchema = z.instanceof(FileList).refine((files) => {
   const file = files[0];
   //image is optional
   if (!file) return true;

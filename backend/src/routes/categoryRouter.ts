@@ -12,7 +12,6 @@ import {
 } from "../logic/categoryLogic";
 
 export const categoryRouter = Router();
-//check
 categoryRouter.use(isOwnerRole);
 
 //verifyIsOwner and check if restaurantOwner middleware

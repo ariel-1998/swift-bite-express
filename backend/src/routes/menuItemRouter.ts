@@ -41,7 +41,7 @@ menuItemRouter.put(
 );
 
 //verifyIsOwner and check if restaurantOwner middleware
-
+//need to select the item before delete so i could delete the image of the item if exist
 menuItemRouter.delete(
   "/:menuItemId([0-9]+)/restaurant/:restaurantId([0-9]+)",
   isOwnerRole,
