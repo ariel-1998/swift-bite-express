@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { executeQuery, executeSingleQuery, pool } from "../utils/DB/dbConfig";
 import { Address, AddressSchema } from "../models/Address";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { getCoordsAndParseAddress } from "../utils/nominatimGeocoding";
+import { getCoordsAndParseAddress } from "../utils/geocoder";
 import { PoolConnection, ResultSetHeader } from "mysql2/promise";
 import { verifyUser } from "../middleware/verifyAuth";
 import { userQueries } from "../utils/DB/queries/userQueries";

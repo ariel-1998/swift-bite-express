@@ -286,6 +286,7 @@ async function create_menu_items_table(connection: PoolConnection) {
   ${extrasAmount} INT DEFAULT NULL,
   ${showSouces} TINYINT NOT NULL DEFAULT 0,
   ${imgPublicId} VARCHAR(500) DEFAULT NULL,
+  UNIQUE (${restaurantId}, ${name}),
   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);

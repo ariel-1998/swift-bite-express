@@ -9,7 +9,7 @@ import { verifyUser } from "./verifyAuth";
 import { restaurantIdSchema } from "../models/Restaurant";
 
 export function isOwnerRole<
-  T extends Request<unknown, unknown, unknown, unknown>
+  T extends Request<object, unknown, unknown, unknown>
 >(req: T, res: Response, next: NextFunction) {
   if (req.user?.role === Role.owner) return next();
   return next(
@@ -25,21 +25,22 @@ type RestaurantId = string | number | undefined | null;
 export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
   key: RestaurantIdKeyInReq
 ) {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request<object>, res: Response, next: NextFunction) => {
     verifyUser(req);
     try {
       const restaurantId = req[key].restaurantId as RestaurantId;
       const parsedId = restaurantIdSchema.parse(restaurantId);
-
       const userId = req.user.id;
       const query = restauransOwnerAddressQueries.getRowByUserIdAndRestaurantId(
         parsedId,
         userId
       );
+      console.log("parsedId", parsedId);
       const [rows] = await executeSingleQuery<RestauransOwnerAddressTable[]>(
         query.query,
         query.params
       );
+      console.log(rows);
       if (!rows[0]) {
         throw new FunctionError(
           "Premission Error: access denied, only The owner is Allowed.",

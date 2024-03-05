@@ -15,12 +15,12 @@ class MenuItemService {
     image,
     name,
     showSouces,
-  }: PostItem) {
+  }: PostItem): Promise<MenuItem> {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("description", description || "");
     formData.append("extrasAmount", extrasAmount);
-    formData.append("image", image[0]);
+    if (image) formData.append("image", image[0]);
     formData.append("name", name);
     formData.append("showSouces", showSouces);
     const { data } = await credentialsAxios.post(menuItemRoute, formData);

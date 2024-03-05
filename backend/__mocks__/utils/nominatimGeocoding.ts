@@ -1,4 +1,4 @@
-import { Geocoder } from "../../src/utils/nominatimGeocoding";
+import { Geocoder } from "../../src/utils/geocoder";
 
 class TestGeocoder extends Geocoder {
   testConvertAddressObjToString = this.convertAddressObjToString;

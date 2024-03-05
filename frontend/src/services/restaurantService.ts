@@ -62,8 +62,8 @@ class RestaurantService {
   }: RestaurantSchema): Promise<NestedRestaurantAndAddress> {
     const formData = new FormData();
     formData.append("name", name);
-    formData.append("image", image[0]);
-    formData.append("logoImage", logoImage[0]);
+    if (image) formData.append("image", image[0]);
+    if (logoImage) formData.append("logoImage", logoImage[0]);
     const { data } = await credentialsAxios.post<NestedRestaurantAndAddress>(
       restaurantRoute,
       formData

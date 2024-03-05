@@ -41,6 +41,7 @@ export async function executeSingleQuery<T>(query: string, params: MixedArray) {
     const data = await executeQuery<T>(connection, { query, params });
     return data;
   } catch (error) {
+    console.log(error);
     throw new FunctionError("Server Error", 500);
   } finally {
     connection?.release();

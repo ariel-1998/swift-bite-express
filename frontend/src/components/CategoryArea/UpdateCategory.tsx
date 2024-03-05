@@ -86,10 +86,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
     <UpdateForm onSubmit={updateCategory}>
       <Select
         value={selectedCategoryId}
-        onChange={(e) => {
-          console.log(e.target.value);
-          setSelectedCategoryId(e.target.value);
-        }}
+        onChange={(e) => setSelectedCategoryId(e.target.value)}
       >
         <option disabled value={""}>
           {isLoading && "Loading Categories..."}

@@ -36,18 +36,22 @@ export const menuItemSchema = z.object({
     .nullable()
     .optional()
     .transform((val) => (!val?.trim() ? null : val.trim())),
-  extrasAmount: z.union(
-    [
-      z.number().min(0, "Extras Amount must be a positive number"),
-      z
-        .string()
-        .refine(
-          (val) => !isNaN(+val) && +val > 0,
-          "Extras Amount must be a positive number"
-        ),
-    ],
-    { errorMap: () => ({ message: "Extras Amount must be a number" }) }
-  ),
+  extrasAmount: z
+    .union(
+      [
+        z.number().min(0, "Extras Amount must be a positive number"),
+        z
+          .string()
+          .refine(
+            (val) => !isNaN(+val) && +val >= 0,
+            "Extras Amount must be 0 or more"
+          )
+          .transform((arg) => +arg),
+      ],
+      { errorMap: () => ({ message: "Extras Amount must be a number" }) }
+    )
+    .optional()
+    .transform((arg) => arg ?? 0),
   //check if correctly implemented
   showSouces: z.nativeEnum(SQLBoolean),
   imgPublicId: publicIdSchema,

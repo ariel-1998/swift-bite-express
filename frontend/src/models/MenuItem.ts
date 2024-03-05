@@ -1,5 +1,5 @@
 import { SQLBoolean } from "./SQLBoolean";
-import { optionalImageSchema } from "./Restaurant";
+import { accepetedImgMymeTypes, optionalImageSchema } from "./Restaurant";
 
 import { z } from "zod";
 
@@ -13,6 +13,16 @@ export type MenuItem = {
   imgPublicId?: string | null;
 };
 
+// const imageSchema = z.instanceof(FileList).refine(files => !!files[0], ).refine((files) => {
+//   const file = files[0];
+//   //image is optional
+//   if (!file) return false;
+//   //image type
+//   if (!file.type.startsWith("image/")) return false;
+//   //only certain mymeTypes are allowed
+//   if (!accepetedImgMymeTypes.includes(file.type.split("/")[1])) return false;
+//   return true;
+// }, "Must be a regular Image");
 export const menuItemSchema = z.object({
   name: z
     .string({

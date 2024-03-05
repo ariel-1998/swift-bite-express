@@ -12,17 +12,20 @@ export type NestedRestaurantAndAddress = Restaurant & {
   address: Partial<Address>;
 };
 
-const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
-export const optionalImageSchema = z.instanceof(FileList).refine((files) => {
-  const file = files[0];
-  //image is optional
-  if (!file) return true;
-  //image type
-  if (!file.type.startsWith("image/")) return false;
-  //only certain mymeTypes are allowed
-  if (!accepetedImgMymeTypes.includes(file.type.split("/")[1])) return false;
-  return true;
-}, "Must be a regular Image");
+export const accepetedImgMymeTypes = ["jpeg", "png", "bmp", "tiff"];
+export const optionalImageSchema = z
+  .instanceof(FileList)
+  .refine((files) => {
+    const file = files[0];
+    //image is optional
+    if (!file) return true;
+    //image type
+    if (!file.type.startsWith("image/")) return false;
+    //only certain mymeTypes are allowed
+    if (!accepetedImgMymeTypes.includes(file.type.split("/")[1])) return false;
+    return true;
+  }, "Must be a regular Image")
+  .optional();
 
 const restaurantNameSchame = z
   .string({

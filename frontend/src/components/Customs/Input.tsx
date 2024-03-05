@@ -36,7 +36,7 @@ export type InputProps = {
 const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ variant, label, errMessage, className, ...rest }, ref) => {
     return (
-      <div>
+      <div className="flex flex-col">
         <InputLabel label={label} />
         <input
           {...rest}
