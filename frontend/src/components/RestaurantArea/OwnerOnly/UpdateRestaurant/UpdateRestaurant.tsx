@@ -89,9 +89,9 @@ const UpdateRestaurant: React.FC<UpdateRestaurantProps> = ({ data }) => {
 
         <h1 className="text-center font-bold text-2xl ">Update {activeForm}</h1>
 
-        {activeForm === "image" && <UpdateRestaurantImage restaurant={data} />}
-
+        {activeForm === "name" && <UpdateRestaurantName restaurant={data} />}
         {activeForm === "logo" && <UpdateRestaurantLogo restaurant={data} />}
+        {activeForm === "image" && <UpdateRestaurantImage restaurant={data} />}
 
         {activeForm === "address" &&
           (data.address.id ? (
@@ -100,7 +100,6 @@ const UpdateRestaurant: React.FC<UpdateRestaurantProps> = ({ data }) => {
             <AddRestaurantAddress restaurant={data} />
           ))}
 
-        {activeForm === "name" && <UpdateRestaurantName restaurant={data} />}
         {activeForm === "category" && <CategoryForm restaurantId={data.id} />}
         {activeForm === "menu-item" && (
           <CreateMenuItem restaurantId={data.id} />

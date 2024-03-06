@@ -1,4 +1,3 @@
-import { MenuItemCategoryTable } from "../models/MenuItemCategoryTable";
 import { credentialsAxios } from "../utils/axiosConfig";
 
 const menuItemCategoryRoute = "/menu-item-category";

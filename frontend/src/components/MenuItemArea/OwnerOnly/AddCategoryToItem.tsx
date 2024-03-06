@@ -13,7 +13,6 @@ type AddCategoryToItemProps = {
   restaurantId: number;
   selectedCategories: Category[];
   setSelectedCategories: React.Dispatch<React.SetStateAction<Category[]>>;
-  // Define props here
 };
 
 const AddCategoryToItem: React.FC<AddCategoryToItemProps> = ({

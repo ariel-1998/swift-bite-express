@@ -13,9 +13,7 @@ import { Category } from "../../../models/Category";
 import Modal from "../../Customs/Modal";
 import { menuItemCategory } from "../../../services/menuItemCategory";
 import { toastifyService } from "../../../services/toastifyService";
-import queryKeys from "../../../utils/queryKeys";
 import { updateMenuItemCache } from "../../../utils/queryCacheUpdates/updateMenuItemCache";
-import useCustomQuery from "../../../hooks/useCustomQuery";
 
 type CreateMenuItemProps = {
   restaurantId: number;
@@ -32,11 +30,6 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
     formState: { errors },
   } = useForm<MenuItemForm>({
     resolver: zodResolver(menuItemSchema),
-  });
-
-  useCustomQuery({
-    queryKey: queryKeys.menuItems.getMenuItemByRestaurantId(restaurantId),
-    queryFn: () => menuItemService.getMenuItemByRestaurantId(restaurantId),
   });
 
   const { mutateAsync, isPending: menuItemPending } = useMutation({
