@@ -43,6 +43,7 @@ export async function createMenuItemCategoryRef(
       throw new FunctionError("Cannot add this category to menu item", 400);
     }
     await connection.commit();
+    if (results.affectedRows < parsedData.length) return res.sendStatus(207);
     res.status(201).json(results);
   } catch (error) {
     next(error);
