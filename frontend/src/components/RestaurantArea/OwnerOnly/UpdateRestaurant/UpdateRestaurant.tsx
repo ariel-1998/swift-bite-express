@@ -7,7 +7,7 @@ import UpdateRestaurantName from "./UpdateRestaurantName";
 import AddRestaurantAddress from "./AddRestaurantAddress";
 import { NestedRestaurantAndAddress } from "../../../../models/Restaurant";
 import CategoryForm from "../../../CategoryArea/CategoryForm";
-import CreateMenuItem from "../../../MenuItemArea/CreateMenuItem";
+import CreateMenuItem from "../../../MenuItemArea/OwnerOnly/CreateMenuItem";
 
 //add lazy to render conditional components
 type FormNames =

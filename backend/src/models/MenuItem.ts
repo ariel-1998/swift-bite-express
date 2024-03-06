@@ -5,6 +5,7 @@ import {
   restaurantIdSchema,
 } from "./Restaurant";
 import { SQLBoolean } from "./SQLBoolean";
+import { Category } from "./Category";
 
 export type MenuItem = {
   id: number;
@@ -14,6 +15,12 @@ export type MenuItem = {
   extrasAmount: number | undefined | null;
   showSouces: SQLBoolean;
   imgPublicId: string | undefined | null;
+};
+
+export type MenuItemJoinedWCategory = MenuItem & {
+  categoryId?: Category["id"];
+  categoryName?: Category["name"];
+  categoryDescription?: Category["description"];
 };
 
 export const menuItemIdSchema = generateIdSchema("MenuItemId");

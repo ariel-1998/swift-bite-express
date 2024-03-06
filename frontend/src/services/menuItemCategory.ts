@@ -1,11 +1,23 @@
 import { MenuItemCategoryTable } from "../models/MenuItemCategoryTable";
 import { credentialsAxios } from "../utils/axiosConfig";
 
-const menuItemCategoryRoute = "/menu-item-categor";
+const menuItemCategoryRoute = "/menu-item-category";
+type PostAssosiation = {
+  menuItemId: number;
+  categoryIds: number[];
+  restaurantId: number;
+};
 class MenuItemCategory {
-  async createMenuItemCategoryRef(refs: MenuItemCategoryTable[]) {
-    const { data } = await credentialsAxios.post(menuItemCategoryRoute, refs);
-    return data;
+  async createMenuItemCategoryRef({
+    categoryIds,
+    menuItemId,
+    restaurantId,
+  }: PostAssosiation) {
+    const { status } = await credentialsAxios.post(
+      `${menuItemCategoryRoute}/restaurant/${restaurantId}/menu-item/${menuItemId}`,
+      categoryIds
+    );
+    return status;
   }
 }
 

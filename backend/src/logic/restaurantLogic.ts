@@ -39,7 +39,8 @@ export async function getSingleRestaurantById(
     );
     const [rows] = await executeSingleQuery<RestaurantJoinedWithAddress[]>(
       query,
-      params
+      params,
+      "restaurants"
     );
     if (!rows.length) throw new FunctionError("Restaurant Not Found.", 404);
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
@@ -86,7 +87,8 @@ export async function getRestaurantsByPage(
     );
     const [rows] = await executeQuery<NestedRestaurantAndAddress[]>(
       connection,
-      getRestaurantsQuery
+      getRestaurantsQuery,
+      "restaurants"
     );
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
     res.status(200).json(rearrangedData);
@@ -137,7 +139,8 @@ export async function searchRestaurants(
     );
     const [rows] = await executeQuery<RestaurantSchema[]>(
       connection,
-      searchQuery
+      searchQuery,
+      "restaurants"
     );
     res.status(200).json(rows);
   } catch (error) {
@@ -186,17 +189,13 @@ export async function addRestaurant(
     connection = await pool.getConnection();
     await connection.beginTransaction();
     //if an error thrown that means duplicate restaurant name
-    let restaurantId: null | number = null;
     // add restaurant
-    try {
-      const [results] = await executeQuery<ResultSetHeader>(
-        connection,
-        addRestaurantQuery
-      );
-      restaurantId = results.insertId;
-    } catch (error) {
-      throw new FunctionError("Restaurant name already exist.", 409);
-    }
+    const [results] = await executeQuery<ResultSetHeader>(
+      connection,
+      addRestaurantQuery,
+      "restaurants"
+    );
+    const restaurantId = results.insertId;
 
     //add new row to restauransOwnerAddress
     const addRestauransOwnerAddressQuery = restauransOwnerAddressQueries.addRow(
@@ -206,7 +205,11 @@ export async function addRestaurant(
         userId: user.id,
       }
     );
-    await executeQuery(connection, addRestauransOwnerAddressQuery);
+    await executeQuery(
+      connection,
+      addRestauransOwnerAddressQuery,
+      "restaurant_owner_address"
+    );
     await connection.commit();
     res.status(201).json({ ...restaurant, id: restaurantId, address: {} });
   } catch (error) {
@@ -258,7 +261,8 @@ export async function updateRestaurant(
 
     const [rows] = await executeQuery<RestaurantJoinedWithAddress[]>(
       connection,
-      getRestaurantQuery
+      getRestaurantQuery,
+      "restaurants"
     );
     const rearrangedDataArray = rearrangeRestaurantAddressDataArray(rows);
     const rearrangedData = rearrangedDataArray[0];
@@ -296,7 +300,7 @@ export async function updateRestaurant(
         rearrangedData.logoPublicId = imageResponse.public_id;
       }
     }
-    await executeQuery(connection, updateQuery);
+    await executeQuery(connection, updateQuery, "restaurants");
     res.status(200).json(rearrangedData);
   } catch (error) {
     next(error);
@@ -317,7 +321,8 @@ export async function getOwnerRestaurants(
     const { params, query } = restaurantQueries.getAllOwnerRestaurants(user.id);
     const [rows] = await executeSingleQuery<RestaurantJoinedWithAddress[]>(
       query,
-      params
+      params,
+      "restaurants"
     );
     const rearrangedData = rearrangeRestaurantAddressDataArray(rows);
     res.status(200).json(rearrangedData);

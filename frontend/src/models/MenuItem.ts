@@ -1,7 +1,8 @@
 import { SQLBoolean } from "./SQLBoolean";
-import { accepetedImgMymeTypes, optionalImageSchema } from "./Restaurant";
+import { optionalImageSchema } from "./Restaurant";
 
 import { z } from "zod";
+import { Category } from "./Category";
 
 export type MenuItem = {
   id: number;
@@ -13,16 +14,12 @@ export type MenuItem = {
   imgPublicId?: string | null;
 };
 
-// const imageSchema = z.instanceof(FileList).refine(files => !!files[0], ).refine((files) => {
-//   const file = files[0];
-//   //image is optional
-//   if (!file) return false;
-//   //image type
-//   if (!file.type.startsWith("image/")) return false;
-//   //only certain mymeTypes are allowed
-//   if (!accepetedImgMymeTypes.includes(file.type.split("/")[1])) return false;
-//   return true;
-// }, "Must be a regular Image");
+export type MenuItemJoinedWCategory = MenuItem & {
+  categoryId?: Category["id"];
+  categoryName?: Category["name"];
+  categoryDescription?: Category["description"];
+};
+
 export const menuItemSchema = z.object({
   name: z
     .string({
@@ -43,7 +40,9 @@ export const menuItemSchema = z.object({
     if (+val < 0) return false;
     return true;
   }, "Extra Amount Required to be a positive number"),
-  showSouces: z.nativeEnum(SQLBoolean),
+  showSouces: z.nativeEnum(SQLBoolean, {
+    errorMap: () => ({ message: "Show souces field is required" }),
+  }),
   image: optionalImageSchema,
 });
 

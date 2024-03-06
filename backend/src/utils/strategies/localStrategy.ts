@@ -21,10 +21,14 @@ export class LocalProvider {
   ): Promise<User | undefined> => {
     const query = `SELECT * FROM ${DB.tables.users.tableName} WHERE ${DB.tables.users.columns.email} = ?`;
     const params = [email];
-    const [rows] = await executeQuery<User[]>(connection, {
-      query,
-      params,
-    });
+    const [rows] = await executeQuery<User[]>(
+      connection,
+      {
+        query,
+        params,
+      },
+      "users"
+    );
     return rows[0];
   };
 
@@ -59,9 +63,7 @@ export class LocalProvider {
     connection: PoolConnection,
     userInfo: RegistrationData
   ): Promise<User> => {
-    const usersTable = DB.tables.users;
-    const { tableName, columns } = usersTable;
-    console.log("start");
+    const { tableName, columns } = DB.tables.users;
     const parsedUserInfo = userRegistrationSchema.parse(userInfo);
     const hashedPassword = await hashPassword(parsedUserInfo.password);
     const newUser = this.createDefaultUserOBJ(parsedUserInfo, hashedPassword);
@@ -80,15 +82,15 @@ export class LocalProvider {
     ];
 
     // email is uniqe so if there are duplicates it will throw an error
-    try {
-      const [results] = await executeQuery<ResultSetHeader>(connection, {
+    const [results] = await executeQuery<ResultSetHeader>(
+      connection,
+      {
         query,
         params,
-      });
-      return { ...newUser, id: results.insertId };
-    } catch (error) {
-      throw new FunctionError("Email already exist.", 409);
-    }
+      },
+      "users"
+    );
+    return { ...newUser, id: results.insertId };
   };
 }
 
@@ -101,13 +103,13 @@ export const localSignupStrategy = async (
   done: VerifyCallback
 ) => {
   let connection: PoolConnection | undefined = undefined;
-  const userInfo: RegistrationData = {
-    email,
-    password,
-    fullName: req.body.fullName,
-    role: req.body.role,
-  };
   try {
+    const userInfo: RegistrationData = {
+      email,
+      password,
+      fullName: req.body.fullName,
+      role: req.body.role,
+    };
     connection = await pool.getConnection();
     await connection.beginTransaction();
     const user = await localProvider.userRegistrationHandler(

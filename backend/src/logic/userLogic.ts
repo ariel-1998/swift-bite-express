@@ -18,7 +18,6 @@ export async function updateUserRole(
   //update isRestauranOuwner to isOwner.True
   let connection: undefined | PoolConnection = undefined;
   try {
-    console.log(req.body);
     verifyUser(req);
     const { user } = req;
     const parsedData = userRegistrationSchema
@@ -36,7 +35,8 @@ export async function updateUserRole(
       );
       const [restaurants] = await executeQuery<RestauransOwnerAddressTable[]>(
         connection,
-        getRestaurantsQuery
+        getRestaurantsQuery,
+        "restaurants"
       );
       //if there are then throw an error cant update role to user when has active restaurants
       if (restaurants.length) {
@@ -47,11 +47,11 @@ export async function updateUserRole(
       }
       //else update to user
       const updateRoleQuery = userQueries.updateUserRole(Role.user);
-      await executeQuery(connection, updateRoleQuery);
+      await executeQuery(connection, updateRoleQuery, "users");
     } else {
       //update starus to owner
       const updateRoleQuery = userQueries.updateUserRole(Role.owner);
-      await executeQuery(connection, updateRoleQuery);
+      await executeQuery(connection, updateRoleQuery, "users");
     }
     res.sendStatus(200);
   } catch (error) {

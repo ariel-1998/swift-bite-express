@@ -1,5 +1,5 @@
 import React, { ComponentProps } from "react";
-import { Category } from "../../models/Category";
+import { Category } from "../../../models/Category";
 import { FaTimesCircle } from "react-icons/fa";
 
 type SelectedCategoryProps = {

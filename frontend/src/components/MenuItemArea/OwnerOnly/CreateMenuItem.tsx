@@ -1,26 +1,30 @@
 import React, { useState } from "react";
-import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
-import Input from "../Customs/Input";
-import Button from "../Customs/Button";
+import UpdateForm from "../../RestaurantArea/OwnerOnly/UpdateForm";
+import Input from "../../Customs/Input";
+import Button from "../../Customs/Button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { MenuItemForm, menuItemSchema } from "../../models/MenuItem";
-import { SQLBoolean } from "../../models/SQLBoolean";
-import { useMutation } from "@tanstack/react-query";
-import { menuItemService } from "../../services/menuItemService";
+import { MenuItemForm, menuItemSchema } from "../../../models/MenuItem";
+import { SQLBoolean } from "../../../models/SQLBoolean";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { menuItemService } from "../../../services/menuItemService";
 import AddCategoryToItem from "./AddCategoryToItem";
-import { Category } from "../../models/Category";
-import Modal from "../Customs/Modal";
+import { Category } from "../../../models/Category";
+import Modal from "../../Customs/Modal";
+import { menuItemCategory } from "../../../services/menuItemCategory";
+import { toastifyService } from "../../../services/toastifyService";
+import queryKeys from "../../../utils/queryKeys";
+import { updateMenuItemCache } from "../../../utils/queryCacheUpdates/updateMenuItemCache";
+import useCustomQuery from "../../../hooks/useCustomQuery";
 
 type CreateMenuItemProps = {
   restaurantId: number;
-  //   restaurant: NestedRestaurantAndAddress;
 };
 
 const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [openModal, setOpenModal] = useState(false);
-
+  const queryClient = useQueryClient();
   const {
     register,
     handleSubmit,
@@ -30,24 +34,47 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
     resolver: zodResolver(menuItemSchema),
   });
 
-  const { mutateAsync } = useMutation({
+  useCustomQuery({
+    queryKey: queryKeys.menuItems.getMenuItemByRestaurantId(restaurantId),
+    queryFn: () => menuItemService.getMenuItemByRestaurantId(restaurantId),
+  });
+
+  const { mutateAsync, isPending: menuItemPending } = useMutation({
     mutationFn: menuItemService.createMenuItem,
+    //need to update menuItem list if fetched
+  });
+
+  const { mutateAsync: refMutate, isPending: categoryPending } = useMutation({
+    mutationFn: menuItemCategory.createMenuItemCategoryRef,
     //need to update menuItem list if fetched
   });
 
   const postData = async (data: MenuItemForm) => {
     if (!selectedCategories.length && !openModal) return setOpenModal(true);
-    console.log("what");
     try {
-      const { id } = await mutateAsync({ ...data, restaurantId });
-
+      const item = await mutateAsync({ ...data, restaurantId });
+      const oldData = updateMenuItemCache.createMenuItem(queryClient, item);
       if (selectedCategories.length) {
-        // add another query that will update the category pairing to the menuItemCategory route
+        const categoryIds = selectedCategories.map((c) => c.id);
+        const status = await refMutate({
+          categoryIds,
+          menuItemId: item.id,
+          restaurantId,
+        });
+        updateMenuItemCache.createMenuItemCategoryRef(
+          queryClient,
+          oldData,
+          item,
+          selectedCategories,
+          status
+        );
       }
       reset();
+      setSelectedCategories([]);
       setOpenModal(false);
     } catch (error) {
       console.log(error);
+      toastifyService.error(error as Error);
     }
   };
 
@@ -77,11 +104,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         type="file"
         {...register("image")}
       />
-      <AddCategoryToItem
-        setSelectedCategories={setSelectedCategories}
-        selectedCategories={selectedCategories}
-        restaurantId={restaurantId}
-      />
+
       <div className="flex flex-col">
         <label>Show sauces available at the restaurant:</label>
         <div className="flex items-center gap-1 ">
@@ -106,13 +129,16 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         </div>
         <div className="text-error">{errors.showSouces?.message}</div>
       </div>
+      <AddCategoryToItem
+        setSelectedCategories={setSelectedCategories}
+        selectedCategories={selectedCategories}
+        restaurantId={restaurantId}
+      />
       <Button
         type="submit"
         size={"formBtn"}
         variant={"primary"}
-        // disabled={mutation.isPending}
-        // defaultValue={restaurant.name}
-        // onClick={onButtonClick}
+        disabled={categoryPending || menuItemPending}
       >
         Create
       </Button>
@@ -134,14 +160,18 @@ function VerifySelectedCategoriesModal({
 }: VerifySelectedCategoriesModalProps) {
   return (
     <Modal close={close}>
-      <h2>Warning</h2>
-      <span>You are trying to Add Menu Item with no Category</span>
-      <span>Are you sure you want to proceed?</span>
-      <div>
-        <Button type="submit">Proceed</Button>
-        <Button type="button" onClick={close}>
-          Cancel
-        </Button>
+      <div className="flex flex-col items-center gap-1 font-semibold">
+        <h2 className="font-bold text-xl text-error mb-1">Warning</h2>
+        <span>You are trying to Add Menu Item with no Category</span>
+        <span>Are you sure you want to proceed?</span>
+        <div className="flex gap-1">
+          <Button type="submit" variant={"primary"}>
+            Proceed
+          </Button>
+          <Button type="button" onClick={close} variant={"error"}>
+            Cancel
+          </Button>
+        </div>
       </div>
     </Modal>
   );

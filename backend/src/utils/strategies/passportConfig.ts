@@ -2,7 +2,6 @@ import passport from "passport";
 import { User } from "../../models/User";
 import { DB } from "../DB/tables";
 import { MixedArray, executeSingleQuery } from "../DB/dbConfig";
-import { FunctionError } from "../../models/Errors/ErrorConstructor";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { externalAuthStrategy } from "./externalStrategies";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -43,18 +42,14 @@ passport.use(
 );
 
 const getUserById = async (userId: string): Promise<User | null> => {
-  try {
-    const {
-      tableName,
-      columns: { id },
-    } = DB.tables.users;
-    const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
-    const params: MixedArray = [userId];
-    const [rows] = await executeSingleQuery<User[]>(query, params);
-    return rows[0];
-  } catch (error) {
-    throw new FunctionError("Server Error.", 500);
-  }
+  const {
+    tableName,
+    columns: { id },
+  } = DB.tables.users;
+  const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
+  const params: MixedArray = [userId];
+  const [rows] = await executeSingleQuery<User[]>(query, params, "users");
+  return rows[0];
 };
 
 passport.serializeUser((user, done) => {

@@ -11,7 +11,7 @@ import { FunctionError } from "../models/Errors/ErrorConstructor";
 
 type CreateMenuItemCategoryRefBody = MenuItemCategoryTable["categoryId"][];
 type CreateMenuItemCategoryRefParams = {
-  categoryId: number;
+  menuItemId: number;
   restaurantId: number;
 };
 type CreateMenuItemCategoryRefReq = Request<
@@ -26,25 +26,32 @@ export async function createMenuItemCategoryRef(
 ) {
   let connection: undefined | PoolConnection = undefined;
   try {
-    console.log("asjkdnaskjdbkbasj");
     const parsedData = menuItemCategoryTableSchema.parse(req.body);
-    const { categoryId, restaurantId } = req.params;
-    const queries = menuItemCategoryQueries.createMenuItemCategoryRef({
-      menuItems: parsedData,
-      categoryId,
+    const { menuItemId, restaurantId } = req.params;
+    const query = menuItemCategoryQueries.createMenuItemCategoryRef({
+      categoryIds: parsedData,
+      menuItemId,
       restaurantId,
     });
     connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    const [results] = await executeQuery<ResultSetHeader>(connection, queries);
+    const [results] = await executeQuery<ResultSetHeader>(
+      connection,
+      query,
+      "menu_items_category"
+    );
     if (!results.affectedRows) {
       //rows are not connected to the restaurantId
-      throw new FunctionError("Cannot add this category to menu item", 400);
+      throw new FunctionError(
+        "Cannot association these categories to menu item",
+        400
+      );
     }
+
     await connection.commit();
     if (results.affectedRows < parsedData.length) return res.sendStatus(207);
-    res.status(201).json(results);
+    res.sendStatus(201);
   } catch (error) {
     next(error);
     await connection?.rollback();

@@ -9,6 +9,7 @@ import {
   updateMenuItemImg,
   updateMenuItemApartFromImg,
   deleteMenuItem,
+  getMenuItemsByRestaurantId,
 } from "../logic/menuItemLogic";
 
 export const menuItemRouter = Router();
@@ -23,6 +24,10 @@ menuItemRouter.post(
 
 //no need for any middlewares
 menuItemRouter.get("/:menuItemId([0-9]+)", getMenuItemById);
+menuItemRouter.get(
+  "/restaurant/:restaurantId([0-9]+)",
+  getMenuItemsByRestaurantId
+);
 
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemRouter.put(

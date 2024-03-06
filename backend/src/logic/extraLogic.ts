@@ -20,7 +20,6 @@ export function createExtra(
     res.json(data as Extra);
   } catch (error) {
     next(error);
-    console.log(error);
   }
 }
 

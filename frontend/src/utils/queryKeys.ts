@@ -4,7 +4,7 @@ const restaurants = "restaurants";
 const user = "user";
 const addresses = "addresses";
 const categories = "categories";
-
+const menuItems = "menuItems";
 class QueryKeys {
   auth = {
     getLogin: [user],
@@ -32,6 +32,15 @@ class QueryKeys {
     },
     getSingleCategoryById(categoryId: number) {
       return [categories, { categoryId }];
+    },
+  };
+
+  menuItems = {
+    getMenuItemById(menuItemId: number) {
+      return [menuItems, { menuItemId }];
+    },
+    getMenuItemByRestaurantId(restaurantId: number) {
+      return [menuItems, { restaurantId }];
     },
   };
 }

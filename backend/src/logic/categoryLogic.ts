@@ -14,7 +14,11 @@ export async function getAllCategoriesByRestaurantId(
     const restaurantId = +req.params.restaurantId;
     const { query, params } =
       categoryQueries.getAllCategoriesByRestaurantId(restaurantId);
-    const [rows] = await executeSingleQuery<Category[]>(query, params);
+    const [rows] = await executeSingleQuery<Category[]>(
+      query,
+      params,
+      "categories"
+    );
     res.status(200).json(rows);
   } catch (error) {
     next(error);
@@ -29,7 +33,11 @@ export async function getSingleCategoryById(
   try {
     const categoryId = +req.params.categoryId;
     const { params, query } = categoryQueries.getSingleCategoryById(categoryId);
-    const [rows] = await executeSingleQuery<Category[]>(query, params);
+    const [rows] = await executeSingleQuery<Category[]>(
+      query,
+      params,
+      "categories"
+    );
     const category = rows[0];
     if (!category) throw new FunctionError("Category Not Found", 404);
     res.status(200).json(category);
@@ -48,11 +56,15 @@ export async function addCategory(
   try {
     const data = categorySchema.parse(req.body);
     const { params, query } = categoryQueries.addCategory(data);
-    const [rows] = await executeSingleQuery<ResultSetHeader>(query, params);
+    const [rows] = await executeSingleQuery<ResultSetHeader>(
+      query,
+      params,
+      "categories"
+    );
     const id = rows.insertId;
     res.status(201).json({ ...data, id });
   } catch (error) {
-    next(new FunctionError("Category already exist", 409));
+    next(error);
   }
 }
 
@@ -68,10 +80,10 @@ export async function updateCategory(
     const data = categorySchema.parse(req.body);
     const category: CategorySchema = { ...data, id };
     const { params, query } = categoryQueries.updateCategory(category);
-    await executeSingleQuery(query, params);
+    await executeSingleQuery<ResultSetHeader>(query, params, "categories");
     res.status(200).json(category);
   } catch (error) {
-    next(new FunctionError("Category Name already exist", 409));
+    next(error);
   }
 }
 
@@ -89,7 +101,14 @@ export async function deleteCategory(
       id,
       restaurantId,
     });
-    await executeSingleQuery(query, params);
+    const [result] = await executeSingleQuery<ResultSetHeader>(
+      query,
+      params,
+      "categories"
+    );
+    if (result.affectedRows < 1) {
+      return res.sendStatus(404);
+    }
     res.sendStatus(204);
   } catch (error) {
     next(error);

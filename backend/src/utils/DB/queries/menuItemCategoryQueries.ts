@@ -13,33 +13,33 @@ type MenuItemCategoryUpdateQuery = MenuItemCategoryTable & {
 
 class MenuItemCategoryQueries {
   createMenuItemCategoryRef(obj: {
-    menuItems: number[];
-    categoryId: number;
+    menuItemId: number;
+    categoryIds: number[];
     restaurantId: number;
   }): TransactionQuery {
     const { columns: categoryCols, tableName: categories } =
       DB.tables.categories;
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
 
-    const menuItemIdPlacholders = obj.menuItems.map(() => "?").join(", ");
+    const menuItemIdPlacholders = obj.categoryIds.map(() => "?").join(", ");
     const query = `
-  INSERT INTO ${tableName} (${categoryId}, ${menuItemId}, ${restaurantId})
-  SELECT 
-${categories}.${categoryCols.id}, 
-  ${menuItems}.${itemCols.id}, 
-  ${categories}.${categoryCols.restaurantId}
-  FROM ${categories}
-  JOIN ${menuItems}
-  ON ${categories}.${categoryCols.restaurantId} = ${menuItems}.${itemCols.restaurantId}
-  AND ${categories}.${categoryCols.restaurantId} = ?
-  AND ${categories}.${categoryCols.id} = ?
-  AND ${menuItems}.${itemCols.id} IN (${menuItemIdPlacholders})
-  `;
+    INSERT INTO ${tableName} (${categoryId}, ${menuItemId}, ${restaurantId})
+    SELECT 
+    ${categories}.${categoryCols.id}, 
+    ${menuItems}.${itemCols.id}, 
+    ${categories}.${categoryCols.restaurantId}
+    FROM ${categories}
+    JOIN ${menuItems}
+    ON ${categories}.${categoryCols.restaurantId} = ${menuItems}.${itemCols.restaurantId}
+    AND ${categories}.${categoryCols.restaurantId} = ?
+    AND ${menuItems}.${itemCols.id} = ?
+    AND ${categories}.${categoryCols.id} IN (${menuItemIdPlacholders})
+    `;
 
     const params: MixedArray = [
       obj.restaurantId,
-      obj.categoryId,
-      ...obj.menuItems,
+      obj.menuItemId,
+      ...obj.categoryIds,
     ];
 
     return { params, query };

@@ -1,12 +1,12 @@
 import React, { ChangeEvent, useState } from "react";
-import queryKeys from "../../utils/queryKeys";
-import useCustomQuery from "../../hooks/useCustomQuery";
-import { categoryService } from "../../services/categoryService";
-import { toastifyService } from "../../services/toastifyService";
-import Input from "../Customs/Input";
-import Button from "../Customs/Button";
-import Modal from "../Customs/Modal";
-import { Category } from "../../models/Category";
+import queryKeys from "../../../utils/queryKeys";
+import useCustomQuery from "../../../hooks/useCustomQuery";
+import { categoryService } from "../../../services/categoryService";
+import { toastifyService } from "../../../services/toastifyService";
+import Input from "../../Customs/Input";
+import Button from "../../Customs/Button";
+import Modal from "../../Customs/Modal";
+import { Category } from "../../../models/Category";
 import SelectedCategory from "./SelectedCategory";
 
 type AddCategoryToItemProps = {
@@ -51,7 +51,7 @@ const AddCategoryToItem: React.FC<AddCategoryToItemProps> = ({
 
   return (
     <div>
-      <div>
+      <div className="mb-3">
         {selectedCategories.map((c) => (
           <SelectedCategory
             category={c}
@@ -65,7 +65,7 @@ const AddCategoryToItem: React.FC<AddCategoryToItemProps> = ({
         ))}
       </div>
       <Button
-        variant={"ghost"}
+        type="button"
         size={"formBtn"}
         className="border"
         onClick={openModalFn}

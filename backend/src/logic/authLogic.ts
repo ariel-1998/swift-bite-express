@@ -24,7 +24,6 @@ export const userInfoResponse = (
   next: NextFunction
 ) => {
   const user = req.user;
-  console.log(req.user);
   if (!user) return next(new FunctionError("UnAutorized!", 401));
   const userInfo: Omit<User, "password"> = {
     authProviderId: user.authProviderId,

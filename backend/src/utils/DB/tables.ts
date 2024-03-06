@@ -11,7 +11,7 @@ import { MenuItemCategoryTable } from "../../models/MenuItemCategoryTable";
 import { Extra } from "../../models/Extra";
 import { Sauce } from "../../models/Sauce";
 
-type SQLTableNames =
+export type SQLTableNames =
   | "auth_provider"
   | "users"
   | "addresses"
@@ -303,6 +303,7 @@ async function create_sauces_table(connection: PoolConnection) {
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
   ${restaurantId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
+  UNIQUE (${restaurantId}, ${name}),
   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
@@ -322,11 +323,13 @@ async function create_extras_table(connection: PoolConnection) {
   ${type} ENUM('drink', 'extra') NOT NULL,
   ${extraPrice} INT DEFAULT NULL,
   ${restaurantId} INT NOT NULL,
+  UNIQUE (${menuItemId}, ${name}),
   FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE,
   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
 }
+
 async function create_menu_items_category_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.menu_items_category;
@@ -372,5 +375,5 @@ export async function createDBTables() {
 }
 
 async function createTable(connection: PoolConnection, query: string) {
-  await executeQuery(connection, { query, params: [] });
+  await executeQuery(connection, { query, params: [] }, null);
 }

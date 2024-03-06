@@ -12,7 +12,7 @@ export const menuItemCategoryRouter = Router();
 
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemCategoryRouter.post(
-  "/restaurant/:restaurantId/category/:categoryId",
+  "/restaurant/:restaurantId([0-9]+)/menu-item/:menuItemId([0-9]+)",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   createMenuItemCategoryRef

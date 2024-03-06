@@ -1,5 +1,9 @@
 import { credentialsAxios, defaultAxios } from "../utils/axiosConfig";
-import { MenuItem, MenuItemForm } from "../models/MenuItem";
+import {
+  MenuItem,
+  MenuItemForm,
+  MenuItemJoinedWCategory,
+} from "../models/MenuItem";
 import { AxiosResponse } from "axios";
 
 const menuItemRoute = "/menu-item";
@@ -28,7 +32,16 @@ class MenuItemService {
   }
 
   async getMenuItemById(menuItemId: MenuItem["id"]) {
-    const { data } = await defaultAxios.get(`${menuItemRoute}/${menuItemId}`);
+    const { data } = await defaultAxios.get<MenuItem>(
+      `${menuItemRoute}/${menuItemId}`
+    );
+    return data;
+  }
+
+  async getMenuItemByRestaurantId(restaurantId: MenuItem["restaurantId"]) {
+    const { data } = await defaultAxios.get<MenuItemJoinedWCategory[]>(
+      `${menuItemRoute}/restaurant/${restaurantId}`
+    );
     return data;
   }
 

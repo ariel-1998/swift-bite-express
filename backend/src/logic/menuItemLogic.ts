@@ -1,5 +1,9 @@
 import { NextFunction, Request, Response } from "express";
-import { MenuItem, menuItemSchema } from "../models/MenuItem";
+import {
+  MenuItem,
+  MenuItemJoinedWCategory,
+  menuItemSchema,
+} from "../models/MenuItem";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
 import { menuItemsQueries } from "../utils/DB/queries/MenuItemsQueries";
@@ -8,11 +12,47 @@ import { ResultSetHeader } from "mysql2";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
 
 type MenuItemIdParams = { menuItemId: string };
-export function getMenuItemById(
+export async function getMenuItemById(
   req: Request<MenuItemIdParams>,
   res: Response<MenuItem>,
   next: NextFunction
-) {}
+) {
+  try {
+    const { menuItemId } = req.params;
+    const { params, query } = menuItemsQueries.getMenuItemById(+menuItemId);
+    const [rows] = await executeSingleQuery<MenuItem[]>(
+      query,
+      params,
+      "menu_items"
+    );
+    const item = rows[0];
+    if (!item) throw new FunctionError("Menu item not found", 404);
+    res.status(200).json(item);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getMenuItemsByRestaurantId(
+  req: Request<{ restaurantId: string }>,
+  res: Response<MenuItemJoinedWCategory[]>,
+  next: NextFunction
+) {
+  try {
+    const { restaurantId } = req.params;
+    const { params, query } = menuItemsQueries.getMenuItemsByRestaurantId(
+      +restaurantId
+    );
+    const [rows] = await executeSingleQuery<MenuItemJoinedWCategory[]>(
+      query,
+      params,
+      "menu_items"
+    );
+    res.status(200).json(rows);
+  } catch (error) {
+    next(error);
+  }
+}
 
 type MenuItemWithoutId = Omit<MenuItem, "id">;
 type CreateMenuItemReq = Request<unknown, unknown, MenuItemWithoutId>;
@@ -37,16 +77,11 @@ export async function createMenuItem(
     }
     //add data to DB
     const { query, params } = menuItemsQueries.createMenuItem(parsedData);
-    let results: ResultSetHeader | undefined = undefined;
-    try {
-      const [sqlData] = await executeSingleQuery<ResultSetHeader>(
-        query,
-        params
-      );
-      results = sqlData;
-    } catch (error) {
-      throw new FunctionError("Duplicate Error: Item Name already exist.", 409);
-    }
+    const [results] = await executeSingleQuery<ResultSetHeader>(
+      query,
+      params,
+      "menu_items"
+    );
 
     res.status(201).json({ ...parsedData, id: results.insertId });
   } catch (error) {

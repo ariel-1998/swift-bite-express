@@ -35,12 +35,11 @@ export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
         parsedId,
         userId
       );
-      console.log("parsedId", parsedId);
       const [rows] = await executeSingleQuery<RestauransOwnerAddressTable[]>(
         query.query,
-        query.params
+        query.params,
+        "restaurant_owner_address"
       );
-      console.log(rows);
       if (!rows[0]) {
         throw new FunctionError(
           "Premission Error: access denied, only The owner is Allowed.",
@@ -49,7 +48,6 @@ export function verifyOwnershipByRestaurantIdAndUserIdMiddleware(
       }
       next();
     } catch (error) {
-      console.log(error);
       next(error);
     }
   };
@@ -80,7 +78,8 @@ export async function verifyOwnershipByRestaurantIdAndUserId(
     );
   const [isOwnerRows] = await executeQuery<RestauransOwnerAddressTable[]>(
     connection,
-    isOwnerQuery
+    isOwnerQuery,
+    "restaurant_owner_address"
   );
   const isOwner = isOwnerRows[0];
   if (!isOwner)

@@ -78,8 +78,6 @@ class RestaurantQueries {
     ) <= ${DISTANCE} AND ${tableName}.${columns.name} LIKE ?
     LIMIT ${SEARCH_LIMIT} OFFSET ${offset}
     `;
-    console.log("PAGE_LIMIT", SEARCH_LIMIT);
-    console.log("offset", offset);
     const params: MixedArray = [latitude, longitude, latitude, `%${search}%`];
     return { params, query };
   }

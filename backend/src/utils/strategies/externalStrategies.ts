@@ -4,7 +4,6 @@ import { Role, User } from "../../models/User";
 import { Profile, VerifyCallback } from "passport-google-oauth20";
 import { executeQuery, pool } from "../DB/dbConfig";
 import { DB } from "../DB/tables";
-import { FunctionError } from "../../models/Errors/ErrorConstructor";
 import { handleErrorTypes } from "../../middleware/errorHandler";
 
 export class ExternalAuthProvider {
@@ -16,10 +15,14 @@ export class ExternalAuthProvider {
     const { columns, tableName } = DB.tables.auth_provider;
     const query = `SELECT * FROM ${tableName} WHERE ${columns.provider} = ? AND ${columns.providerUserId} = ?`;
     const params = [profile.provider, profile.id];
-    const [providerData] = await executeQuery<AuthProvider[]>(connection, {
-      query,
-      params,
-    });
+    const [providerData] = await executeQuery<AuthProvider[]>(
+      connection,
+      {
+        query,
+        params,
+      },
+      "auth_provider"
+    );
     return providerData[0];
   };
 
@@ -31,7 +34,11 @@ export class ExternalAuthProvider {
     const { columns, tableName } = DB.tables.users;
     const query = `SELECT * FROM ${tableName} WHERE ${columns.authProviderId} = ?`;
     const params = [authProviderId];
-    const [users] = await executeQuery<User[]>(connection, { query, params });
+    const [users] = await executeQuery<User[]>(
+      connection,
+      { query, params },
+      "users"
+    );
     return users[0];
   };
 
@@ -70,7 +77,7 @@ export class ExternalAuthProvider {
     const query = `INSERT INTO ${tableName} (${columns.id}, ${columns.provider}, ${columns.providerUserId}) VALUES (?, ?, ?)`;
     const params = [provider.id, provider.provider, provider.providerUserId];
 
-    await executeQuery(connection, { query, params });
+    await executeQuery(connection, { query, params }, "auth_provider");
     return id;
   };
 
@@ -95,26 +102,26 @@ export class ExternalAuthProvider {
     profile: Profile,
     providerRowId: string
   ): Promise<User> => {
-    try {
-      const { columns, tableName } = DB.tables.users;
-      const newUser = this.createDefaultUserOBJ(profile, providerRowId);
-      const query = `INSERT INTO ${tableName} (${columns.authProviderId}, ${columns.primaryAddressId},  ${columns.fullName}, ${columns.role}, ${columns.email}) VALUES (?, ?, ?, ?, ?)`;
-      const params = [
-        newUser.authProviderId,
-        newUser.primaryAddressId,
-        newUser.fullName,
-        newUser.role,
-        newUser.email,
-      ];
-      const [results] = await executeQuery<ResultSetHeader>(connection, {
+    const { columns, tableName } = DB.tables.users;
+    const newUser = this.createDefaultUserOBJ(profile, providerRowId);
+    const query = `INSERT INTO ${tableName} (${columns.authProviderId}, ${columns.primaryAddressId},  ${columns.fullName}, ${columns.role}, ${columns.email}) VALUES (?, ?, ?, ?, ?)`;
+    const params = [
+      newUser.authProviderId,
+      newUser.primaryAddressId,
+      newUser.fullName,
+      newUser.role,
+      newUser.email,
+    ];
+    const [results] = await executeQuery<ResultSetHeader>(
+      connection,
+      {
         query,
         params,
-      });
+      },
+      "users"
+    );
 
-      return { ...newUser, id: results.insertId };
-    } catch (error) {
-      throw new FunctionError("You Signed In a with a different method.", 409);
-    }
+    return { ...newUser, id: results.insertId };
   };
 
   createNewUserAndProvider = async (
@@ -150,7 +157,6 @@ export async function externalAuthStrategy(
       connection,
       profile
     );
-    console.log("user", user);
     //if user exist return the user and exit the function
     if (user) return done(null, user);
     //add provider to auth-provider DB

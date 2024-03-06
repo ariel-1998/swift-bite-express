@@ -68,13 +68,26 @@ class MenuItemsQueries {
     ];
     return { params, query };
   }
-  //need to change to get menuItem by with categories
-  //and add join to category table to join the menu items categories to the object
-  //might need to keep that getMenuItemById for single menuItemPage and the above for owner to update menuitem he needs the categories with it to know which categories ot belongs to
-  // getMenuItemWithCategoriesByItemId(menuItemId: number): TransactionQuery {}
   getMenuItemById(menuItemId: number): TransactionQuery {
     const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
     const params: MixedArray = [menuItemId];
+    return { params, query };
+  }
+  getMenuItemsByRestaurantId(restId: number): TransactionQuery {
+    const { columns: categoryCols, tableName: categories } =
+      DB.tables.categories;
+    const { columns: micCols, tableName: mic } = DB.tables.menu_items_category;
+    const query = `
+    SELECT ${tableName}.*, 
+    ${categories}.${categoryCols.id} AS categoryId, 
+    ${categories}.${categoryCols.name} AS categoryName,
+    ${categories}.${categoryCols.description} AS categoryDescription
+    FROM ${tableName}
+    LEFT JOIN ${mic} ON ${mic}.${micCols.menuItemId} = ${tableName}.${id}
+    LEFT JOIN ${categories} ON ${categories}.${categoryCols.id} = ${mic}.${micCols.categoryId}
+    WHERE ${tableName}.${restaurantId} = ?
+    ORDER BY categoryId`;
+    const params: MixedArray = [restId];
     return { params, query };
   }
 

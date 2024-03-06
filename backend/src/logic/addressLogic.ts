@@ -25,9 +25,13 @@ export const getAddressById = async (
   try {
     const { addressId } = req.params;
     const { params, query } = addressQueries.getAddressByIdQuery(+addressId);
-    const [rows] = await executeSingleQuery<AddressSchema[]>(query, params);
+    const [rows] = await executeSingleQuery<AddressSchema[]>(
+      query,
+      params,
+      "addresses"
+    );
     const address = rows[0];
-    if (!address) res.sendStatus(404);
+    if (!address) return res.sendStatus(404);
     res.status(200).json(address);
   } catch (error) {
     next(error);
@@ -70,14 +74,15 @@ export const addAddress = async (
       //add address
       const [addressRes] = await executeQuery<ResultSetHeader>(
         connection,
-        addressParams
+        addressParams,
+        "addresses"
       );
       addedAddressId = addressRes.insertId;
       const updateParams = userQueries.updateUserAddressIdQuery(
         user,
         addedAddressId
       );
-      await executeQuery<ResultSetHeader>(connection, updateParams);
+      await executeQuery<ResultSetHeader>(connection, updateParams, "users");
     } else {
       const isOwner = await verifyOwnershipByRestaurantIdAndUserId(
         connection,
@@ -92,7 +97,8 @@ export const addAddress = async (
       }
       const [addressRes] = await executeQuery<ResultSetHeader>(
         connection,
-        addressParams
+        addressParams,
+        "addresses"
       );
       addedAddressId = addressRes.insertId;
       //create add RestauransOwnerAddressTable query
@@ -102,15 +108,13 @@ export const addAddress = async (
         userId: user.id,
       });
       // add RestauransOwnerAddressTable row
-      await executeQuery(connection, addRowQuery);
+      await executeQuery(connection, addRowQuery, "restaurant_owner_address");
     }
 
     await connection.commit();
     //need to return address;
     res.status(201).json({ ...addressWithoutId, id: addedAddressId });
   } catch (error) {
-    console.log(error);
-
     await connection?.rollback();
     next(error);
   } finally {
@@ -154,7 +158,7 @@ export async function updateAddress(
         addressWithoutId,
         addressId
       );
-      await executeQuery<ResultSetHeader>(connection, updateQuery);
+      await executeQuery<ResultSetHeader>(connection, updateQuery, "addresses");
       updatedAddressId = addressId;
     } else {
       const isOwner = await verifyOwnershipByRestaurantIdAndUserId(
@@ -171,13 +175,16 @@ export async function updateAddress(
         addressWithoutId,
         isOwner.addressId
       );
-      await executeQuery<ResultSetHeader>(connection, updateAddressQuery);
+      await executeQuery<ResultSetHeader>(
+        connection,
+        updateAddressQuery,
+        "addresses"
+      );
       updatedAddressId = isOwner.addressId;
     }
     await connection.commit();
     res.status(200).json({ ...addressWithoutId, id: updatedAddressId });
   } catch (error) {
-    console.log(error);
     await connection?.rollback();
     next(error);
   } finally {
