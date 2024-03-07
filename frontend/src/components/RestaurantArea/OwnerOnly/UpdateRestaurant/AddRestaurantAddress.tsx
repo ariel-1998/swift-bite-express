@@ -8,7 +8,13 @@ type AddRestaurantAddressProps = {
 const AddRestaurantAddress: React.FC<AddRestaurantAddressProps> = ({
   restaurant,
 }) => {
-  return <RestaurantAddressForm restaurant={restaurant} method="create" />;
+  return (
+    <RestaurantAddressForm
+      restaurant={restaurant}
+      method="create"
+      formTitle="add restaurant's address"
+    />
+  );
 };
 
 export default AddRestaurantAddress;

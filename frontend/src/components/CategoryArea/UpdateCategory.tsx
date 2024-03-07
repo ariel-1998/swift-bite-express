@@ -1,7 +1,7 @@
 import React, { FormEvent, useRef, useState } from "react";
 import { categoryService } from "../../services/categoryService";
 import { toastifyService } from "../../services/toastifyService";
-import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateCategoryCache } from "../../utils/queryCacheUpdates/updateCategoryCache";
 import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
 import { CategoryForm, categorySchema } from "../../models/Category";
@@ -14,18 +14,16 @@ import LoadingInput from "../Customs/LoadingInput";
 
 type UpdateCategoryProps = {
   restaurantId: number;
-  queryKey: QueryKey;
-  categoryId: number;
 };
 
-const UpdateCategory: React.FC<UpdateCategoryProps> = ({
-  restaurantId,
-  queryKey,
-}) => {
+const UpdateCategory: React.FC<UpdateCategoryProps> = ({ restaurantId }) => {
   const queryClient = useQueryClient();
   const nameRef = useRef<HTMLInputElement | null>(null);
   const descriptionRef = useRef<HTMLInputElement | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
+
+  const queryKey =
+    queryKeys.categories.getAllCategoriesByRestaurantId(restaurantId);
 
   const { data, isLoading, isError } = useCustomQuery({
     queryKey,
@@ -83,7 +81,7 @@ const UpdateCategory: React.FC<UpdateCategoryProps> = ({
   }
 
   return (
-    <UpdateForm onSubmit={updateCategory}>
+    <UpdateForm onSubmit={updateCategory} formTitle="Update category in menu">
       <Select
         value={selectedCategoryId}
         onChange={(e) => setSelectedCategoryId(e.target.value)}

@@ -1,25 +1,24 @@
 import React, { FormEvent, useRef } from "react";
 import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
-import { QueryKey, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { categoryService } from "../../services/categoryService";
 import Button from "../Customs/Button";
 import { CategoryForm, categorySchema } from "../../models/Category";
 import { toastifyService } from "../../services/toastifyService";
 import { updateCategoryCache } from "../../utils/queryCacheUpdates/updateCategoryCache";
 import Input from "../Customs/Input";
+import queryKeys from "../../utils/queryKeys";
 
 type AddCategoryProps = {
   restaurantId: number;
-  queryKey: QueryKey;
 };
 
-const AddCategory: React.FC<AddCategoryProps> = ({
-  restaurantId,
-  queryKey,
-}) => {
+const AddCategory: React.FC<AddCategoryProps> = ({ restaurantId }) => {
   const queryClient = useQueryClient();
   const nameRef = useRef<HTMLInputElement | null>(null);
   const descriptionRef = useRef<HTMLInputElement | null>(null);
+  const queryKey =
+    queryKeys.categories.getAllCategoriesByRestaurantId(restaurantId);
 
   const { mutate } = useMutation({
     mutationFn: categoryService.addCategory,
@@ -63,7 +62,7 @@ const AddCategory: React.FC<AddCategoryProps> = ({
   }
 
   return (
-    <UpdateForm onSubmit={submitCategory}>
+    <UpdateForm onSubmit={submitCategory} formTitle="Add category to menu">
       <Input label="Category Name:" type="text" ref={nameRef} />
       <Input label="Desctiption:" type="text" ref={descriptionRef} />
       <Button type="submit" size={"formBtn"} variant={"primary"}>

@@ -40,7 +40,7 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
     try {
       updateRestaurantSchema
         .pick({ logoImage: true })
-        .refine(({ logoImage }) => logoImage[0], "Logo was not selected")
+        .refine(({ logoImage }) => logoImage?.[0], "Logo was not selected")
         .parse({ logoImage });
       mutation.mutate({ restaurantId: restaurant.id, logoImage: logoImage! });
     } catch (error) {
@@ -48,7 +48,7 @@ const UpdateRestaurantLogo: React.FC<UpdateRestaurantLogoProps> = ({
     }
   };
   return (
-    <UpdateForm onSubmit={submitUpdate}>
+    <UpdateForm onSubmit={submitUpdate} formTitle="Update restaurant logo">
       <Input label="Restaurant Logo:" type="file" ref={logoRef} />
       <Button
         type="submit"

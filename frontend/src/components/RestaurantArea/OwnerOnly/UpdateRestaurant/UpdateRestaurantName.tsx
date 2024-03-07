@@ -43,7 +43,7 @@ const UpdateRestaurantName: React.FC<UpdateRestaurantNameProps> = ({
   };
 
   return (
-    <UpdateForm onSubmit={submitUpdate}>
+    <UpdateForm onSubmit={submitUpdate} formTitle="Update restaurant name">
       <Input label="Restaurant Name:" type="text" ref={nameRef} />
       <Button
         type="submit"

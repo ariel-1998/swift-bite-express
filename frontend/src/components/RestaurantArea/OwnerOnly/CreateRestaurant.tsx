@@ -24,7 +24,7 @@ const CreateRestaurant: React.FC = () => {
     onSuccess(data) {
       updateRestaurantCache.updateSingleRestaurantInCache(data, queryClient);
 
-      navigate(`/restaurants/${data.id}?activeForm=address`);
+      navigate(`/restaurants/${data.id}`);
       //no need to update query cache for restaurants as there is no address in it and all the query caches are with addresses
       //need to navigate to update restaurant address page "restaurant/owner/:restaurantId"
     },

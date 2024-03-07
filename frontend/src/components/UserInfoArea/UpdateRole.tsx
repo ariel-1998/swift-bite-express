@@ -81,7 +81,7 @@ const UpdateRole: React.FC = () => {
     return Array.from({ length: 5 }, () => Math.ceil(Math.random() * 9));
   }
   return (
-    <AuthForm onSubmit={submitForm} title={`${title}`}>
+    <AuthForm onSubmit={submitForm} title={title}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col items-center text-error text-center ">
           <span className="font-bold">NOTE:</span>

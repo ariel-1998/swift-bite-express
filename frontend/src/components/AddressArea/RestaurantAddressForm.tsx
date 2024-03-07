@@ -16,10 +16,12 @@ import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
 type RestaurantAddressFormProps = {
   restaurant: NestedRestaurantAndAddress;
   method: "update" | "create";
+  formTitle: string;
 };
 
 const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   restaurant,
+  formTitle,
   method,
 }) => {
   const queryClient = useQueryClient();
@@ -63,7 +65,7 @@ const RestaurantAddressForm: React.FC<RestaurantAddressFormProps> = ({
   };
 
   return (
-    <UpdateForm onSubmit={handleSubmit(submitAddress)}>
+    <UpdateForm onSubmit={handleSubmit(submitAddress)} formTitle={formTitle}>
       <Input
         label="Country:"
         errMessage={errors.country?.message}

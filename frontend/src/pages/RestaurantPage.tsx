@@ -8,6 +8,7 @@ import UpdateRestaurant from "../components/RestaurantArea/OwnerOnly/UpdateResta
 import useUserInfo from "../hooks/useUserInfo";
 import { Role } from "../models/User";
 import ProtectedComp from "../components/ProtectedComponent.tsx/ProtectedComp";
+import UpdateFormsToShow from "../components/RestaurantArea/OwnerOnly/UpdateRestaurant/UpdateOptions/UpdateFormsToShow";
 //might add react lazy
 const RestaurantPage: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
@@ -24,7 +25,8 @@ const RestaurantPage: React.FC = () => {
       {isError && "error"}
 
       <ProtectedComp condition={user?.role === Role.owner}>
-        {data && <UpdateRestaurant data={data} />}
+        {/* {data && <UpdateRestaurant data={data} />} */}
+        {data && <UpdateFormsToShow data={data} />}
       </ProtectedComp>
 
       <ProtectedComp condition={!user || user?.role === Role.user}>

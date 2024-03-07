@@ -72,7 +72,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
   };
 
   return (
-    <UpdateForm onSubmit={handleSubmit(postData)}>
+    <UpdateForm onSubmit={handleSubmit(postData)} formTitle="Add item to menu">
       <Input
         label="Name:"
         type="text"

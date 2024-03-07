@@ -1,4 +1,6 @@
 import React, { ReactNode, createContext, useState } from "react";
+import useUserInfo from "../hooks/useUserInfo";
+import { Role } from "../models/User";
 type RestaurantActiveFormContextProps = {
   activeForm: FormsState;
   setActiveForm: React.Dispatch<React.SetStateAction<FormsState>>;
@@ -7,27 +9,31 @@ type RestaurantActiveFormContextProps = {
 export const RestaurantActiveFormContext =
   createContext<RestaurantActiveFormContextProps>(null);
 
-type RestaurantForms = {
+export type RestaurantForms = {
   name: "restaurant";
-  active: "name" | "logo" | "image";
+  active: "Update Name" | "Update Logo" | "Update Image" | "";
 };
 
-type AddressForms = {
+export type AddressForms = {
   name: "address";
-  active: "update" | "create";
+  active: "Update Address" | "Create Address" | "";
 };
 
-type CategoryForms = {
+export type CategoryForms = {
   name: "category";
-  active: "update" | "create";
+  active: "Update Category" | "Create Category" | "";
 };
 
-type MenuItemForms = {
-  name: "menuItem";
-  active: "create" | "updateImage" | "updateNoImg";
+export type MenuItemForms = {
+  name: "menu item";
+  active:
+    | "Create Menu item"
+    | "Update Menu item Image"
+    | "Update Menu item Details"
+    | "";
 };
 
-type FormsState =
+export type FormsState =
   | RestaurantForms
   | AddressForms
   | CategoryForms
@@ -41,7 +47,7 @@ const RestaurantActiveFormProvider: React.FC<
 > = ({ children }) => {
   const [activeForm, setActiveForm] = useState<FormsState>({
     name: "restaurant",
-    active: "name",
+    active: "",
   });
   return (
     <RestaurantActiveFormContext.Provider value={{ setActiveForm, activeForm }}>
@@ -50,4 +56,13 @@ const RestaurantActiveFormProvider: React.FC<
   );
 };
 
-export default RestaurantActiveFormProvider;
+export default function FormContextProvider({
+  children,
+}: RestaurantActiveFormProviderProps) {
+  const { user } = useUserInfo();
+
+  if (user?.role !== Role.owner) return children;
+  return (
+    <RestaurantActiveFormProvider>{children}</RestaurantActiveFormProvider>
+  );
+}

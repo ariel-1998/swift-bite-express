@@ -3,7 +3,6 @@ import {
   NestedRestaurantAndAddress,
   updateRestaurantSchema,
 } from "../../../../models/Restaurant";
-import { ZodError } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantService } from "../../../../services/restaurantService";
 import Input from "../../../Customs/Input";
@@ -40,7 +39,7 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
     try {
       updateRestaurantSchema
         .pick({ image: true })
-        .refine(({ image }) => image[0], "Image was not selected")
+        .refine(({ image }) => image?.[0], "Image was not selected")
         .parse({ image });
       mutation.mutate({ restaurantId: restaurant.id, image: image! });
     } catch (error) {
@@ -48,7 +47,7 @@ const UpdateRestaurantImage: React.FC<UpdateRestaurantImageProps> = ({
     }
   };
   return (
-    <UpdateForm onSubmit={submitUpdate}>
+    <UpdateForm onSubmit={submitUpdate} formTitle="Update restaurant image">
       <Input label="Restaurant Image:" type="file" ref={imageRef} />
       <Button
         type="submit"
