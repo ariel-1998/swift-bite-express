@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import {
+  CategoriesNestedInMenuItem,
   MenuItem,
   MenuItemJoinedWCategory,
+  MenuItemsNestedInCategories,
   menuItemSchema,
 } from "../models/MenuItem";
 import { UploadedFile } from "express-fileupload";
@@ -10,21 +12,26 @@ import { menuItemsQueries } from "../utils/DB/queries/MenuItemsQueries";
 import { executeSingleQuery } from "../utils/DB/dbConfig";
 import { ResultSetHeader } from "mysql2";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
+import { rearrangeMenueItems } from "../utils/helperFunctions";
 
 type MenuItemIdParams = { menuItemId: string };
 export async function getMenuItemById(
   req: Request<MenuItemIdParams>,
+  //need to change to CategoriesNestedInMenuItem
   res: Response<MenuItem>,
   next: NextFunction
 ) {
   try {
     const { menuItemId } = req.params;
     const { params, query } = menuItemsQueries.getMenuItemById(+menuItemId);
+    //need to change to MenuItemJoinedWCategory
     const [rows] = await executeSingleQuery<MenuItem[]>(
       query,
       params,
       "menu_items"
     );
+    //to rearrange data
+
     const item = rows[0];
     if (!item) throw new FunctionError("Menu item not found", 404);
     res.status(200).json(item);
@@ -34,21 +41,32 @@ export async function getMenuItemById(
 }
 
 export async function getMenuItemsByRestaurantId(
-  req: Request<{ restaurantId: string }>,
-  res: Response<MenuItemJoinedWCategory[]>,
+  req: Request<
+    { restaurantId: string },
+    unknown,
+    unknown,
+    { isOwner?: boolean }
+  >,
+  //need to change to CategoriesNestedInMenuItem
+  res: Response<CategoriesNestedInMenuItem[] | MenuItemsNestedInCategories[]>,
   next: NextFunction
 ) {
   try {
     const { restaurantId } = req.params;
+    const isOwner = req.query.isOwner;
     const { params, query } = menuItemsQueries.getMenuItemsByRestaurantId(
-      +restaurantId
+      +restaurantId,
+      isOwner
     );
     const [rows] = await executeSingleQuery<MenuItemJoinedWCategory[]>(
       query,
       params,
       "menu_items"
     );
-    res.status(200).json(rows);
+    const rearrangedData = rearrangeMenueItems(rows, isOwner);
+    //need to change to CategoriesNestedInMenuItem
+    //to rearrange data
+    res.status(200).json(rearrangedData);
   } catch (error) {
     next(error);
   }

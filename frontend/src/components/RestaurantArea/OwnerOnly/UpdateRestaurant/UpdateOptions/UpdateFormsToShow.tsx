@@ -11,6 +11,9 @@ import UpdateRestaurantImage from "../UpdateRestaurantImage";
 import AddCategory from "../../../../CategoryArea/AddCategory";
 import UpdateCategory from "../../../../CategoryArea/UpdateCategory";
 import CreateMenuItem from "../../../../MenuItemArea/OwnerOnly/CreateMenuItem";
+import OwnerMenuItemCard from "../../../../MenuItemArea/OwnerOnly/OwnerMenuItemCard";
+import { Role } from "../../../../../models/User";
+import { SQLBoolean } from "../../../../../models/SQLBoolean";
 
 type UpdateFormsToShowProps = {
   data: NestedRestaurantAndAddress;
@@ -63,6 +66,14 @@ const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
       <UpdateOptions data={data} />
       <ActiveFormOptions />
       <GenerateForm />
+      <OwnerMenuItemCard
+        menuItem={{
+          id: 1,
+          name: "arirl",
+          restaurantId: 1,
+          showSouces: SQLBoolean.false,
+        }}
+      />
     </div>
   );
 };

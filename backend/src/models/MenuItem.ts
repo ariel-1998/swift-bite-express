@@ -23,6 +23,14 @@ export type MenuItemJoinedWCategory = MenuItem & {
   categoryDescription?: Category["description"];
 };
 
+export type CategoriesNestedInMenuItem = MenuItem & {
+  categories: Partial<Category>[];
+};
+
+export type MenuItemsNestedInCategories = Partial<Category> & {
+  menuItems: MenuItem[];
+};
+
 export const menuItemIdSchema = generateIdSchema("MenuItemId");
 
 export const menuItemSchema = z.object({

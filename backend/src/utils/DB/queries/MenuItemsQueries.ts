@@ -69,14 +69,22 @@ class MenuItemsQueries {
     return { params, query };
   }
   getMenuItemById(menuItemId: number): TransactionQuery {
+    // const query = `SELECT mi.*, c.id as categoryId, c.name as categoryName, c.description as categoryDescription FROM menu_items mi
+    // left join menu_items_category mic on mic.menuItemId = mi.id
+    // left join categories c on c.id = mic.categoryId
+    // where mi.id = 7`
     const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
     const params: MixedArray = [menuItemId];
     return { params, query };
   }
-  getMenuItemsByRestaurantId(restId: number): TransactionQuery {
+  getMenuItemsByRestaurantId(
+    restId: number,
+    isOwner: boolean | undefined
+  ): TransactionQuery {
     const { columns: categoryCols, tableName: categories } =
       DB.tables.categories;
     const { columns: micCols, tableName: mic } = DB.tables.menu_items_category;
+    const orderBy = isOwner ? `${tableName}.${id}` : "categoryId";
     const query = `
     SELECT ${tableName}.*, 
     ${categories}.${categoryCols.id} AS categoryId, 
@@ -86,7 +94,7 @@ class MenuItemsQueries {
     LEFT JOIN ${mic} ON ${mic}.${micCols.menuItemId} = ${tableName}.${id}
     LEFT JOIN ${categories} ON ${categories}.${categoryCols.id} = ${mic}.${micCols.categoryId}
     WHERE ${tableName}.${restaurantId} = ?
-    ORDER BY categoryId`;
+    ORDER BY ${orderBy}`;
     const params: MixedArray = [restId];
     return { params, query };
   }

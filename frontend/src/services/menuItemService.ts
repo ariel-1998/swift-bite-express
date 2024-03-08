@@ -1,8 +1,9 @@
 import { credentialsAxios, defaultAxios } from "../utils/axiosConfig";
 import {
+  CategoriesNestedInMenuItem,
   MenuItem,
   MenuItemForm,
-  MenuItemJoinedWCategory,
+  MenuItemsNestedInCategories,
 } from "../models/MenuItem";
 import { AxiosResponse } from "axios";
 
@@ -38,10 +39,16 @@ class MenuItemService {
     return data;
   }
 
-  async getMenuItemByRestaurantId(restaurantId: MenuItem["restaurantId"]) {
-    const { data } = await defaultAxios.get<MenuItemJoinedWCategory[]>(
-      `${menuItemRoute}/restaurant/${restaurantId}`
-    );
+  async getMenuItemByRestaurantId<T extends boolean>(
+    restaurantId: MenuItem["restaurantId"],
+    isOwner: T
+  ) {
+    const params = isOwner ? { isOwner: true } : {};
+    const { data } = await defaultAxios.get<
+      typeof isOwner extends true
+        ? CategoriesNestedInMenuItem[]
+        : MenuItemsNestedInCategories[]
+    >(`${menuItemRoute}/restaurant/${restaurantId}`, { params });
     return data;
   }
 

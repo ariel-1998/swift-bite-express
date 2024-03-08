@@ -1,7 +1,8 @@
 import { QueryClient } from "@tanstack/react-query";
-import { MenuItem, MenuItemJoinedWCategory } from "../../models/MenuItem";
+import { CategoriesNestedInMenuItem, MenuItem } from "../../models/MenuItem";
 import queryKeys from "../queryKeys";
 import { Category } from "../../models/Category";
+import { toastifyService } from "../../services/toastifyService";
 
 class UpdateMenuItemCache {
   createMenuItem(queryClient: QueryClient, menuItem: MenuItem) {
@@ -10,41 +11,47 @@ class UpdateMenuItemCache {
     const itemsKey = queryKeys.menuItems.getMenuItemByRestaurantId(
       menuItem.restaurantId
     );
-    const oldArrData =
-      queryClient.getQueryData<MenuItemJoinedWCategory[]>(itemsKey);
-    queryClient.setQueryData<MenuItemJoinedWCategory[]>(itemsKey, (old) => {
+    queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
       if (!old) return;
-      return [...old, menuItem];
+      const nestedItem: CategoriesNestedInMenuItem = {
+        ...menuItem,
+        categories: [],
+      };
+      return [...old, nestedItem];
     });
-    return oldArrData;
+    return { ...menuItem, categories: [] } satisfies CategoriesNestedInMenuItem;
   }
 
   createMenuItemCategoryRef(
     queryClient: QueryClient,
-    oldData: ReturnType<typeof this.createMenuItem>,
-    item: MenuItem,
-    categories: Category[],
-    statusCode: number
+    restaurantId: number,
+    status: number,
+    menuItem: CategoriesNestedInMenuItem,
+    categories: Category[]
   ) {
-    if (!oldData) return;
-    const itemsKey = queryKeys.menuItems.getMenuItemByRestaurantId(
-      item.restaurantId
-    );
-    if (statusCode === 207) {
-      //invalidate if partial was added successfully
-      return queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
+    const itemsKey =
+      queryKeys.menuItems.getMenuItemByRestaurantId(restaurantId);
+    if (status === 207) {
+      queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
+      toastifyService.info(
+        "Only some of the categories were attached to the menu items"
+      );
     }
-    //manualy add data to cache if all was added successfully
-    queryClient.setQueryData<MenuItemJoinedWCategory[]>(itemsKey, () => {
-      const newItems: MenuItemJoinedWCategory[] = categories.map((c) => {
-        return {
-          categoryId: c.id,
-          categoryName: c.name,
-          categoryDescription: c.description,
-          ...item,
-        };
+    queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
+      if (!old) return;
+      return old.map((mi) => {
+        if (mi.id === menuItem.id) {
+          const newCategoriesArr: Partial<Category>[] = [
+            ...menuItem.categories,
+            ...categories,
+          ];
+          return {
+            ...menuItem,
+            categories: newCategoriesArr,
+          } satisfies CategoriesNestedInMenuItem;
+        }
+        return mi;
       });
-      return [...oldData, ...newItems];
     });
   }
 }

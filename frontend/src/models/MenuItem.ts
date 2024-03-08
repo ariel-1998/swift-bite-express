@@ -14,10 +14,18 @@ export type MenuItem = {
   imgPublicId?: string | null;
 };
 
-export type MenuItemJoinedWCategory = MenuItem & {
-  categoryId?: Category["id"];
-  categoryName?: Category["name"];
-  categoryDescription?: Category["description"];
+// export type MenuItemJoinedWCategory = MenuItem & {
+//   categoryId?: Category["id"];
+//   categoryName?: Category["name"];
+//   categoryDescription?: Category["description"];
+// };
+//for owners
+export type CategoriesNestedInMenuItem = MenuItem & {
+  categories: Partial<Category>[];
+};
+//for users
+export type MenuItemsNestedInCategories = Partial<Category> & {
+  menuItems: MenuItem[];
 };
 
 export const menuItemSchema = z.object({

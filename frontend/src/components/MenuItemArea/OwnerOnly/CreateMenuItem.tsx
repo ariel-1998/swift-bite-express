@@ -10,10 +10,12 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { menuItemService } from "../../../services/menuItemService";
 import AddCategoryToItem from "./AddCategoryToItem";
 import { Category } from "../../../models/Category";
-import Modal from "../../Customs/Modal";
 import { menuItemCategory } from "../../../services/menuItemCategory";
 import { toastifyService } from "../../../services/toastifyService";
 import { updateMenuItemCache } from "../../../utils/queryCacheUpdates/updateMenuItemCache";
+import VerifySelectedCategoriesModal from "./VerifySelectedCategoriesModal";
+import queryKeys from "../../../utils/queryKeys";
+import useCustomQuery from "../../../hooks/useCustomQuery";
 
 type CreateMenuItemProps = {
   restaurantId: number;
@@ -46,27 +48,26 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
     if (!selectedCategories.length && !openModal) return setOpenModal(true);
     try {
       const item = await mutateAsync({ ...data, restaurantId });
-      const oldData = updateMenuItemCache.createMenuItem(queryClient, item);
+      const nestetItem = updateMenuItemCache.createMenuItem(queryClient, item);
       if (selectedCategories.length) {
         const categoryIds = selectedCategories.map((c) => c.id);
-        const status = await refMutate({
+        const statusCode = await refMutate({
           categoryIds,
           menuItemId: item.id,
           restaurantId,
         });
         updateMenuItemCache.createMenuItemCategoryRef(
           queryClient,
-          oldData,
-          item,
-          selectedCategories,
-          status
+          restaurantId,
+          statusCode,
+          nestetItem,
+          selectedCategories
         );
       }
       reset();
       setSelectedCategories([]);
       setOpenModal(false);
     } catch (error) {
-      console.log(error);
       toastifyService.error(error as Error);
     }
   };
@@ -143,29 +144,3 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
 };
 
 export default CreateMenuItem;
-
-type VerifySelectedCategoriesModalProps = {
-  selectedCategories?: Category[];
-  close: () => void;
-};
-function VerifySelectedCategoriesModal({
-  close,
-}: VerifySelectedCategoriesModalProps) {
-  return (
-    <Modal close={close}>
-      <div className="flex flex-col items-center gap-1 font-semibold">
-        <h2 className="font-bold text-xl text-error mb-1">Warning</h2>
-        <span>You are trying to Add Menu Item with no Category</span>
-        <span>Are you sure you want to proceed?</span>
-        <div className="flex gap-1">
-          <Button type="submit" variant={"primary"}>
-            Proceed
-          </Button>
-          <Button type="button" onClick={close} variant={"error"}>
-            Cancel
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-}

@@ -1,3 +1,10 @@
+import { Category } from "../models/Category";
+import {
+  CategoriesNestedInMenuItem,
+  MenuItem,
+  MenuItemJoinedWCategory,
+  MenuItemsNestedInCategories,
+} from "../models/MenuItem";
 import {
   NestedRestaurantAndAddress,
   RestaurantJoinedWithAddress,
@@ -48,4 +55,91 @@ export function rearrangeRestaurantAddressDataArray(
     return obj;
   });
   return rearrangedData;
+}
+
+function rearrangeMenueItemsUser(
+  items: MenuItemJoinedWCategory[]
+): MenuItemsNestedInCategories[] {
+  const data: MenuItemsNestedInCategories[] = [];
+  let meintainedObjData: MenuItemsNestedInCategories | undefined = undefined;
+  items.forEach(
+    (
+      { restaurantId, categoryDescription, categoryId, categoryName, ...rest },
+      i
+    ) => {
+      const menuItem: MenuItem = { ...rest, restaurantId };
+      if (i === 0 || categoryId !== items[i - 1].categoryId) {
+        if (i !== 0 && categoryId !== items[i - 1].categoryId) {
+          data.push(meintainedObjData!);
+        }
+        meintainedObjData = {
+          id: categoryId,
+          restaurantId,
+          description: categoryDescription,
+          name: categoryName,
+          menuItems: [menuItem],
+        };
+        if (i === items.length - 1) data.push(meintainedObjData!);
+        return;
+      }
+
+      meintainedObjData?.menuItems.push(menuItem);
+      if (i === items.length - 1) data.push(meintainedObjData!);
+    }
+  );
+  return data;
+}
+
+function rearrangeMenueItemsOwner(
+  items: MenuItemJoinedWCategory[]
+): CategoriesNestedInMenuItem[] {
+  const data: CategoriesNestedInMenuItem[] = [];
+  let meintainedObjData: CategoriesNestedInMenuItem | undefined = undefined;
+
+  items.forEach(
+    (
+      {
+        restaurantId,
+        categoryId,
+        categoryDescription,
+        categoryName,
+        id,
+        ...rest
+      },
+      i
+    ) => {
+      const category: Partial<Category> = {
+        restaurantId,
+        id: categoryId,
+        description: categoryDescription,
+        name: categoryName,
+      };
+
+      if (i === 0 || id !== items[i - 1].id) {
+        if (i !== 0 && id !== items[i - 1].id) {
+          data.push(meintainedObjData!);
+        }
+
+        meintainedObjData = {
+          id,
+          ...rest,
+          categories: [],
+          restaurantId,
+        };
+        if (i === items.length - 1) data.push(meintainedObjData!);
+        return;
+      }
+      meintainedObjData?.categories.push(category);
+      if (i === items.length - 1) data.push(meintainedObjData!);
+    }
+  );
+  return data;
+}
+
+export function rearrangeMenueItems(
+  items: MenuItemJoinedWCategory[],
+  isOwner: boolean | undefined
+) {
+  if (isOwner) return rearrangeMenueItemsOwner(items);
+  return rearrangeMenueItemsUser(items);
 }
