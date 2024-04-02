@@ -23,8 +23,7 @@ const categoryForms: ActiveForm<CategoryForms> = [
 ];
 const menuItemForms: ActiveForm<MenuItemForms> = [
   "Create Menu item",
-  "Update Menu item Details",
-  "Update Menu item Image",
+  "Update Menu item",
 ];
 
 const ActiveFormOptions: React.FC = () => {

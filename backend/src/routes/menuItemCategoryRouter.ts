@@ -19,7 +19,7 @@ menuItemCategoryRouter.post(
 );
 //verifyIsOwner and check if restaurantOwner middleware
 menuItemCategoryRouter.put(
-  "/:oldCategoryId",
+  "/restaurant/:restaurantId([0-9]+)/menu-item/:menuItemId([0-9]+)",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateMenuItemCategoryRef

@@ -32,7 +32,7 @@ class MenuItemService {
     return data;
   }
 
-  async getMenuItemById(menuItemId: MenuItem["id"]) {
+  async getMenuItemById(menuItemId: MenuItem["id"]): Promise<MenuItem> {
     const { data } = await defaultAxios.get<MenuItem>(
       `${menuItemRoute}/${menuItemId}`
     );
@@ -52,7 +52,10 @@ class MenuItemService {
     return data;
   }
 
-  async updateMenuItemApartFromImg({ id, ...rest }: UpdateApartFromImg) {
+  async updateMenuItemApartFromImg({
+    id,
+    ...rest
+  }: UpdateApartFromImg): Promise<MenuItem> {
     const { data } = await credentialsAxios.put<
       MenuItem,
       AxiosResponse,

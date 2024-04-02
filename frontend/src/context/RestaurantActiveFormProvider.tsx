@@ -26,11 +26,7 @@ export type CategoryForms = {
 
 export type MenuItemForms = {
   name: "menu item";
-  active:
-    | "Create Menu item"
-    | "Update Menu item Image"
-    | "Update Menu item Details"
-    | "";
+  active: "Create Menu item" | "Update Menu item" | "";
 };
 
 export type FormsState =

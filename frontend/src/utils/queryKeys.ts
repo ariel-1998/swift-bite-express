@@ -7,40 +7,40 @@ const categories = "categories";
 const menuItems = "menuItems";
 class QueryKeys {
   auth = {
-    getLogin: [user],
+    getLogin: [user], //User
   };
   addresses = {
-    getAddressById: [addresses, "user"],
+    getAddressById: [addresses, "user"], //Address
   };
   restaurants = {
     getSingleRestaurantById(restaurantId: number) {
-      return [restaurants, "byId", restaurantId];
+      return [restaurants, "byId", restaurantId]; //NestedRestaurantAndAddress
     },
     searchRestaurantsByName(search: string, address: Address | undefined) {
-      return [restaurants, address, "search", search];
+      return [restaurants, address, "search", search]; //InfiniteData<Restaurant[]>
     },
     getNearRestaurantsByPage(address: Address | undefined) {
-      return [restaurants, address, "pages"];
+      return [restaurants, address, "pages"]; //InfiniteData<NestedRestaurantAndAddress[]>
     },
-    getOwnerRestaurants: [restaurants, "owner"],
+    getOwnerRestaurants: [restaurants, "owner"], //NestedRestaurantAndAddress[]
   };
 
   categories = {
     //need to check if cahched in object
     getAllCategoriesByRestaurantId(restaurantId: number) {
-      return [categories, { restaurantId }];
+      return [categories, { restaurantId }]; //Category[]
     },
     getSingleCategoryById(categoryId: number) {
-      return [categories, { categoryId }];
+      return [categories, { categoryId }]; //Category
     },
   };
 
   menuItems = {
     getMenuItemById(menuItemId: number) {
-      return [menuItems, { menuItemId }];
+      return [menuItems, { menuItemId }]; //MenuItem
     },
-    getMenuItemByRestaurantId(restaurantId: number) {
-      return [menuItems, { restaurantId }];
+    getMenuItemsByRestaurantId(restaurantId: number) {
+      return [menuItems, { restaurantId }]; //owner = CategoriesNestedInMenuItem[] || user = MenuItemsNestedInCategories[]
     },
   };
 }

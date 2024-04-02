@@ -18,6 +18,17 @@ class MenuItemCategory {
     );
     return status;
   }
+  async updateMenuItemCategoryRef({
+    categoryIds,
+    menuItemId,
+    restaurantId,
+  }: PostAssosiation) {
+    const status = await credentialsAxios.put(
+      `${menuItemCategoryRoute}/restaurant/${restaurantId}/menu-item/${menuItemId}`,
+      categoryIds
+    );
+    return status;
+  }
 }
 
 export const menuItemCategory = new MenuItemCategory();

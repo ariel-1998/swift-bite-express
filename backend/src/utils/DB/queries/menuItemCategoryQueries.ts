@@ -1,4 +1,3 @@
-import { MenuItemCategoryTable } from "../../../models/MenuItemCategoryTable";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
@@ -7,21 +6,25 @@ const {
   tableName,
 } = DB.tables.menu_items_category;
 
-type MenuItemCategoryUpdateQuery = MenuItemCategoryTable & {
-  oldCategoryId: number;
+type ItemCategoryRef = {
+  menuItemId: number;
+  categoryIds: number[];
+  restaurantId: number;
 };
 
 class MenuItemCategoryQueries {
-  createMenuItemCategoryRef(obj: {
-    menuItemId: number;
-    categoryIds: number[];
-    restaurantId: number;
-  }): TransactionQuery {
+  private createCategoryIdPlaceholders(categoryIds: number[]) {
+    return categoryIds.map(() => "?").join(", ");
+  }
+  createMenuItemCategoryRef(obj: ItemCategoryRef): TransactionQuery {
     const { columns: categoryCols, tableName: categories } =
       DB.tables.categories;
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
 
-    const menuItemIdPlacholders = obj.categoryIds.map(() => "?").join(", ");
+    // const menuItemIdPlacholders = obj.categoryIds.map(() => "?").join(", ");
+    const menuItemIdPlacholders = this.createCategoryIdPlaceholders(
+      obj.categoryIds
+    );
     const query = `
     INSERT INTO ${tableName} (${categoryId}, ${menuItemId}, ${restaurantId})
     SELECT 
@@ -45,22 +48,56 @@ class MenuItemCategoryQueries {
     return { params, query };
   }
 
-  updateMenuItemCategoryRef(
-    row: MenuItemCategoryUpdateQuery
-  ): TransactionQuery {
-    const query = `
-    UPDATE ${tableName}
-    SET ${categoryId} = ?
-    WHERE ${categoryId} = ?
-    AND ${menuItemId} = ?
-    AND ${restaurantId} = ?`;
+  updateMenuItemCategoryRef(obj: ItemCategoryRef): TransactionQuery {
+    const { columns: categoryCols, tableName: categories } =
+      DB.tables.categories;
+    const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
+
+    const deleteQuery = `
+    DELETE FROM ${tableName} 
+    WHERE ${menuItemId} = ?
+    AND  ${restaurantId} = ?
+    `;
+
+    const menuItemIdPlacholders = this.createCategoryIdPlaceholders(
+      obj.categoryIds
+    );
+    const insertQuery = `
+    INSERT INTO ${tableName} (${categoryId}, ${menuItemId}, ${restaurantId})
+    SELECT 
+    ${categories}.${categoryCols.id}, 
+    ${menuItems}.${itemCols.id}, 
+    ${categories}.${categoryCols.restaurantId}
+    FROM ${categories}
+    JOIN ${menuItems}
+    ON ${categories}.${categoryCols.restaurantId} = ${menuItems}.${itemCols.restaurantId}
+    AND ${categories}.${categoryCols.restaurantId} = ?
+    AND ${menuItems}.${itemCols.id} = ?
+    AND ${categories}.${categoryCols.id} IN (${menuItemIdPlacholders})
+    `;
+    // const query = `
+    // UPDATE ${tableName}
+    // SET ${categoryId} = ?
+    // WHERE ${categoryId} = ?
+    // AND ${menuItemId} = ?
+    // AND ${restaurantId} = ?`;
+
+    // const deleteParams: MixedArray = [obj.menuItemId, obj.restaurantId];
+
+    // const params: MixedArray = [
+    //   obj.restaurantId,
+    //   obj.menuItemId,
+    //   ...obj.categoryIds,
+    // ];
     const params: MixedArray = [
-      row.categoryId,
-      row.oldCategoryId,
-      row.menuItemId,
-      row.restaurantId,
+      obj.menuItemId,
+      obj.restaurantId,
+      obj.restaurantId,
+      obj.menuItemId,
+      ...obj.categoryIds,
     ];
-    return { params, query };
+
+    return { params, query: `${deleteQuery}; ${insertQuery}` };
   }
 }
 

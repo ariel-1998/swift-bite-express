@@ -61,7 +61,7 @@ function rearrangeMenueItemsUser(
   items: MenuItemJoinedWCategory[]
 ): MenuItemsNestedInCategories[] {
   const data: MenuItemsNestedInCategories[] = [];
-  let meintainedObjData: MenuItemsNestedInCategories | undefined = undefined;
+  let maintainedObjData: MenuItemsNestedInCategories | undefined = undefined;
   items.forEach(
     (
       { restaurantId, categoryDescription, categoryId, categoryName, ...rest },
@@ -70,21 +70,21 @@ function rearrangeMenueItemsUser(
       const menuItem: MenuItem = { ...rest, restaurantId };
       if (i === 0 || categoryId !== items[i - 1].categoryId) {
         if (i !== 0 && categoryId !== items[i - 1].categoryId) {
-          data.push(meintainedObjData!);
+          data.push(maintainedObjData!);
         }
-        meintainedObjData = {
+        maintainedObjData = {
           id: categoryId,
           restaurantId,
           description: categoryDescription,
           name: categoryName,
           menuItems: [menuItem],
         };
-        if (i === items.length - 1) data.push(meintainedObjData!);
+        if (i === items.length - 1) data.push(maintainedObjData!);
         return;
       }
 
-      meintainedObjData?.menuItems.push(menuItem);
-      if (i === items.length - 1) data.push(meintainedObjData!);
+      maintainedObjData?.menuItems.push(menuItem);
+      if (i === items.length - 1) data.push(maintainedObjData!);
     }
   );
   return data;
@@ -94,7 +94,7 @@ function rearrangeMenueItemsOwner(
   items: MenuItemJoinedWCategory[]
 ): CategoriesNestedInMenuItem[] {
   const data: CategoriesNestedInMenuItem[] = [];
-  let meintainedObjData: CategoriesNestedInMenuItem | undefined = undefined;
+  let maintainedObjData: CategoriesNestedInMenuItem | undefined = undefined;
 
   items.forEach(
     (
@@ -117,20 +117,20 @@ function rearrangeMenueItemsOwner(
 
       if (i === 0 || id !== items[i - 1].id) {
         if (i !== 0 && id !== items[i - 1].id) {
-          data.push(meintainedObjData!);
+          data.push(maintainedObjData!);
         }
 
-        meintainedObjData = {
+        maintainedObjData = {
           id,
           ...rest,
           categories: [],
           restaurantId,
         };
-        if (i === items.length - 1) data.push(meintainedObjData!);
+        if (i === items.length - 1) data.push(maintainedObjData!);
         return;
       }
-      meintainedObjData?.categories.push(category);
-      if (i === items.length - 1) data.push(meintainedObjData!);
+      maintainedObjData?.categories.push(category);
+      if (i === items.length - 1) data.push(maintainedObjData!);
     }
   );
   return data;

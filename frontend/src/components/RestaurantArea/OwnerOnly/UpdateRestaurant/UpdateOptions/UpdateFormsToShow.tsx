@@ -11,9 +11,7 @@ import UpdateRestaurantImage from "../UpdateRestaurantImage";
 import AddCategory from "../../../../CategoryArea/AddCategory";
 import UpdateCategory from "../../../../CategoryArea/UpdateCategory";
 import CreateMenuItem from "../../../../MenuItemArea/OwnerOnly/CreateMenuItem";
-import OwnerMenuItemCard from "../../../../MenuItemArea/OwnerOnly/OwnerMenuItemCard";
-import { Role } from "../../../../../models/User";
-import { SQLBoolean } from "../../../../../models/SQLBoolean";
+import UpdateItem from "../../../../MenuItemArea/OwnerOnly/UpdateItem/UpdateItem";
 
 type UpdateFormsToShowProps = {
   data: NestedRestaurantAndAddress;
@@ -21,7 +19,7 @@ type UpdateFormsToShowProps = {
 
 const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
   const { activeForm } = useActiveRestaurantForm();
-  function GenerateForm() {
+  function GenerateForm(): JSX.Element | null {
     switch (activeForm.name) {
       case "restaurant": {
         if (activeForm.active === "Update Name")
@@ -30,7 +28,7 @@ const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
           return <UpdateRestaurantLogo restaurant={data} />;
         if (activeForm.active === "Update Image")
           return <UpdateRestaurantImage restaurant={data} />;
-        break;
+        return null;
       }
 
       case "address": {
@@ -38,7 +36,7 @@ const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
           return <AddRestaurantAddress restaurant={data} />;
         if (activeForm.active === "Update Address")
           return <UpdateRestaurantAddress restaurant={data} />;
-        break;
+        return null;
       }
 
       case "category": {
@@ -46,18 +44,23 @@ const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
           return <AddCategory restaurantId={data.id} />;
         if (activeForm.active === "Update Category")
           return <UpdateCategory restaurantId={data.id} />;
-        break;
+        return null;
       }
 
       case "menu item": {
-        if (activeForm.active === "Create Menu item") {
+        if (activeForm.active === "Create Menu item")
           return <CreateMenuItem restaurantId={data.id} />;
-        }
-        break;
+        if (activeForm.active === "Update Menu item")
+          return <UpdateItem restaurantId={data.id} />;
+        // if (activeForm.active === "Update Menu item Image")
+        //   return <UpdateItem restaurantId={data.id} update="image" />;
+        // if (activeForm.active === "Menu Item - Category Association")
+        //   return <UpdateItem restaurantId={data.id} update="association" />;
+        return null;
       }
 
       default:
-        return undefined;
+        return null;
     }
   }
 
@@ -66,14 +69,6 @@ const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
       <UpdateOptions data={data} />
       <ActiveFormOptions />
       <GenerateForm />
-      <OwnerMenuItemCard
-        menuItem={{
-          id: 1,
-          name: "arirl",
-          restaurantId: 1,
-          showSouces: SQLBoolean.false,
-        }}
-      />
     </div>
   );
 };

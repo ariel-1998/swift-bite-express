@@ -60,14 +60,43 @@ export async function createMenuItemCategoryRef(
   }
 }
 
-type UpdateMenuItemCategoryRefParams = { oldCategoryId: string };
-type UpdateMenuItemCategoryRefReq = Request<
-  UpdateMenuItemCategoryRefParams,
-  unknown,
-  MenuItemCategoryTable
->;
-export function updateMenuItemCategoryRef(
-  req: UpdateMenuItemCategoryRefReq,
+export async function updateMenuItemCategoryRef(
+  req: CreateMenuItemCategoryRefReq,
   res: Response,
   next: NextFunction
-) {}
+) {
+  let connection: undefined | PoolConnection = undefined;
+  try {
+    const parsedData = menuItemCategoryTableSchema.parse(req.body);
+    const { menuItemId, restaurantId } = req.params;
+    const query = menuItemCategoryQueries.updateMenuItemCategoryRef({
+      categoryIds: parsedData,
+      menuItemId,
+      restaurantId,
+    });
+    connection = await pool.getConnection();
+    await connection.beginTransaction();
+    const [results] = await executeQuery<ResultSetHeader>(
+      connection,
+      query,
+      "menu_items_category"
+    );
+
+    if (!results.affectedRows) {
+      //rows are not connected to the restaurantId
+      throw new FunctionError(
+        "Cannot association these categories to menu item",
+        400
+      );
+    }
+
+    await connection.commit();
+    if (results.affectedRows < parsedData.length) return res.sendStatus(207);
+    res.sendStatus(201);
+  } catch (error) {
+    next(error);
+    await connection?.rollback();
+  } finally {
+    connection?.release();
+  }
+}

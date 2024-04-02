@@ -12,7 +12,10 @@ import { menuItemsQueries } from "../utils/DB/queries/MenuItemsQueries";
 import { executeSingleQuery } from "../utils/DB/dbConfig";
 import { ResultSetHeader } from "mysql2";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
-import { rearrangeMenueItems } from "../utils/helperFunctions";
+import {
+  TurnUndefinedToNullInObj,
+  rearrangeMenueItems,
+} from "../utils/helperFunctions";
 
 type MenuItemIdParams = { menuItemId: string };
 export async function getMenuItemById(
@@ -131,11 +134,28 @@ type UpdateMenuItemApartFromImg = Request<
   unknown,
   MenuItemWithoutIdAndImg
 >;
-export function updateMenuItemApartFromImg(
+export async function updateMenuItemApartFromImg(
   req: UpdateMenuItemApartFromImg,
-  res: Response<MenuItem>,
+  res: Response<undefined>,
   next: NextFunction
-) {}
+) {
+  try {
+    const { menuItemId } = req.params;
+    const parsedData = menuItemSchema
+      .omit({ imgPublicId: true })
+      .parse(req.body);
+    const menuItem: TurnUndefinedToNullInObj<Omit<MenuItem, "imgPublicId">> = {
+      ...parsedData,
+      id: +menuItemId,
+    };
+    const { params, query } =
+      menuItemsQueries.updateMenuItemApartFromImg(menuItem);
+    await executeSingleQuery(query, params, "menu_items");
+    res.sendStatus(200);
+  } catch (error) {
+    next(error);
+  }
+}
 
 type DeleteMenuItemParams = { menuItemId: string; restaurantId: string };
 type DeleteMenuItemReq = Request<DeleteMenuItemParams>;

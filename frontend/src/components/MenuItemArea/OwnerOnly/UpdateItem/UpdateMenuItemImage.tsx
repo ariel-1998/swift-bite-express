@@ -1,11 +1,11 @@
 import React from "react";
-import UpdateForm from "../../../../RestaurantArea/OwnerOnly/UpdateForm";
+import UpdateForm from "../../../RestaurantArea/OwnerOnly/UpdateForm";
 
 type UpdateMenuItemImageProps = {
   // Define props here
 };
 
-const UpdateMenuItemImage: React.FC<UpdateMenuItemImageProps> = ({ props }) => {
+const UpdateMenuItemImage: React.FC<UpdateMenuItemImageProps> = ({}) => {
   return <UpdateForm formTitle="Update item image in menu"></UpdateForm>;
 };
 
