@@ -18,7 +18,7 @@ class Cloudinary {
     await cld.uploader.destroy(imgPublicId);
   }
 
-  async updateImage(oldPublicId: string | undefined | null, filePath: string) {
+  async updateImage(oldPublicId: string | null, filePath: string) {
     const data = await this.uploadImage(filePath);
     if (oldPublicId) await this.deleteImage(oldPublicId);
     return data;

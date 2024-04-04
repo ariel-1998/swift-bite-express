@@ -16,6 +16,7 @@ import {
   TurnUndefinedToNullInObj,
   rearrangeMenueItems,
 } from "../utils/helperFunctions";
+import { imageSchema } from "../models/Restaurant";
 
 type MenuItemIdParams = { menuItemId: string };
 export async function getMenuItemById(
@@ -87,12 +88,13 @@ export async function createMenuItem(
     let image: undefined | UploadedFile = undefined;
     if (req.files) {
       image = Object.values(req.files)[0] as UploadedFile;
+      imageSchema.parse(image);
     }
     //check if there body data is valid
     const parsedData = menuItemSchema.parse(req.body);
     //add image to cloudinary
     if (image) {
-      const cldImage = await cloudinary.uploadImage(image?.tempFilePath);
+      const cldImage = await cloudinary.uploadImage(image.tempFilePath);
       publicId = cldImage.public_id;
       parsedData.imgPublicId = publicId;
     }
@@ -122,11 +124,34 @@ type UpdateMenuItemImgReq = Request<
   unknown,
   UpdateMenuItemImgBody
 >;
-export function updateMenuItemImg(
+export async function updateMenuItemImg(
   req: UpdateMenuItemImgReq,
-  res: Response<MenuItem>,
+  res: Response<string>,
   next: NextFunction
-) {}
+) {
+  try {
+    const menuItemId = req.params.menuItemId;
+    const { imgPublicId, restaurantId } = menuItemSchema
+      .pick({ restaurantId: true, imgPublicId: true })
+      .parse(req.body);
+    if (!req.files) throw new FunctionError("Image is required", 400);
+    const image = Object.values(req.files)[0] as UploadedFile;
+    imageSchema.parse(image);
+    const { public_id } = await cloudinary.updateImage(
+      imgPublicId,
+      image.tempFilePath
+    );
+    const { params, query } = menuItemsQueries.updateMenuItemImg({
+      id: +menuItemId,
+      imgPublicId: public_id,
+      restaurantId,
+    });
+    await executeSingleQuery<ResultSetHeader>(query, params, "menu_items");
+    res.status(200).json(public_id);
+  } catch (error) {
+    next(error);
+  }
+}
 
 type MenuItemWithoutIdAndImg = Omit<MenuItem, "id" | "imgPublicId">;
 type UpdateMenuItemApartFromImg = Request<
