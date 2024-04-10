@@ -6,7 +6,7 @@ type PostAssosiation = {
   categoryIds: number[];
   restaurantId: number;
 };
-class MenuItemCategory {
+class MenuItemCategoryService {
   async createMenuItemCategoryRef({
     categoryIds,
     menuItemId,
@@ -23,7 +23,7 @@ class MenuItemCategory {
     menuItemId,
     restaurantId,
   }: PostAssosiation) {
-    const status = await credentialsAxios.put(
+    const { status } = await credentialsAxios.put(
       `${menuItemCategoryRoute}/restaurant/${restaurantId}/menu-item/${menuItemId}`,
       categoryIds
     );
@@ -31,4 +31,4 @@ class MenuItemCategory {
   }
 }
 
-export const menuItemCategory = new MenuItemCategory();
+export const menuItemCategoryService = new MenuItemCategoryService();

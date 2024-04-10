@@ -65,7 +65,7 @@ const UpdateFormsToShow: React.FC<UpdateFormsToShowProps> = ({ data }) => {
   }
 
   return (
-    <div className="rounded m-auto mt-5 shadow-md border-secondary border-2 p-5 flex flex-col w-[95vw] sm:w-[500px]  bg-white">
+    <div className="rounded m-auto my-5 shadow-md border-secondary border-2 p-5 flex flex-col w-[95vw] sm:w-[500px]  bg-white">
       <UpdateOptions data={data} />
       <ActiveFormOptions />
       <GenerateForm />

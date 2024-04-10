@@ -5,12 +5,11 @@ import { menuItemService } from "../../../../services/menuItemService";
 import OwnerMenuItemCard from "../OwnerMenuItemCard";
 import UpdateMenuItemImage from "./UpdateMenuItemImage";
 import UpdateMenuItemDetails from "./UpdateMenuItemDetails";
-import { MenuItem } from "../../../../models/MenuItem";
+import { CategoriesNestedInMenuItem } from "../../../../models/MenuItem";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 import { useQueryClient } from "@tanstack/react-query";
 import UpdateMenuItemCategoryAssociation from "./UpdateMenuItemCategoryAssociation";
 import Modal from "../../../Customs/Modal";
-import Select from "../../../Customs/Select";
 
 type UpdateType = "image" | "details" | "association" | null;
 type UpdateItemProps = {
@@ -20,8 +19,8 @@ type UpdateItemProps = {
 const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
   //need to check that the right format returns for user and owner each with different type
   const queryClient = useQueryClient();
-  const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
-  // const deselectItem = () => setSelectedItem(null);
+  const [selectedItem, setSelectedItem] =
+    useState<CategoriesNestedInMenuItem | null>(null);
 
   const { data, isLoading, isError } = useCustomQuery({
     queryKey: queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId),
@@ -29,11 +28,11 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
       menuItemService.getMenuItemByRestaurantId(restaurantId, true),
   });
 
-  const cacheItemOnClick = (item: MenuItem) => {
+  const cacheItemOnClick = (item: CategoriesNestedInMenuItem) => {
     updateMenuItemCache.setSingleItemQueryDataOnClick(queryClient, item);
-    setSelectedItemId(item.id);
+    setSelectedItem(item);
   };
-
+  console.log(data);
   return (
     <div>
       {isLoading && <div>Loading...</div>}
@@ -42,80 +41,58 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
       {data &&
         data.map((item) => (
           <OwnerMenuItemCard
+            key={item.id}
             menuItem={item}
             onClick={() => cacheItemOnClick(item)}
           />
         ))}
 
-      {selectedItemId && (
+      {selectedItem && (
         <UpdateSelection
-          itemId={selectedItemId}
-          deselectItem={() => setSelectedItemId(null)}
+          // restaurantId={restaurantId}
+          menuItem={selectedItem}
+          deselectItem={() => setSelectedItem(null)}
         />
       )}
-
-      {/* 
-      {update === "image" && selectedItemId && <UpdateMenuItemImage />}
-      {update === "association" && selectedItemId && (
-        <UpdateMenuItemCategoryAssociation />
-      )} */}
-
-      {/* <div onClick={deselectItem} className="text-center">
-        Back to list
-      </div> */}
     </div>
   );
 };
 
 type UpdateSelectionProps = {
-  // setUpdateType: React.Dispatch<React.SetStateAction<UpdateType>>;
-  // updateType: UpdateType;
-  itemId: number;
+  menuItem: CategoriesNestedInMenuItem;
   deselectItem(): void;
 };
-function UpdateSelection({
-  // setUpdateType,
-  // updateType,
-  itemId,
-  deselectItem,
-}: UpdateSelectionProps) {
-  const [updateType, setUpdateType] = useState<UpdateType>(null);
-
-  const { data: item, isLoading } = useCustomQuery({
-    queryKey: queryKeys.menuItems.getMenuItemById(itemId),
-    queryFn: () => menuItemService.getMenuItemById(itemId),
-  });
+function UpdateSelection({ menuItem, deselectItem }: UpdateSelectionProps) {
+  const [updateType, setUpdateType] = useState<UpdateType>("details");
 
   return (
     <Modal close={deselectItem}>
-      <ul className="flex font-bold justify-around mb-5 divide-x divide-solid">
-        <Li
-          formName={"details"}
-          setUpdateType={setUpdateType}
-          activeForm={updateType}
-        />
-        <Li
-          formName={"image"}
-          setUpdateType={setUpdateType}
-          activeForm={updateType}
-        />
-        <Li
-          formName={"association"}
-          setUpdateType={setUpdateType}
-          activeForm={updateType}
-        />
-      </ul>
-
-      {updateType && isLoading && <div>Loading...</div>}
-      {updateType && item ? (
-        updateType === "details" ? (
-          <UpdateMenuItemDetails item={item} />
+      <div className="flex flex-col sm:w-[400px] w-full">
+        <ul className="flex font-bold justify-around mb-5 divide-x divide-solid">
+          <Li
+            formName={"details"}
+            setUpdateType={setUpdateType}
+            activeForm={updateType}
+          />
+          <Li
+            formName={"image"}
+            setUpdateType={setUpdateType}
+            activeForm={updateType}
+          />
+          <Li
+            formName={"association"}
+            setUpdateType={setUpdateType}
+            activeForm={updateType}
+          />
+        </ul>
+        {updateType === "details" ? (
+          <UpdateMenuItemDetails item={menuItem} />
         ) : updateType === "image" ? (
-          <UpdateMenuItemImage />
+          <UpdateMenuItemImage menuItem={menuItem} />
         ) : updateType === "association" ? (
-          <UpdateMenuItemCategoryAssociation />
-        ) : null
-      ) : null}
+          <UpdateMenuItemCategoryAssociation menuItem={menuItem} />
+        ) : null}
+      </div>
     </Modal>
   );
 }
@@ -132,7 +109,7 @@ function Li({ formName, setUpdateType, activeForm }: LiProps) {
         if (activeForm === formName) return;
         setUpdateType(formName);
       }}
-      className={`grow hover:bg-secondary p-2 transition-colors text-center
+      className={`grow hover:bg-secondary p-2 transition-colors text-center inline-block
 ${
   activeForm === formName
     ? "bg-secondary cursor-default"

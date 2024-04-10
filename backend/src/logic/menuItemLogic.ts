@@ -9,7 +9,7 @@ import {
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
 import { menuItemsQueries } from "../utils/DB/queries/MenuItemsQueries";
-import { executeSingleQuery } from "../utils/DB/dbConfig";
+import { executeQuery, executeSingleQuery, pool } from "../utils/DB/dbConfig";
 import { ResultSetHeader } from "mysql2";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
 import {
@@ -67,7 +67,11 @@ export async function getMenuItemsByRestaurantId(
       params,
       "menu_items"
     );
+    // console.log(rows);
+    console.log(isOwner);
     const rearrangedData = rearrangeMenueItems(rows, isOwner);
+    console.log(rearrangedData);
+
     //need to change to CategoriesNestedInMenuItem
     //to rearrange data
     res.status(200).json(rearrangedData);
@@ -118,7 +122,7 @@ export async function createMenuItem(
   }
 }
 
-type UpdateMenuItemImgBody = Pick<MenuItem, "imgPublicId" | "restaurantId">;
+type UpdateMenuItemImgBody = Pick<MenuItem, "restaurantId">;
 type UpdateMenuItemImgReq = Request<
   MenuItemIdParams,
   unknown,
@@ -126,28 +130,44 @@ type UpdateMenuItemImgReq = Request<
 >;
 export async function updateMenuItemImg(
   req: UpdateMenuItemImgReq,
-  res: Response<string>,
+  res: Response<MenuItem>,
   next: NextFunction
 ) {
   try {
-    const menuItemId = req.params.menuItemId;
-    const { imgPublicId, restaurantId } = menuItemSchema
-      .pick({ restaurantId: true, imgPublicId: true })
+    const connection = await pool.getConnection();
+    const menuItemId = +req.params.menuItemId;
+    const { restaurantId } = menuItemSchema
+      .pick({ restaurantId: true })
       .parse(req.body);
+
     if (!req.files) throw new FunctionError("Image is required", 400);
     const image = Object.values(req.files)[0] as UploadedFile;
     imageSchema.parse(image);
+
+    const getMenuItemQuery = menuItemsQueries.getMenuItemById(menuItemId);
+    const [items] = await executeQuery<MenuItem[]>(
+      connection,
+      getMenuItemQuery,
+      "menu_items"
+    );
+    const menuItem = items[0];
+    if (!menuItem) throw new FunctionError("Menu item was not found.", 404);
+
     const { public_id } = await cloudinary.updateImage(
-      imgPublicId,
+      menuItem.imgPublicId || null,
       image.tempFilePath
     );
-    const { params, query } = menuItemsQueries.updateMenuItemImg({
+    const updateMenuItemImgQuery = menuItemsQueries.updateMenuItemImg({
       id: +menuItemId,
       imgPublicId: public_id,
       restaurantId,
     });
-    await executeSingleQuery<ResultSetHeader>(query, params, "menu_items");
-    res.status(200).json(public_id);
+    await executeQuery<ResultSetHeader>(
+      connection,
+      updateMenuItemImgQuery,
+      "menu_items"
+    );
+    res.status(200).json({ ...menuItem, imgPublicId: public_id });
   } catch (error) {
     next(error);
   }

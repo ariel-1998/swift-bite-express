@@ -7,6 +7,7 @@ import {
   ResponseError,
   toastifyService,
 } from "../../services/toastifyService";
+import { stringOrNumber } from "@cloudinary/url-gen/types/types";
 
 class UpdateMenuItemCache {
   setSingleItemQueryDataOnClick(queryClient: QueryClient, menuItem: MenuItem) {
@@ -31,39 +32,6 @@ class UpdateMenuItemCache {
       return [...old, nestedItem];
     });
     return { ...menuItem, categories: [] } satisfies CategoriesNestedInMenuItem;
-  }
-
-  createMenuItemCategoryRef(
-    queryClient: QueryClient,
-    restaurantId: number,
-    status: number,
-    menuItem: CategoriesNestedInMenuItem,
-    categories: Category[]
-  ) {
-    const itemsKey =
-      queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId);
-    if (status === 207) {
-      queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
-      toastifyService.info(
-        "Only some of the categories were attached to the menu items"
-      );
-    }
-    queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
-      if (!old) return;
-      return old.map((mi) => {
-        if (mi.id === menuItem.id) {
-          const newCategoriesArr: Partial<Category>[] = [
-            ...menuItem.categories,
-            ...categories,
-          ];
-          return {
-            ...menuItem,
-            categories: newCategoriesArr,
-          } satisfies CategoriesNestedInMenuItem;
-        }
-        return mi;
-      });
-    });
   }
 
   updateMenuItemApartFromImg = {
@@ -112,6 +80,109 @@ class UpdateMenuItemCache {
           oldArrData
         );
       }
+    },
+  };
+
+  updateMenuItemImg = {
+    onSuccess(queryClient: QueryClient, menuItem: MenuItem) {
+      const singleMenuItemKey = queryKeys.menuItems.getMenuItemById(
+        menuItem.id
+      );
+      queryClient.setQueryData<MenuItem>(singleMenuItemKey, menuItem);
+      const menuItemsKey = queryKeys.menuItems.getMenuItemsByRestaurantId(
+        menuItem.restaurantId
+      );
+      queryClient.setQueryData<CategoriesNestedInMenuItem[]>(
+        menuItemsKey,
+        (old) => {
+          if (!old) return;
+          return old.map((item) => {
+            if (item.id !== menuItem.id) return item;
+            return { ...item, imgPublicId: menuItem.imgPublicId };
+          });
+        }
+      );
+    },
+  };
+
+  createMenuItemCategoryRef(
+    queryClient: QueryClient,
+    restaurantId: number,
+    status: number,
+    menuItem: CategoriesNestedInMenuItem,
+    categories: Category[]
+  ) {
+    const itemsKey =
+      queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId);
+    if (status === 207) {
+      queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
+      toastifyService.info(
+        "Only some of the categories were attached to the menu items"
+      );
+    }
+    queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
+      if (!old) return;
+      return old.map((mi) => {
+        if (mi.id === menuItem.id) {
+          const newCategoriesArr: Partial<Category>[] = [
+            ...menuItem.categories,
+            ...categories,
+          ];
+          return {
+            ...menuItem,
+            categories: newCategoriesArr,
+          } satisfies CategoriesNestedInMenuItem;
+        }
+        return mi;
+      });
+    });
+  }
+
+  updateMenuItemCategoryRef = {
+    onMutate(
+      queryClient: QueryClient,
+      menuItem: CategoriesNestedInMenuItem,
+      categories: Category[]
+    ) {
+      const queryKey = queryKeys.menuItems.getMenuItemsByRestaurantId(
+        menuItem.restaurantId
+      );
+      const oldData =
+        queryClient.getQueryData<CategoriesNestedInMenuItem[]>(queryKey);
+      queryClient.setQueryData<CategoriesNestedInMenuItem[]>(
+        queryKey,
+        (old) => {
+          if (!old) return;
+          return old.map((item) => {
+            if (item.id !== menuItem.id) return item;
+            return { ...item, categories };
+          });
+        }
+      );
+      return { oldData, queryKey };
+    },
+
+    onSuccess(
+      queryClient: QueryClient,
+      context: ReturnType<typeof this.onMutate>,
+      status: stringOrNumber
+    ) {
+      const { queryKey } = context;
+      if (status === 207) {
+        queryClient.invalidateQueries({ exact: true, queryKey });
+        toastifyService.info("Only some of the categories were updated");
+      }
+    },
+    onError<T extends ResponseError | FrontError>(
+      error: T,
+      context: ReturnType<typeof this.onMutate> | undefined,
+      queryClient: QueryClient
+    ) {
+      toastifyService.error(error);
+      if (!context) return;
+      const { oldData, queryKey } = context;
+      if (!oldData) return;
+      queryClient.setQueryData<CategoriesNestedInMenuItem[]>(queryKey, oldData);
     },
   };
 }

@@ -73,6 +73,7 @@ class MenuItemsQueries {
     // left join menu_items_category mic on mic.menuItemId = mi.id
     // left join categories c on c.id = mic.categoryId
     // where mi.id = 7`
+    //i dont need the above at all, keeping it just incase....
     const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
     const params: MixedArray = [menuItemId];
     return { params, query };

@@ -7,7 +7,7 @@ const spinnerStyles = cva(
     "rounded-full",
     "h-full",
     "aspect-square",
-    "bg-yellow-500",
+    // "bg-yellow-500",
     "bg-inherit",
     "border",
     "animate-spin",
@@ -18,6 +18,7 @@ const spinnerStyles = cva(
       variant: {
         default: ["border-[#007bff]"],
         disabled: ["border-secondary"],
+        white: ["border-white"],
       },
     },
     defaultVariants: {

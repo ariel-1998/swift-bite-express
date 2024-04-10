@@ -10,12 +10,10 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { menuItemService } from "../../../services/menuItemService";
 import AddCategoryToItem from "./AddCategoryToItem";
 import { Category } from "../../../models/Category";
-import { menuItemCategory } from "../../../services/menuItemCategory";
+import { menuItemCategoryService } from "../../../services/menuItemCategoryService";
 import { toastifyService } from "../../../services/toastifyService";
 import { updateMenuItemCache } from "../../../utils/queryCacheUpdates/updateMenuItemCache";
 import VerifySelectedCategoriesModal from "./VerifySelectedCategoriesModal";
-import queryKeys from "../../../utils/queryKeys";
-import useCustomQuery from "../../../hooks/useCustomQuery";
 
 type CreateMenuItemProps = {
   restaurantId: number;
@@ -36,12 +34,10 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
 
   const { mutateAsync, isPending: menuItemPending } = useMutation({
     mutationFn: menuItemService.createMenuItem,
-    //need to update menuItem list if fetched
   });
 
   const { mutateAsync: refMutate, isPending: categoryPending } = useMutation({
-    mutationFn: menuItemCategory.createMenuItemCategoryRef,
-    //need to update menuItem list if fetched
+    mutationFn: menuItemCategoryService.createMenuItemCategoryRef,
   });
 
   const postData = async (data: MenuItemForm) => {

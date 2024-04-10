@@ -8,6 +8,7 @@ import Button from "../Customs/Button";
 import { useMutation } from "@tanstack/react-query";
 import { AddressReq, addressService } from "../../services/addressService";
 import useUserInfo from "../../hooks/useUserInfo";
+import UpdateForm from "../RestaurantArea/OwnerOnly/UpdateForm";
 
 type UserAddressFormProps = {
   address?: Address;
@@ -56,8 +57,9 @@ const UserAddressForm: React.FC<UserAddressFormProps> = ({
   };
 
   return (
-    <div className="max-h-full overflow-auto">
-      <AuthForm onSubmit={handleSubmit(submitAddress)} title={title}>
+    // sm:p-10 border-secondary border-2 flex flex-col w-[95vw] sm:w-[500px]
+    <div className="max-h-full overflow-auto bg-white border-secondary border-2 sm:w-[500px] w-[90vw]">
+      <UpdateForm onSubmit={handleSubmit(submitAddress)} title={title}>
         <Input
           label="Country:"
           errMessage={errors.country?.message}
@@ -117,7 +119,7 @@ const UserAddressForm: React.FC<UserAddressFormProps> = ({
         <Button type="submit" size={"formBtn"} variant={"primary"}>
           {title}
         </Button>
-      </AuthForm>
+      </UpdateForm>
     </div>
   );
 };

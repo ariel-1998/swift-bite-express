@@ -20,7 +20,6 @@ type UpdateMenuItemDetailsProps = {
 
 const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
   item,
-  // menuItemId,
 }) => {
   const queryClient = useQueryClient();
   const {
@@ -31,12 +30,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
     resolver: zodResolver(menuItemSchema.omit({ image: true })),
   });
 
-  // const { data: item, isLoading } = useCustomQuery({
-  //   queryKey: queryKeys.menuItems.getMenuItemById(menuItemId),
-  //   queryFn: () => menuItemService.getMenuItemById(menuItemId),
-  // });
-
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: menuItemService.updateMenuItemApartFromImg,
     onMutate(variables) {
       const context = updateMenuItemCache.updateMenuItemApartFromImg.onMutate(
@@ -71,6 +65,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         {...register("name")}
         errMessage={errors.name?.message}
         defaultValue={item.name}
+        disabled={isPending}
       />
       <Input
         errMessage={errors.description?.message}
@@ -78,6 +73,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         type="text"
         {...register("description")}
         defaultValue={item.description || ""}
+        disabled={isPending}
       />
       <Input
         errMessage={errors.extrasAmount?.message}
@@ -85,6 +81,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         type="number"
         {...register("extrasAmount")}
         defaultValue={item.extrasAmount?.toString()}
+        disabled={isPending}
       />
       <div className="flex flex-col">
         <label>Show sauces available at the restaurant:</label>
@@ -95,6 +92,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
             value={SQLBoolean.true}
             {...register("showSouces")}
             defaultChecked={Boolean(item.showSouces)}
+            disabled={isPending}
           />
           <label htmlFor="yes">Yes</label>
         </div>
@@ -105,6 +103,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
             value={SQLBoolean.false}
             {...register("showSouces")}
             defaultChecked={Boolean(item.showSouces)}
+            disabled={isPending}
           />
           <label htmlFor="no" className="h-fit">
             No
@@ -113,7 +112,12 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         <div className="text-error">{errors.showSouces?.message}</div>
       </div>
 
-      <Button type="submit" size={"formBtn"} variant={"primary"}>
+      <Button
+        type="submit"
+        size={"formBtn"}
+        variant={"primary"}
+        disabled={isPending}
+      >
         Update
       </Button>
     </UpdateForm>

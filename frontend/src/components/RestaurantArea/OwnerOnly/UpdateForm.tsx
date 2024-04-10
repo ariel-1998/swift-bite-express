@@ -6,7 +6,7 @@ type UpdateFormProps = {
   formTitle?: string;
 } & ComponentProps<"form">;
 
-const classes = "flex flex-col gap-3 px-10 py-5";
+const classes = "flex flex-col gap-3 px-10 py-5 m-0";
 const UpdateForm: React.FC<UpdateFormProps> = ({
   className,
   children,

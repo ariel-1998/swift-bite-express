@@ -29,7 +29,6 @@ export function generateCldResizedImage(
       : CONSTANTS.DEFAULT_RESTAURANT_LOGO_PUBLIC_ID;
   }
   const image = cld.image(cldPublicId);
-  console.log(cldPublicId);
   const resizedImg = image.resize(resize);
   return resizedImg;
 }

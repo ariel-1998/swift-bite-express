@@ -11,6 +11,9 @@ const menuItemRoute = "/menu-item";
 
 type PostItem = MenuItemForm & Pick<MenuItem, "restaurantId">;
 type UpdateApartFromImg = Omit<MenuItem, "imgPublicId">;
+type UpdateImage = Pick<MenuItem, "id" | "restaurantId"> & {
+  image: FileList;
+};
 //for now data returns from axios is MenuItem, probably update to menuItemwith CategoryId and categoryName
 class MenuItemService {
   async createMenuItem({
@@ -49,6 +52,7 @@ class MenuItemService {
         ? CategoriesNestedInMenuItem[]
         : MenuItemsNestedInCategories[]
     >(`${menuItemRoute}/restaurant/${restaurantId}`, { params });
+    console.log("dataasdasdasd", data);
     return data;
   }
 
@@ -64,7 +68,20 @@ class MenuItemService {
     return data;
   }
 
-  async updateMenuItemImg() {}
+  async updateMenuItemImg({
+    id,
+    restaurantId,
+    image,
+  }: UpdateImage): Promise<MenuItem> {
+    const formData = new FormData();
+    formData.append("restaurantId", restaurantId.toString());
+    formData.append("image", image[0]);
+    const { data } = await credentialsAxios.put<MenuItem>(
+      `${menuItemRoute}/${id}/image`,
+      formData
+    );
+    return data;
+  }
   async deleteMenuItem() {}
 }
 

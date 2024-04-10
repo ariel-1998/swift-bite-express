@@ -19,7 +19,7 @@ const OwnerMenuItemCard: React.FC<OwnerMenuItemCardProps> = ({
   );
 
   return (
-    <div className="border p-2 rounded-md flex gap-2" {...rest}>
+    <div className="border p-2 rounded-md flex gap-2 cursor-pointer" {...rest}>
       <AdvancedImage cldImg={img} className={"border-r"} />
       <div className="flex flex-col">
         <div className="font-bold text-lg">{menuItem.name}</div>
