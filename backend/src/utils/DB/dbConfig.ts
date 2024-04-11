@@ -36,6 +36,7 @@ export async function executeQuery<T>(
     );
     return data;
   } catch (error) {
+    console.log(error);
     const { code, message } = sqlErrorHandler(error, tableName);
     throw new FunctionError(message, code);
   }

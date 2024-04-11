@@ -21,6 +21,6 @@ menuItemCategoryRouter.post(
 menuItemCategoryRouter.put(
   "/restaurant/:restaurantId([0-9]+)/menu-item/:menuItemId([0-9]+)",
   isOwnerRole,
-  verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
+  verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
   updateMenuItemCategoryRef
 );

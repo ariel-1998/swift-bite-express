@@ -12,6 +12,11 @@ type ItemCategoryRef = {
   restaurantId: number;
 };
 
+type TransactionQueries = {
+  deleteQuery: TransactionQuery;
+  insertQuery: TransactionQuery;
+};
+
 class MenuItemCategoryQueries {
   private createCategoryIdPlaceholders(categoryIds: number[]) {
     return categoryIds.map(() => "?").join(", ");
@@ -48,7 +53,7 @@ class MenuItemCategoryQueries {
     return { params, query };
   }
 
-  updateMenuItemCategoryRef(obj: ItemCategoryRef): TransactionQuery {
+  updateMenuItemCategoryRef(obj: ItemCategoryRef): TransactionQueries {
     const { columns: categoryCols, tableName: categories } =
       DB.tables.categories;
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
@@ -58,6 +63,8 @@ class MenuItemCategoryQueries {
     WHERE ${menuItemId} = ?
     AND  ${restaurantId} = ?
     `;
+
+    const deleteParams: MixedArray = [obj.menuItemId, obj.restaurantId];
 
     const menuItemIdPlacholders = this.createCategoryIdPlaceholders(
       obj.categoryIds
@@ -75,29 +82,21 @@ class MenuItemCategoryQueries {
     AND ${menuItems}.${itemCols.id} = ?
     AND ${categories}.${categoryCols.id} IN (${menuItemIdPlacholders})
     `;
-    // const query = `
-    // UPDATE ${tableName}
-    // SET ${categoryId} = ?
-    // WHERE ${categoryId} = ?
-    // AND ${menuItemId} = ?
-    // AND ${restaurantId} = ?`;
 
-    // const deleteParams: MixedArray = [obj.menuItemId, obj.restaurantId];
-
-    // const params: MixedArray = [
-    //   obj.restaurantId,
-    //   obj.menuItemId,
-    //   ...obj.categoryIds,
-    // ];
-    const params: MixedArray = [
-      obj.menuItemId,
-      obj.restaurantId,
+    const insertParams: MixedArray = [
       obj.restaurantId,
       obj.menuItemId,
       ...obj.categoryIds,
     ];
-
-    return { params, query: `${deleteQuery}; ${insertQuery}` };
+    const deleteQ: TransactionQuery = {
+      query: deleteQuery,
+      params: deleteParams,
+    };
+    const insertQ: TransactionQuery = {
+      query: insertQuery,
+      params: insertParams,
+    };
+    return { deleteQuery: deleteQ, insertQuery: insertQ };
   }
 }
 

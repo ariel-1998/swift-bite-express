@@ -17,7 +17,6 @@ type UpdateItemProps = {
 };
 
 const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
-  //need to check that the right format returns for user and owner each with different type
   const queryClient = useQueryClient();
   const [selectedItem, setSelectedItem] =
     useState<CategoriesNestedInMenuItem | null>(null);
@@ -32,7 +31,6 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
     updateMenuItemCache.setSingleItemQueryDataOnClick(queryClient, item);
     setSelectedItem(item);
   };
-  console.log(data);
   return (
     <div>
       {isLoading && <div>Loading...</div>}
@@ -49,7 +47,6 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
 
       {selectedItem && (
         <UpdateSelection
-          // restaurantId={restaurantId}
           menuItem={selectedItem}
           deselectItem={() => setSelectedItem(null)}
         />

@@ -69,29 +69,43 @@ export async function updateMenuItemCategoryRef(
   try {
     const parsedData = menuItemCategoryTableSchema.parse(req.body);
     const { menuItemId, restaurantId } = req.params;
-    const query = menuItemCategoryQueries.updateMenuItemCategoryRef({
-      categoryIds: parsedData,
-      menuItemId,
-      restaurantId,
-    });
+    console.log("restaurantId", restaurantId);
+    const { deleteQuery, insertQuery } =
+      menuItemCategoryQueries.updateMenuItemCategoryRef({
+        categoryIds: parsedData,
+        menuItemId,
+        restaurantId,
+      });
     connection = await pool.getConnection();
     await connection.beginTransaction();
-    const [results] = await executeQuery<ResultSetHeader>(
+    const [deleteRes] = await executeQuery<ResultSetHeader>(
       connection,
-      query,
+      deleteQuery,
+      "menu_items_category"
+    );
+    if (!parsedData.length) {
+      await connection.commit();
+      if (!deleteRes.affectedRows) {
+        //rows are not connected to the restaurantId
+        throw new FunctionError("Error: Changes were not applied. ", 400);
+      }
+      return res.sendStatus(201);
+    }
+    const [insertRes] = await executeQuery<ResultSetHeader>(
+      connection,
+      insertQuery,
       "menu_items_category"
     );
 
-    if (!results.affectedRows) {
+    if (!insertRes.affectedRows) {
       //rows are not connected to the restaurantId
       throw new FunctionError(
         "Cannot association these categories to menu item",
         400
       );
     }
-
     await connection.commit();
-    if (results.affectedRows < parsedData.length) return res.sendStatus(207);
+    if (insertRes.affectedRows < parsedData.length) return res.sendStatus(207);
     res.sendStatus(201);
   } catch (error) {
     next(error);

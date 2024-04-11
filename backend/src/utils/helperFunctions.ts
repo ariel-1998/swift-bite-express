@@ -57,89 +57,159 @@ export function rearrangeRestaurantAddressDataArray(
   return rearrangedData;
 }
 
-function rearrangeMenueItemsUser(
+// function rearrangeMenuItemsUser(
+//   items: MenuItemJoinedWCategory[]
+// ): MenuItemsNestedInCategories[] {
+//   const data: MenuItemsNestedInCategories[] = [];
+//   let maintainedObjData: MenuItemsNestedInCategories | undefined = undefined;
+//   items.forEach(
+//     (
+//       { restaurantId, categoryDescription, categoryId, categoryName, ...rest },
+//       i
+//     ) => {
+//       const menuItem: MenuItem = { ...rest, restaurantId };
+//       if (i === 0 || categoryId !== items[i - 1].categoryId) {
+//         if (i !== 0 && categoryId !== items[i - 1].categoryId) {
+//           data.push(maintainedObjData!);
+//         }
+//         maintainedObjData = {
+//           id: categoryId,
+//           restaurantId,
+//           description: categoryDescription,
+//           name: categoryName,
+//           menuItems: [menuItem],
+//         };
+//         if (i === items.length - 1) data.push(maintainedObjData!);
+//         return;
+//       }
+
+//       maintainedObjData?.menuItems.push(menuItem);
+//       if (i === items.length - 1) data.push(maintainedObjData!);
+//     }
+//   );
+//   return data;
+// }
+
+function rearrangeMenuItemsUser(
   items: MenuItemJoinedWCategory[]
 ): MenuItemsNestedInCategories[] {
-  const data: MenuItemsNestedInCategories[] = [];
-  let maintainedObjData: MenuItemsNestedInCategories | undefined = undefined;
-  items.forEach(
-    (
-      { restaurantId, categoryDescription, categoryId, categoryName, ...rest },
-      i
-    ) => {
-      const menuItem: MenuItem = { ...rest, restaurantId };
-      if (i === 0 || categoryId !== items[i - 1].categoryId) {
-        if (i !== 0 && categoryId !== items[i - 1].categoryId) {
-          data.push(maintainedObjData!);
-        }
-        maintainedObjData = {
-          id: categoryId,
-          restaurantId,
-          description: categoryDescription,
-          name: categoryName,
-          menuItems: [menuItem],
-        };
-        if (i === items.length - 1) data.push(maintainedObjData!);
-        return;
-      }
+  let i = 0;
+  const arrangedData: MenuItemsNestedInCategories[] = [];
+  let currentJ: MenuItemsNestedInCategories | undefined = undefined;
 
-      maintainedObjData?.menuItems.push(menuItem);
-      if (i === items.length - 1) data.push(maintainedObjData!);
-    }
-  );
-  return data;
+  while (i < items.length) {
+    const currentI = items[i];
+    const item: MenuItem = {
+      id: currentI.id,
+      description: currentI.description,
+      extrasAmount: currentI.extrasAmount,
+      imgPublicId: currentI.imgPublicId,
+      name: currentI.name,
+      restaurantId: currentI.restaurantId,
+      showSouces: currentI.showSouces,
+    };
+
+    if (currentI.categoryId !== currentJ?.id) {
+      const currentItem: MenuItemsNestedInCategories = {
+        id: currentI.categoryId,
+        name: currentI.categoryName,
+        description: currentI.categoryDescription,
+        restaurantId: currentI.restaurantId,
+        menuItems: [item],
+      };
+      currentJ = currentItem;
+      arrangedData.push(currentItem);
+    } else currentJ?.menuItems.push(item);
+    i++;
+  }
+  return arrangedData;
 }
 
-function rearrangeMenueItemsOwner(
+// function rearrangeMenuItemsOwner(
+//   items: MenuItemJoinedWCategory[]
+// ): CategoriesNestedInMenuItem[] {
+//   const data: CategoriesNestedInMenuItem[] = [];
+//   let maintainedObjData: CategoriesNestedInMenuItem | undefined = undefined;
+
+//   items.forEach(
+//     (
+//       {
+//         restaurantId,
+//         categoryId,
+//         categoryDescription,
+//         categoryName,
+//         id,
+//         ...rest
+//       },
+//       i
+//     ) => {
+//       const category: Partial<Category> = {
+//         restaurantId,
+//         id: categoryId,
+//         description: categoryDescription,
+//         name: categoryName,
+//       };
+
+//       if (i === 0 || id !== items[i - 1].id) {
+//         if (i !== 0 && id !== items[i - 1].id) {
+//           data.push(maintainedObjData!);
+//         }
+
+//         maintainedObjData = {
+//           id,
+//           ...rest,
+//           categories: [],
+//           restaurantId,
+//         };
+//         if (i === items.length - 1) data.push(maintainedObjData!);
+//         return;
+//       }
+//       maintainedObjData?.categories.push(category);
+//       if (i === items.length - 1) data.push(maintainedObjData!);
+//     }
+//   );
+//   return data;
+// }
+
+function rearrangeMenuItemsOwner(
   items: MenuItemJoinedWCategory[]
 ): CategoriesNestedInMenuItem[] {
-  const data: CategoriesNestedInMenuItem[] = [];
-  let maintainedObjData: CategoriesNestedInMenuItem | undefined = undefined;
-
-  items.forEach(
-    (
-      {
-        restaurantId,
-        categoryId,
-        categoryDescription,
-        categoryName,
-        id,
-        ...rest
-      },
-      i
-    ) => {
-      const category: Partial<Category> = {
-        restaurantId,
-        id: categoryId,
-        description: categoryDescription,
-        name: categoryName,
+  let i = 0;
+  // let j = 0;
+  const arrangedItems: CategoriesNestedInMenuItem[] = [];
+  // let lastItem: CategoriesNestedInMenuItem | null = null;
+  let currentJ: CategoriesNestedInMenuItem | undefined = undefined;
+  while (i < items.length) {
+    const currentI = items[i];
+    const category: Partial<Category> = {
+      id: currentI.categoryId,
+      description: currentI.categoryDescription,
+      name: currentI.categoryName,
+      restaurantId: currentI.restaurantId,
+    };
+    if (currentI.id !== currentJ?.id) {
+      const currentItem: CategoriesNestedInMenuItem = {
+        id: currentI.id,
+        restaurantId: currentI.restaurantId,
+        description: currentI.description,
+        name: currentI.name,
+        extrasAmount: currentI.extrasAmount,
+        imgPublicId: currentI.imgPublicId,
+        showSouces: currentI.showSouces,
+        categories: category.id ? [category] : [],
       };
-
-      if (i === 0 || id !== items[i - 1].id) {
-        if (i !== 0 && id !== items[i - 1].id) {
-          data.push(maintainedObjData!);
-        }
-
-        maintainedObjData = {
-          id,
-          ...rest,
-          categories: [],
-          restaurantId,
-        };
-        if (i === items.length - 1) data.push(maintainedObjData!);
-        return;
-      }
-      maintainedObjData?.categories.push(category);
-      if (i === items.length - 1) data.push(maintainedObjData!);
-    }
-  );
-  return data;
+      currentJ = currentItem;
+      arrangedItems.push(currentItem);
+    } else currentJ.categories.push(category);
+    i++;
+  }
+  return arrangedItems;
 }
 
 export function rearrangeMenueItems(
   items: MenuItemJoinedWCategory[],
   isOwner: boolean | undefined
 ) {
-  if (isOwner) return rearrangeMenueItemsOwner(items);
-  return rearrangeMenueItemsUser(items);
+  if (isOwner) return rearrangeMenuItemsOwner(items);
+  return rearrangeMenuItemsUser(items);
 }

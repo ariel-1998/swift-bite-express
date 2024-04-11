@@ -67,10 +67,7 @@ export async function getMenuItemsByRestaurantId(
       params,
       "menu_items"
     );
-    // console.log(rows);
-    console.log(isOwner);
     const rearrangedData = rearrangeMenueItems(rows, isOwner);
-    console.log(rearrangedData);
 
     //need to change to CategoriesNestedInMenuItem
     //to rearrange data
