@@ -10,18 +10,9 @@ import { CategorySchema } from "../../models/Category";
 import { MenuItemCategoryTable } from "../../models/MenuItemCategoryTable";
 import { Extra } from "../../models/Extra";
 import { Sauce } from "../../models/Sauce";
+import { MenuItemOption } from "../../models/MenuItemOption";
 
-export type SQLTableNames =
-  | "auth_provider"
-  | "users"
-  | "addresses"
-  | "restaurants"
-  | "restaurant_owner_address"
-  | "categories"
-  | "menu_items"
-  | "sauces"
-  | "extras"
-  | "menu_items_category";
+export type SQLTableNames = keyof Tables;
 
 export class SqlTable<T> {
   constructor(public tableName: SQLTableNames, public columns: Columns<T>) {}
@@ -39,6 +30,7 @@ type Tables = {
   restaurants: SqlTable<Required<RestaurantSchema>>;
   categories: SqlTable<Required<CategorySchema>>;
   menu_items: SqlTable<Required<MenuItem>>;
+  menu_item_options: SqlTable<Required<MenuItemOption>>;
   sauces: SqlTable<Required<Sauce>>;
   extras: SqlTable<Required<Extra>>;
   menu_items_category: SqlTable<Required<MenuItemCategoryTable>>;
@@ -108,6 +100,7 @@ DB.addTable("categories", {
   description: "description",
   name: "name",
 });
+
 DB.addTable("menu_items", {
   id: "id",
   name: "name",
@@ -119,6 +112,13 @@ DB.addTable("menu_items", {
   showSouces: "showSouces",
   price: "price",
 });
+
+DB.addTable("menu_item_options", {
+  id: "id",
+  menuItemId: "menuItemId",
+  name: "name",
+});
+
 DB.addTable("sauces", {
   id: "id",
   restaurantId: "restaurantId",
@@ -298,6 +298,31 @@ async function create_menu_items_table(connection: PoolConnection) {
   await createTable(connection, query);
 }
 
+DB.addTable("menu_item_options", {
+  id: "id",
+  menuItemId: "menuItemId",
+  name: "name",
+});
+
+async function create_menu_item_options_table(connection: PoolConnection) {
+  const { menu_item_options, menu_items } = DB.tables;
+  const {
+    columns: { id, menuItemId, name },
+    tableName,
+  } = menu_item_options;
+  const { columns: menuItemCols, tableName: menuItems } = menu_items;
+
+  const query = `
+  CREATE TABLE IF NOT EXISTS ${tableName} (
+  ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+  ${menuItemId} INT NOT NULL,
+  ${name} VARCHAR(20) NOT NULL,
+  UNIQUE (${menuItemId}, ${name})
+  FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${menuItemCols.id}) ON DELETE CASCADE
+  )`;
+  await createTable(connection, query);
+}
+
 async function create_sauces_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.sauces;
@@ -368,6 +393,7 @@ export async function createDBTables() {
     await create_restaurant_owner_address_table(connection);
     await create_categories_table(connection);
     await create_menu_items_table(connection);
+    await create_menu_item_options_table(connection);
     await create_sauces_table(connection);
     await create_extras_table(connection);
     await create_menu_items_category_table(connection);
