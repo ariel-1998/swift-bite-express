@@ -57,39 +57,6 @@ export function rearrangeRestaurantAddressDataArray(
   return rearrangedData;
 }
 
-// function rearrangeMenuItemsUser(
-//   items: MenuItemJoinedWCategory[]
-// ): MenuItemsNestedInCategories[] {
-//   const data: MenuItemsNestedInCategories[] = [];
-//   let maintainedObjData: MenuItemsNestedInCategories | undefined = undefined;
-//   items.forEach(
-//     (
-//       { restaurantId, categoryDescription, categoryId, categoryName, ...rest },
-//       i
-//     ) => {
-//       const menuItem: MenuItem = { ...rest, restaurantId };
-//       if (i === 0 || categoryId !== items[i - 1].categoryId) {
-//         if (i !== 0 && categoryId !== items[i - 1].categoryId) {
-//           data.push(maintainedObjData!);
-//         }
-//         maintainedObjData = {
-//           id: categoryId,
-//           restaurantId,
-//           description: categoryDescription,
-//           name: categoryName,
-//           menuItems: [menuItem],
-//         };
-//         if (i === items.length - 1) data.push(maintainedObjData!);
-//         return;
-//       }
-
-//       maintainedObjData?.menuItems.push(menuItem);
-//       if (i === items.length - 1) data.push(maintainedObjData!);
-//     }
-//   );
-//   return data;
-// }
-
 function rearrangeMenuItemsUser(
   items: MenuItemJoinedWCategory[]
 ): MenuItemsNestedInCategories[] {
@@ -107,6 +74,8 @@ function rearrangeMenuItemsUser(
       name: currentI.name,
       restaurantId: currentI.restaurantId,
       showSouces: currentI.showSouces,
+      drinksAmount: currentI.drinksAmount,
+      price: currentI.price,
     };
 
     if (currentI.categoryId !== currentJ?.id) {
@@ -124,52 +93,6 @@ function rearrangeMenuItemsUser(
   }
   return arrangedData;
 }
-
-// function rearrangeMenuItemsOwner(
-//   items: MenuItemJoinedWCategory[]
-// ): CategoriesNestedInMenuItem[] {
-//   const data: CategoriesNestedInMenuItem[] = [];
-//   let maintainedObjData: CategoriesNestedInMenuItem | undefined = undefined;
-
-//   items.forEach(
-//     (
-//       {
-//         restaurantId,
-//         categoryId,
-//         categoryDescription,
-//         categoryName,
-//         id,
-//         ...rest
-//       },
-//       i
-//     ) => {
-//       const category: Partial<Category> = {
-//         restaurantId,
-//         id: categoryId,
-//         description: categoryDescription,
-//         name: categoryName,
-//       };
-
-//       if (i === 0 || id !== items[i - 1].id) {
-//         if (i !== 0 && id !== items[i - 1].id) {
-//           data.push(maintainedObjData!);
-//         }
-
-//         maintainedObjData = {
-//           id,
-//           ...rest,
-//           categories: [],
-//           restaurantId,
-//         };
-//         if (i === items.length - 1) data.push(maintainedObjData!);
-//         return;
-//       }
-//       maintainedObjData?.categories.push(category);
-//       if (i === items.length - 1) data.push(maintainedObjData!);
-//     }
-//   );
-//   return data;
-// }
 
 function rearrangeMenuItemsOwner(
   items: MenuItemJoinedWCategory[]
@@ -196,6 +119,8 @@ function rearrangeMenuItemsOwner(
         extrasAmount: currentI.extrasAmount,
         imgPublicId: currentI.imgPublicId,
         showSouces: currentI.showSouces,
+        drinksAmount: currentI.drinksAmount,
+        price: currentI.price,
         categories: category.id ? [category] : [],
       };
       currentJ = currentItem;

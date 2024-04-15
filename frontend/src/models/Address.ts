@@ -36,6 +36,6 @@ export const addressSchema = z.object({
 
 export type AddressFormData = z.infer<typeof addressSchema>;
 
-function checkIfStringIsNum(arg: string) {
+export function checkIfStringIsNum(arg: string) {
   return !isNaN(+arg);
 }

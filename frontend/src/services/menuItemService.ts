@@ -22,12 +22,16 @@ class MenuItemService {
     extrasAmount,
     image,
     name,
+    price,
     showSouces,
+    drinksAmount,
   }: PostItem): Promise<MenuItem> {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("description", description || "");
     formData.append("extrasAmount", extrasAmount);
+    formData.append("drinksAmount", drinksAmount);
+    formData.append("price", price);
     if (image) formData.append("image", image[0]);
     formData.append("name", name);
     formData.append("showSouces", showSouces);

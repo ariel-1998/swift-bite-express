@@ -13,8 +13,10 @@ export type MenuItem = {
   restaurantId: number; //refers to restaurants
   description: string | undefined | null;
   extrasAmount: number | undefined | null;
+  drinksAmount: number | undefined | null;
   showSouces: SQLBoolean;
   imgPublicId: string | undefined | null;
+  price: number;
 };
 
 export type MenuItemJoinedWCategory = MenuItem & {
@@ -67,6 +69,32 @@ export const menuItemSchema = z.object({
     )
     .optional()
     .transform((arg) => arg ?? 0),
+  drinksAmount: z
+    .union(
+      [
+        z.number().min(0, "Drinks Amount must be a positive number"),
+        z
+          .string()
+          .refine(
+            (val) => !isNaN(+val) && +val >= 0,
+            "Drinks Amount must be 0 or more"
+          )
+          .transform((arg) => +arg),
+      ],
+      { errorMap: () => ({ message: "Drinks Amount must be a number" }) }
+    )
+    .optional()
+    .transform((arg) => arg ?? 0),
+  price: z.union(
+    [
+      z.number().min(0, "Invalid Price"),
+      z
+        .string()
+        .refine((arg) => !isNaN(+arg) && +arg > 0, "Invalid Price")
+        .transform((arg) => +arg),
+    ],
+    { errorMap: () => ({ message: "Invalid Price" }) }
+  ),
   //check if correctly implemented
   showSouces: z.nativeEnum(SQLBoolean),
   imgPublicId: publicIdSchema,

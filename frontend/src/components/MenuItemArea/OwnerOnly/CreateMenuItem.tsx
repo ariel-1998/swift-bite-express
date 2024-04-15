@@ -67,7 +67,6 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
       toastifyService.error(error as Error);
     }
   };
-
   return (
     <UpdateForm onSubmit={handleSubmit(postData)} formTitle="Add item to menu">
       <Input
@@ -89,12 +88,23 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         {...register("extrasAmount")}
       />
       <Input
+        errMessage={errors.drinksAmount?.message}
+        label="Choose the number of drinks:"
+        type="number"
+        {...register("drinksAmount")}
+      />
+      <Input
         errMessage={errors.image?.message}
         label="Choose Image:"
         type="file"
         {...register("image")}
       />
-
+      <Input
+        errMessage={errors.price?.message}
+        label="Price:"
+        type="number"
+        {...register("price")}
+      />
       <div className="flex flex-col">
         <label>Show sauces available at the restaurant:</label>
         <div className="flex items-center gap-1 ">

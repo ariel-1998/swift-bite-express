@@ -13,8 +13,10 @@ const {
     description,
     imgPublicId,
     extrasAmount,
+    drinksAmount,
     showSouces,
     restaurantId,
+    price,
   },
 } = DB.tables.menu_items;
 
@@ -22,7 +24,7 @@ class MenuItemsQueries {
   createMenuItem(menuItem: Omit<MenuItemQuery, "id">): TransactionQuery {
     const query = `
       INSERT INTO ${tableName} 
-      (${restaurantId}, ${name}, ${description}, ${imgPublicId}, ${extrasAmount}, ${showSouces})
+      (${restaurantId}, ${name}, ${description}, ${imgPublicId}, ${extrasAmount}, ${drinksAmount}, ${showSouces}, ${price})
       VALUES(?,?,?,?,?,?)`;
 
     const params: MixedArray = [
@@ -31,7 +33,9 @@ class MenuItemsQueries {
       menuItem.description,
       menuItem.imgPublicId,
       menuItem.extrasAmount,
+      menuItem.drinksAmount,
       menuItem.showSouces,
+      menuItem.price,
     ];
     return { params, query };
   }
@@ -55,14 +59,18 @@ class MenuItemsQueries {
     SET ${name} = ?,
     ${description} = ?,
     ${extrasAmount} = ?,
-    ${showSouces} = ?
+    ${drinksAmount} = ?,
+    ${showSouces} = ?,
+    ${price} = ?
     WHERE ${id} = ? And ${restaurantId} = ?
     `;
     const params: MixedArray = [
       menuItem.name,
       menuItem.description,
       menuItem.extrasAmount,
+      menuItem.drinksAmount,
       menuItem.showSouces,
+      menuItem.price,
       menuItem.id,
       menuItem.restaurantId,
     ];

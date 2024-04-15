@@ -4,11 +4,11 @@ import { useParams } from "react-router-dom";
 import { restaurantService } from "../services/restaurantService";
 import queryKeys from "../utils/queryKeys";
 import RestaurantHeaderImg from "../components/RestaurantArea/RestaurantHeaderImg";
-import UpdateRestaurant from "../components/RestaurantArea/OwnerOnly/UpdateRestaurant/UpdateRestaurant";
 import useUserInfo from "../hooks/useUserInfo";
 import { Role } from "../models/User";
 import ProtectedComp from "../components/ProtectedComponent.tsx/ProtectedComp";
 import UpdateFormsToShow from "../components/RestaurantArea/OwnerOnly/UpdateRestaurant/UpdateOptions/UpdateFormsToShow";
+import MenuItemCardList from "../components/MenuItemArea/UserOnly/MenuItemCardList";
 //might add react lazy
 const RestaurantPage: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
@@ -30,7 +30,12 @@ const RestaurantPage: React.FC = () => {
       </ProtectedComp>
 
       <ProtectedComp condition={!user || user?.role === Role.user}>
-        {data && <RestaurantHeaderImg restaurant={data} />}
+        {data && (
+          <>
+            <RestaurantHeaderImg restaurant={data} />
+            <MenuItemCardList restaurantId={data?.id} />
+          </>
+        )}
       </ProtectedComp>
     </>
   );

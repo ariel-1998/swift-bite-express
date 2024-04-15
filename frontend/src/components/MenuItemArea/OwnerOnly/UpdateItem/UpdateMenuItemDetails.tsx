@@ -48,14 +48,23 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
     },
   });
 
-  const submitForm = handleSubmit((data: Omit<MenuItemForm, "image">) => {
-    mutate({
-      restaurantId: item.restaurantId,
-      ...data,
-      extrasAmount: +data.extrasAmount,
-      id: item?.id,
-    });
-  });
+  const submitForm = handleSubmit(
+    ({
+      extrasAmount,
+      price,
+      drinksAmount,
+      ...rest
+    }: Omit<MenuItemForm, "image">) => {
+      mutate({
+        drinksAmount: +drinksAmount,
+        restaurantId: item.restaurantId,
+        extrasAmount: +extrasAmount,
+        price: +price,
+        ...rest,
+        id: item?.id,
+      });
+    }
+  );
 
   return (
     <UpdateForm formTitle="Update item Details in menu" onSubmit={submitForm}>
@@ -81,6 +90,22 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         type="number"
         {...register("extrasAmount")}
         defaultValue={item.extrasAmount?.toString()}
+        disabled={isPending}
+      />
+      <Input
+        errMessage={errors.drinksAmount?.message}
+        label="Choose the number of drinks:"
+        type="number"
+        {...register("drinksAmount")}
+        defaultValue={item.drinksAmount?.toString()}
+        disabled={isPending}
+      />
+      <Input
+        errMessage={errors.price?.message}
+        label="Price:"
+        type="number"
+        {...register("price")}
+        defaultValue={item.price}
         disabled={isPending}
       />
       <div className="flex flex-col">

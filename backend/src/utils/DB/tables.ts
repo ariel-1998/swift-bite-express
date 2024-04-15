@@ -114,8 +114,10 @@ DB.addTable("menu_items", {
   description: "description",
   imgPublicId: "imgPublicId",
   extrasAmount: "extrasAmount",
+  drinksAmount: "drinksAmount",
   restaurantId: "restaurantId",
   showSouces: "showSouces",
+  price: "price",
 });
 DB.addTable("sauces", {
   id: "id",
@@ -271,9 +273,11 @@ async function create_menu_items_table(connection: PoolConnection) {
     name,
     description,
     extrasAmount,
+    drinksAmount,
     imgPublicId,
     showSouces,
     restaurantId,
+    price,
   } = columns;
   const { columns: restaurantCols, tableName: restaurants } =
     DB.tables.restaurants;
@@ -284,8 +288,10 @@ async function create_menu_items_table(connection: PoolConnection) {
   ${name} VARCHAR(45) NOT NULL,
   ${description} VARCHAR(500) DEFAULT NULL,
   ${extrasAmount} INT DEFAULT NULL,
+  ${drinksAmount} INT DEFAULT NULL,
   ${showSouces} TINYINT NOT NULL DEFAULT 0,
   ${imgPublicId} VARCHAR(500) DEFAULT NULL,
+  ${price} INT NOT NULL,
   UNIQUE (${restaurantId}, ${name}),
   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restaurantCols.id}) ON DELETE CASCADE
   )`;
