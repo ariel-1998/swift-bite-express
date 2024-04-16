@@ -1,11 +1,11 @@
 import React, { ComponentProps } from "react";
-import { MenuItemWCategoryAndOptions } from "../../../models/MenuItem";
+import { CategoriesNestedInMenuItem } from "../../../models/MenuItem";
 import { thumbnail } from "@cloudinary/url-gen/actions/resize";
 import { generateCldResizedImage } from "../../../utils/cloudinaryConfig";
 import { AdvancedImage } from "@cloudinary/react";
 
 type OwnerMenuItemCardProps = {
-  menuItem: MenuItemWCategoryAndOptions;
+  menuItem: CategoriesNestedInMenuItem;
 } & ComponentProps<"div">;
 
 const OwnerMenuItemCard: React.FC<OwnerMenuItemCardProps> = ({

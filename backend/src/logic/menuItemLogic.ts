@@ -43,7 +43,6 @@ export async function getMenuItemById(
 
 export async function getMenuItemsByRestaurantId(
   req: Request<{ restaurantId: string }>,
-  //need to change to CategoriesNestedInMenuItem
   res: Response<MenuItemWCategoryAndOptions[] | CategoriesNestedInMenuItem[]>,
   next: NextFunction
 ) {

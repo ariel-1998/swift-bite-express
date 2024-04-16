@@ -25,7 +25,7 @@ class UpdateMenuItemCache {
       old ? menuItem : old
     );
   }
-  createMenuItem(queryClient: QueryClient, menuItem: MenuItem) {
+  createMenuItem(queryClient: QueryClient, menuItem: MenuItemWOptions) {
     const singleItemKey = queryKeys.menuItems.getMenuItemById(menuItem.id);
     queryClient.setQueryData<MenuItem>(singleItemKey, menuItem);
 

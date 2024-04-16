@@ -5,7 +5,10 @@ import { menuItemService } from "../../../../services/menuItemService";
 import OwnerMenuItemCard from "../OwnerMenuItemCard";
 import UpdateMenuItemImage from "./UpdateMenuItemImage";
 import UpdateMenuItemDetails from "./UpdateMenuItemDetails";
-import { MenuItemWCategoryAndOptions } from "../../../../models/MenuItem";
+import {
+  CategoriesNestedInMenuItem,
+  MenuItemWCategoryAndOptions,
+} from "../../../../models/MenuItem";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 import { useQueryClient } from "@tanstack/react-query";
 import UpdateMenuItemCategoryAssociation from "./UpdateMenuItemCategoryAssociation";
@@ -19,15 +22,15 @@ type UpdateItemProps = {
 const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
   const queryClient = useQueryClient();
   const [selectedItem, setSelectedItem] =
-    useState<MenuItemWCategoryAndOptions | null>(null);
+    useState<CategoriesNestedInMenuItem | null>(null);
 
   const { data, isLoading, isError } = useCustomQuery({
     queryKey: queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId),
     queryFn: () =>
-      menuItemService.getMenuItemByRestaurantId(restaurantId, true),
+      menuItemService.getMenuItemByRestaurantId<true>(restaurantId),
   });
 
-  const cacheItemOnClick = (item: MenuItemWCategoryAndOptions) => {
+  const cacheItemOnClick = (item: CategoriesNestedInMenuItem) => {
     updateMenuItemCache.setSingleItemQueryDataOnClick(queryClient, item);
     setSelectedItem(item);
   };
@@ -56,7 +59,7 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
 };
 
 type UpdateSelectionProps = {
-  menuItem: MenuItemWCategoryAndOptions;
+  menuItem: CategoriesNestedInMenuItem;
   deselectItem(): void;
 };
 function UpdateSelection({ menuItem, deselectItem }: UpdateSelectionProps) {

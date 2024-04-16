@@ -40,8 +40,9 @@ class QueryKeys {
       return [menuItems, { menuItemId }]; //MenuItemWdOptions
     },
     getMenuItemsByRestaurantId(restaurantId: number) {
-      //MenuItemWCategoryAndOptions[]
-      return [menuItems, { restaurantId }]; //owner = CategoriesNestedInMenuItem[] || user = MenuItemsNestedInCategories[]
+      //user = MenuItemWCategoryAndOptions[] |owner =  CategoriesNestedInMenuItem[]
+      return [menuItems, { restaurantId }];
+      //old //owner = CategoriesNestedInMenuItem[] || user = MenuItemsNestedInCategories[]
     },
   };
 }

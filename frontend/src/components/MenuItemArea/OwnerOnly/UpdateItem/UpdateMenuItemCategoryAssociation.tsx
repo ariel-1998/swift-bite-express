@@ -1,5 +1,5 @@
 import React, { FormEvent, useState } from "react";
-import { MenuItemWCategoryAndOptions } from "../../../../models/MenuItem";
+import { CategoriesNestedInMenuItem } from "../../../../models/MenuItem";
 import UpdateForm from "../../../RestaurantArea/OwnerOnly/UpdateForm";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { menuItemCategoryService } from "../../../../services/menuItemCategoryService";
@@ -9,7 +9,7 @@ import AddCategoryToItem from "../AddCategoryToItem";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 
 type UpdateMenuItemCategoryAssociationProps = {
-  menuItem: MenuItemWCategoryAndOptions;
+  menuItem: CategoriesNestedInMenuItem;
 };
 
 const UpdateMenuItemCategoryAssociation: React.FC<
@@ -19,7 +19,6 @@ const UpdateMenuItemCategoryAssociation: React.FC<
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(
     menuItem.categories as Category[]
   );
-  console.log(menuItem);
   const { mutate, isPending } = useMutation({
     mutationFn: menuItemCategoryService.updateMenuItemCategoryRef,
     onMutate() {

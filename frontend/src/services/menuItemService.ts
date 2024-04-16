@@ -5,9 +5,7 @@ import {
   MenuItemForm,
   MenuItemWCategoryAndOptions,
   MenuItemWOptions,
-  MenuItemsNestedInCategories,
 } from "../models/MenuItem";
-import { AxiosResponse } from "axios";
 
 const menuItemRoute = "/menu-item";
 
@@ -27,7 +25,7 @@ class MenuItemService {
     price,
     showSouces,
     drinksAmount,
-  }: PostItem): Promise<MenuItem> {
+  }: PostItem): Promise<MenuItemWOptions> {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("description", description || "");
@@ -37,11 +35,14 @@ class MenuItemService {
     if (image) formData.append("image", image[0]);
     formData.append("name", name);
     formData.append("showSouces", showSouces);
-    const { data } = await credentialsAxios.post(menuItemRoute, formData);
+    const { data } = await credentialsAxios.post<MenuItemWOptions>(
+      menuItemRoute,
+      formData
+    );
     return data;
   }
 
-  async getMenuItemById(menuItemId: MenuItem["id"]): Promise<MenuItem> {
+  async getMenuItemById(menuItemId: MenuItem["id"]): Promise<MenuItemWOptions> {
     const { data } = await defaultAxios.get<MenuItemWOptions>(
       `${menuItemRoute}/${menuItemId}`
     );
@@ -49,46 +50,33 @@ class MenuItemService {
   }
 
   async getMenuItemByRestaurantId<T extends boolean>(
-    restaurantId: MenuItem["restaurantId"],
-    isOwner: T
+    restaurantId: MenuItem["restaurantId"]
   ) {
     //might not need param of isOwner
-    const params = isOwner ? { isOwner: true } : {};
-    const { data } = await defaultAxios.get<MenuItemWCategoryAndOptions[]>(
-      `${menuItemRoute}/restaurant/${restaurantId}`,
-      { params }
-    );
-    // const params = isOwner ? { isOwner: true } : {};
-    // const { data } = await defaultAxios.get<
-    //   typeof isOwner extends true
-    //     ? CategoriesNestedInMenuItem[]
-    //     : MenuItemsNestedInCategories[]
-    // >(`${menuItemRoute}/restaurant/${restaurantId}`, { params });
-    console.log("dataasdasdasd", data);
+    const { data } = await defaultAxios.get<
+      T extends true
+        ? CategoriesNestedInMenuItem[]
+        : MenuItemWCategoryAndOptions[]
+    >(`${menuItemRoute}/restaurant/${restaurantId}`);
     return data;
   }
 
   async updateMenuItemApartFromImg({
     id,
     ...rest
-  }: UpdateApartFromImg): Promise<MenuItem> {
-    const { data } = await credentialsAxios.put<
-      MenuItem,
-      AxiosResponse,
-      Omit<UpdateApartFromImg, "id">
-    >(`${menuItemRoute}/${id}`, rest);
-    return data;
+  }: UpdateApartFromImg): Promise<void> {
+    await credentialsAxios.put<undefined>(`${menuItemRoute}/${id}`, rest);
   }
 
   async updateMenuItemImg({
     id,
     restaurantId,
     image,
-  }: UpdateImage): Promise<MenuItem> {
+  }: UpdateImage): Promise<MenuItemWOptions> {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("image", image[0]);
-    const { data } = await credentialsAxios.put<MenuItem>(
+    const { data } = await credentialsAxios.put<MenuItemWOptions>(
       `${menuItemRoute}/${id}/image`,
       formData
     );
