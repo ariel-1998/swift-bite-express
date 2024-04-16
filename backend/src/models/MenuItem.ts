@@ -6,6 +6,7 @@ import {
 } from "./Restaurant";
 import { SQLBoolean } from "./SQLBoolean";
 import { Category } from "./Category";
+import { MenuItemOption } from "./MenuItemOption";
 
 export type MenuItem = {
   id: number;
@@ -19,18 +20,14 @@ export type MenuItem = {
   price: number;
 };
 
-export type MenuItemJoinedWCategory = MenuItem & {
-  categoryId?: Category["id"];
-  categoryName?: Category["name"];
-  categoryDescription?: Category["description"];
+export type MenuItemWOptions = MenuItem & { options: MenuItemOption[] };
+
+export type MenuItemWCategoryAndOptions = MenuItemWOptions & {
+  category: Category | null;
 };
 
-export type CategoriesNestedInMenuItem = MenuItem & {
-  categories: Partial<Category>[];
-};
-
-export type MenuItemsNestedInCategories = Partial<Category> & {
-  menuItems: MenuItem[];
+export type CategoriesNestedInMenuItem = MenuItemWOptions & {
+  categories: Category[];
 };
 
 export const menuItemIdSchema = generateIdSchema("MenuItemId");

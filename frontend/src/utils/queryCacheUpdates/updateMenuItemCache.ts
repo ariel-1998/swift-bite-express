@@ -1,5 +1,9 @@
 import { QueryClient } from "@tanstack/react-query";
-import { CategoriesNestedInMenuItem, MenuItem } from "../../models/MenuItem";
+import {
+  CategoriesNestedInMenuItem,
+  MenuItem,
+  MenuItemWOptions,
+} from "../../models/MenuItem";
 import queryKeys from "../queryKeys";
 import { Category } from "../../models/Category";
 import {
@@ -10,11 +14,16 @@ import {
 import { stringOrNumber } from "@cloudinary/url-gen/types/types";
 
 class UpdateMenuItemCache {
-  setSingleItemQueryDataOnClick(queryClient: QueryClient, menuItem: MenuItem) {
+  setSingleItemQueryDataOnClick(
+    queryClient: QueryClient,
+    menuItem: MenuItemWOptions
+  ) {
     const queryKey = queryKeys.menuItems.getMenuItemById(menuItem.id);
-    const data = queryClient.getQueryData<MenuItem>(queryKey);
-    if (data) return;
-    queryClient.setQueryData<MenuItem>(queryKey, menuItem);
+    // const data = queryClient.getQueryData<MenuItemWOptions>(queryKey);
+    // if (data) return;
+    queryClient.setQueryData<MenuItemWOptions>(queryKey, (old) =>
+      old ? menuItem : old
+    );
   }
   createMenuItem(queryClient: QueryClient, menuItem: MenuItem) {
     const singleItemKey = queryKeys.menuItems.getMenuItemById(menuItem.id);

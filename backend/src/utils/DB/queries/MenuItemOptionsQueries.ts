@@ -31,10 +31,16 @@ class MenuItemOptionsQueries {
   createOptions(options: Options): TransactionQuery {
     const { placeHolders, vals } =
       this.createOptionsPlaceholdersAndVals(options);
+    const { columns: itemsCols, tableName: menuItems } = DB.tables.menu_items;
     //need to check how to insert only if menuItem has restaurantId = menuItemId
     const query = `
     INSERT INTO ${tableName} (${menuItemId}, ${name})
-    VALUES ${placeHolders}
+    SELECT 
+    ${menuItems}.${itemsCols.id}, 
+    ?
+    FROM ${menuItems} 
+    WHERE ${menuItems}.${itemsCols.id} = ? 
+    AND ${menuItems}.${itemsCols.restaurantId} = ?
     `;
     const params: MixedArray = vals;
     return { query, params };

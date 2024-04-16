@@ -16,6 +16,11 @@ export type MenuItem = {
   showSouces: SQLBoolean;
   imgPublicId?: string | null;
 };
+export type MenuItemWOptions = MenuItem & { options: string[] };
+
+export type MenuItemWCategoryAndOptions = MenuItemWOptions & {
+  category: Category | null;
+};
 
 // export type MenuItemJoinedWCategory = MenuItem & {
 //   categoryId?: Category["id"];

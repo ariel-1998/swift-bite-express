@@ -3,6 +3,8 @@ import {
   CategoriesNestedInMenuItem,
   MenuItem,
   MenuItemForm,
+  MenuItemWCategoryAndOptions,
+  MenuItemWOptions,
   MenuItemsNestedInCategories,
 } from "../models/MenuItem";
 import { AxiosResponse } from "axios";
@@ -40,7 +42,7 @@ class MenuItemService {
   }
 
   async getMenuItemById(menuItemId: MenuItem["id"]): Promise<MenuItem> {
-    const { data } = await defaultAxios.get<MenuItem>(
+    const { data } = await defaultAxios.get<MenuItemWOptions>(
       `${menuItemRoute}/${menuItemId}`
     );
     return data;
@@ -50,12 +52,18 @@ class MenuItemService {
     restaurantId: MenuItem["restaurantId"],
     isOwner: T
   ) {
+    //might not need param of isOwner
     const params = isOwner ? { isOwner: true } : {};
-    const { data } = await defaultAxios.get<
-      typeof isOwner extends true
-        ? CategoriesNestedInMenuItem[]
-        : MenuItemsNestedInCategories[]
-    >(`${menuItemRoute}/restaurant/${restaurantId}`, { params });
+    const { data } = await defaultAxios.get<MenuItemWCategoryAndOptions[]>(
+      `${menuItemRoute}/restaurant/${restaurantId}`,
+      { params }
+    );
+    // const params = isOwner ? { isOwner: true } : {};
+    // const { data } = await defaultAxios.get<
+    //   typeof isOwner extends true
+    //     ? CategoriesNestedInMenuItem[]
+    //     : MenuItemsNestedInCategories[]
+    // >(`${menuItemRoute}/restaurant/${restaurantId}`, { params });
     console.log("dataasdasdasd", data);
     return data;
   }

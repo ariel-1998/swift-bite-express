@@ -37,9 +37,10 @@ class QueryKeys {
 
   menuItems = {
     getMenuItemById(menuItemId: number) {
-      return [menuItems, { menuItemId }]; //MenuItem
+      return [menuItems, { menuItemId }]; //MenuItemWdOptions
     },
     getMenuItemsByRestaurantId(restaurantId: number) {
+      //MenuItemWCategoryAndOptions[]
       return [menuItems, { restaurantId }]; //owner = CategoriesNestedInMenuItem[] || user = MenuItemsNestedInCategories[]
     },
   };

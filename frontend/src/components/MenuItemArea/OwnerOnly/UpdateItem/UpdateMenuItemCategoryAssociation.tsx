@@ -1,5 +1,5 @@
 import React, { FormEvent, useState } from "react";
-import { CategoriesNestedInMenuItem } from "../../../../models/MenuItem";
+import { MenuItemWCategoryAndOptions } from "../../../../models/MenuItem";
 import UpdateForm from "../../../RestaurantArea/OwnerOnly/UpdateForm";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { menuItemCategoryService } from "../../../../services/menuItemCategoryService";
@@ -9,7 +9,7 @@ import AddCategoryToItem from "../AddCategoryToItem";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 
 type UpdateMenuItemCategoryAssociationProps = {
-  menuItem: CategoriesNestedInMenuItem;
+  menuItem: MenuItemWCategoryAndOptions;
 };
 
 const UpdateMenuItemCategoryAssociation: React.FC<

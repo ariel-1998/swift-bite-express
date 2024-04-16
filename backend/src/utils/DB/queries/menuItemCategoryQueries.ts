@@ -26,7 +26,6 @@ class MenuItemCategoryQueries {
       DB.tables.categories;
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
 
-    // const menuItemIdPlacholders = obj.categoryIds.map(() => "?").join(", ");
     const menuItemIdPlacholders = this.createCategoryIdPlaceholders(
       obj.categoryIds
     );

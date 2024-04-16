@@ -25,7 +25,7 @@ class MenuItemsQueries {
     const query = `
       INSERT INTO ${tableName} 
       (${restaurantId}, ${name}, ${description}, ${imgPublicId}, ${extrasAmount}, ${drinksAmount}, ${showSouces}, ${price})
-      VALUES(?,?,?,?,?,?)`;
+      VALUES(?,?,?,?,?,?,?,?)`;
 
     const params: MixedArray = [
       menuItem.restaurantId,
@@ -77,33 +77,99 @@ class MenuItemsQueries {
     return { params, query };
   }
   getMenuItemById(menuItemId: number): TransactionQuery {
-    // const query = `SELECT mi.*, c.id as categoryId, c.name as categoryName, c.description as categoryDescription FROM menu_items mi
-    // left join menu_items_category mic on mic.menuItemId = mi.id
-    // left join categories c on c.id = mic.categoryId
-    // where mi.id = 7`
-    //i dont need the above at all, keeping it just incase....
-    const query = `SELECT * FROM ${tableName} WHERE ${id} = ?`;
+    const { columns: optionCols, tableName: options } =
+      DB.tables.menu_item_options;
+    const query = `
+    SELECT 
+      ${tableName}.*,
+    CASE 
+    WHEN  
+      COUNT(menu_item_options.id) > 0 
+    THEN
+      JSON_ARRAYAGG(
+        JSON_OBJECT(
+          '${optionCols.id}', ${options}.${optionCols.id},
+          '${optionCols.menuItemId}', ${options}.${optionCols.menuItemId},
+          '${optionCols.name}', ${options}.${optionCols.name}
+        )  
+      ) 
+    ELSE 
+      JSON_ARRAY()
+    END 
+      AS options
+    FROM 
+      ${tableName} 
+    LEFT JOIN 
+      ${options} 
+    ON 
+      ${tableName}.${id} = ${options}.${optionCols.menuItemId}
+    WHERE 
+      ${tableName}.${id} = ? 
+    GROUP BY ${tableName}.${id}
+    `;
     const params: MixedArray = [menuItemId];
     return { params, query };
   }
   getMenuItemsByRestaurantId(
     restId: number,
-    isOwner: boolean | undefined
+    isOwner: boolean
   ): TransactionQuery {
     const { columns: categoryCols, tableName: categories } =
       DB.tables.categories;
     const { columns: micCols, tableName: mic } = DB.tables.menu_items_category;
-    const orderBy = isOwner ? `${tableName}.${id}` : "categoryId";
+    const { columns: optionCols, tableName: options } =
+      DB.tables.menu_item_options;
+
+    const orderBy = isOwner
+      ? `${tableName}.${id}`
+      : `${categories}.${categoryCols.id}`;
     const query = `
-    SELECT ${tableName}.*, 
-    ${categories}.${categoryCols.id} AS categoryId, 
-    ${categories}.${categoryCols.name} AS categoryName,
-    ${categories}.${categoryCols.description} AS categoryDescription
-    FROM ${tableName}
-    LEFT JOIN ${mic} ON ${mic}.${micCols.menuItemId} = ${tableName}.${id}
-    LEFT JOIN ${categories} ON ${categories}.${categoryCols.id} = ${mic}.${micCols.categoryId}
-    WHERE ${tableName}.${restaurantId} = ?
-    ORDER BY ${orderBy}`;
+    SELECT 
+      ${tableName}.*, 
+      CASE
+      WHEN 
+        COUNT(menu_item_options.id) > 0 
+      THEN
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            '${optionCols.id}', ${options}.${optionCols.id},
+            '${optionCols.menuItemId}', ${options}.${optionCols.menuItemId},
+            '${optionCols.name}', ${options}.${optionCols.name}
+          )  
+        ) 
+      ELSE
+        JSON_ARRAY()
+      END
+        AS options,
+      CASE
+      WHEN 
+        ${categories}.${categoryCols.id} IS NOT NULL
+      THEN
+        JSON_OBJECT(
+            '${categoryCols.id}', ${categories}.${categoryCols.id},
+            '${categoryCols.name}', ${categories}.${categoryCols.name},
+            '${categoryCols.description}', ${categories}.${categoryCols.description},
+            '${categoryCols.restaurantId}', ${categories}.${categoryCols.restaurantId}
+        ) 
+      ELSE 
+        NULL  
+      END 
+        AS category
+    FROM 
+      ${tableName}
+    LEFT JOIN 
+      ${options} ON ${tableName}.${id} = ${options}.${optionCols.menuItemId}
+    LEFT JOIN 
+      ${mic} ON ${mic}.${micCols.menuItemId} = ${tableName}.${id}
+    LEFT JOIN 
+      ${categories} ON ${categories}.${categoryCols.id} = ${mic}.${micCols.categoryId}
+    WHERE 
+      ${tableName}.${restaurantId} = ?
+    GROUP BY 
+      ${tableName}.${id},${categories}.${categoryCols.id}
+    ORDER BY 
+      ${orderBy}
+    `;
     const params: MixedArray = [restId];
     return { params, query };
   }

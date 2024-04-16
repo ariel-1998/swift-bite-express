@@ -317,7 +317,7 @@ async function create_menu_item_options_table(connection: PoolConnection) {
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
   ${menuItemId} INT NOT NULL,
   ${name} VARCHAR(20) NOT NULL,
-  UNIQUE (${menuItemId}, ${name})
+  UNIQUE (${menuItemId}, ${name}),
   FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${menuItemCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);

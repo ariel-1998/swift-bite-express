@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import {
-  CategoriesNestedInMenuItem,
   MenuItem,
-  MenuItemJoinedWCategory,
-  MenuItemsNestedInCategories,
+  MenuItemWOptions,
+  MenuItemWCategoryAndOptions,
   menuItemSchema,
+  CategoriesNestedInMenuItem,
 } from "../models/MenuItem";
 import { UploadedFile } from "express-fileupload";
 import { cloudinary } from "../utils/cloudinaryConfig";
@@ -14,28 +14,25 @@ import { ResultSetHeader } from "mysql2";
 import { FunctionError } from "../models/Errors/ErrorConstructor";
 import {
   TurnUndefinedToNullInObj,
-  rearrangeMenueItems,
+  rearrangeMenuItemsForOwner,
 } from "../utils/helperFunctions";
 import { imageSchema } from "../models/Restaurant";
+import { Role } from "../models/User";
 
 type MenuItemIdParams = { menuItemId: string };
 export async function getMenuItemById(
   req: Request<MenuItemIdParams>,
-  //need to change to CategoriesNestedInMenuItem
-  res: Response<MenuItem>,
+  res: Response<MenuItemWOptions>,
   next: NextFunction
 ) {
   try {
     const { menuItemId } = req.params;
     const { params, query } = menuItemsQueries.getMenuItemById(+menuItemId);
-    //need to change to MenuItemJoinedWCategory
-    const [rows] = await executeSingleQuery<MenuItem[]>(
+    const [rows] = await executeSingleQuery<MenuItemWOptions[]>(
       query,
       params,
       "menu_items"
     );
-    //to rearrange data
-
     const item = rows[0];
     if (!item) throw new FunctionError("Menu item not found", 404);
     res.status(200).json(item);
@@ -45,33 +42,27 @@ export async function getMenuItemById(
 }
 
 export async function getMenuItemsByRestaurantId(
-  req: Request<
-    { restaurantId: string },
-    unknown,
-    unknown,
-    { isOwner?: boolean }
-  >,
+  req: Request<{ restaurantId: string }>,
   //need to change to CategoriesNestedInMenuItem
-  res: Response<CategoriesNestedInMenuItem[] | MenuItemsNestedInCategories[]>,
+  res: Response<MenuItemWCategoryAndOptions[] | CategoriesNestedInMenuItem[]>,
   next: NextFunction
 ) {
   try {
     const { restaurantId } = req.params;
-    const isOwner = req.query.isOwner;
+    const isOwner = req.user?.role === Role.owner;
     const { params, query } = menuItemsQueries.getMenuItemsByRestaurantId(
       +restaurantId,
       isOwner
     );
-    const [rows] = await executeSingleQuery<MenuItemJoinedWCategory[]>(
+    const [rows] = await executeSingleQuery<MenuItemWCategoryAndOptions[]>(
       query,
       params,
       "menu_items"
     );
-    const rearrangedData = rearrangeMenueItems(rows, isOwner);
-    console.log(rows);
-    //need to change to CategoriesNestedInMenuItem
-    //to rearrange data
-    res.status(200).json(rearrangedData);
+    let response: MenuItemWCategoryAndOptions[] | CategoriesNestedInMenuItem[] =
+      rows;
+    if (isOwner) response = rearrangeMenuItemsForOwner(response);
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -81,7 +72,7 @@ type MenuItemWithoutId = Omit<MenuItem, "id">;
 type CreateMenuItemReq = Request<unknown, unknown, MenuItemWithoutId>;
 export async function createMenuItem(
   req: CreateMenuItemReq,
-  res: Response<MenuItem>,
+  res: Response<MenuItemWOptions>,
   next: NextFunction
 ) {
   let publicId: string | null = null;
@@ -106,8 +97,7 @@ export async function createMenuItem(
       params,
       "menu_items"
     );
-
-    res.status(201).json({ ...parsedData, id: results.insertId });
+    res.status(201).json({ ...parsedData, id: results.insertId, options: [] });
   } catch (error) {
     // remove the image from Dcloudinary
     try {
@@ -127,7 +117,7 @@ type UpdateMenuItemImgReq = Request<
 >;
 export async function updateMenuItemImg(
   req: UpdateMenuItemImgReq,
-  res: Response<MenuItem>,
+  res: Response<MenuItemWOptions>,
   next: NextFunction
 ) {
   try {
@@ -142,7 +132,7 @@ export async function updateMenuItemImg(
     imageSchema.parse(image);
 
     const getMenuItemQuery = menuItemsQueries.getMenuItemById(menuItemId);
-    const [items] = await executeQuery<MenuItem[]>(
+    const [items] = await executeQuery<MenuItemWOptions[]>(
       connection,
       getMenuItemQuery,
       "menu_items"
