@@ -5,10 +5,7 @@ import { menuItemService } from "../../../../services/menuItemService";
 import OwnerMenuItemCard from "../OwnerMenuItemCard";
 import UpdateMenuItemImage from "./UpdateMenuItemImage";
 import UpdateMenuItemDetails from "./UpdateMenuItemDetails";
-import {
-  CategoriesNestedInMenuItem,
-  MenuItemWCategoryAndOptions,
-} from "../../../../models/MenuItem";
+import { CategoriesNestedInMenuItem } from "../../../../models/MenuItem";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 import { useQueryClient } from "@tanstack/react-query";
 import UpdateMenuItemCategoryAssociation from "./UpdateMenuItemCategoryAssociation";

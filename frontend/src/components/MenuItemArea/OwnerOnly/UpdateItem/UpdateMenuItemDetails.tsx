@@ -4,8 +4,8 @@ import { menuItemService } from "../../../../services/menuItemService";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  MenuItem,
   MenuItemForm,
+  MenuItemWOptions,
   menuItemSchema,
 } from "../../../../models/MenuItem";
 import Input from "../../../Customs/Input";
@@ -15,7 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 
 type UpdateMenuItemDetailsProps = {
-  item: MenuItem;
+  item: MenuItemWOptions;
 };
 
 const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
@@ -35,7 +35,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
     onMutate(variables) {
       const context = updateMenuItemCache.updateMenuItemApartFromImg.onMutate(
         queryClient,
-        variables
+        { ...item, ...variables }
       );
       return context;
     },
@@ -60,8 +60,8 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         restaurantId: item.restaurantId,
         extrasAmount: +extrasAmount,
         price: +price,
+        id: item.id,
         ...rest,
-        id: item?.id,
       });
     }
   );

@@ -18,6 +18,7 @@ import { sauceRouter } from "./routes/sauceRouter";
 import { extraRouter } from "./routes/extraRouter";
 import { menuItemCategoryRouter } from "./routes/menuItemCategoryRouter";
 import { userRouter } from "./routes/userRouter";
+import { menuItemsOptionsRouter } from "./routes/menuItemsOptionsRouter";
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/category", categoryRouter);
 app.use("/api/menu-item", menuItemRouter);
 app.use("/api/menu-item/:menuItemId([0-9]+)/extra", extraRouter);
 app.use("/api/menu-item-category", menuItemCategoryRouter);
+app.use("/api/menu-item-options", menuItemsOptionsRouter);
 
 app.use(errorHandler);
 

@@ -18,6 +18,7 @@ import {
 } from "../utils/helperFunctions";
 import { imageSchema } from "../models/Restaurant";
 import { Role } from "../models/User";
+import { PoolConnection } from "mysql2/promise";
 
 type MenuItemIdParams = { menuItemId: string };
 export async function getMenuItemById(
@@ -119,8 +120,8 @@ export async function updateMenuItemImg(
   res: Response<MenuItemWOptions>,
   next: NextFunction
 ) {
+  let connection: PoolConnection | undefined = undefined;
   try {
-    const connection = await pool.getConnection();
     const menuItemId = +req.params.menuItemId;
     const { restaurantId } = menuItemSchema
       .pick({ restaurantId: true })
@@ -129,8 +130,8 @@ export async function updateMenuItemImg(
     if (!req.files) throw new FunctionError("Image is required", 400);
     const image = Object.values(req.files)[0] as UploadedFile;
     imageSchema.parse(image);
-
     const getMenuItemQuery = menuItemsQueries.getMenuItemById(menuItemId);
+    connection = await pool.getConnection();
     const [items] = await executeQuery<MenuItemWOptions[]>(
       connection,
       getMenuItemQuery,
@@ -156,6 +157,8 @@ export async function updateMenuItemImg(
     res.status(200).json({ ...menuItem, imgPublicId: public_id });
   } catch (error) {
     next(error);
+  } finally {
+    connection?.release();
   }
 }
 

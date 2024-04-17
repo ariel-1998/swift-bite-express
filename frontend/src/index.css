@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --restaurant-header: 500px;
+  --restaurant-header: 450px;
 }
 .restaurant-header-img {
   height: var(--restaurant-header);

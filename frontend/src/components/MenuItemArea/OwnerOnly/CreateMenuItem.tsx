@@ -54,7 +54,6 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         });
         updateMenuItemCache.createMenuItemCategoryRef(
           queryClient,
-          restaurantId,
           statusCode,
           nestetItem,
           selectedCategories

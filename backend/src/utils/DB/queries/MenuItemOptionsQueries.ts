@@ -1,71 +1,62 @@
 import { z } from "zod";
-import {
-  MenuItemOption,
-  menuItemOptionsSchema,
-} from "../../../models/MenuItemOption";
+import { menuItemOptionsSchema } from "../../../models/MenuItemOption";
 import { DB } from "../tables";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 
 type Options = z.infer<typeof menuItemOptionsSchema>;
-type TransactionQueries = {
-  deleteQuery: TransactionQuery;
-  insertQuery: TransactionQuery;
-};
+
 const {
   columns: { id, menuItemId, name },
   tableName,
 } = DB.tables.menu_item_options;
 
 class MenuItemOptionsQueries {
-  private createOptionsPlaceholdersAndVals({ menuItemId, options }: Options) {
-    let placeHolders = "";
-    const vals: (string | number)[] = [];
-    options.forEach((opt, i) => {
-      placeHolders += i === options.length - 1 ? "(?, ?)" : "(?, ?), ";
-      vals.push(menuItemId);
-      vals.push(opt);
-    });
-    return { placeHolders, vals };
-  }
-
-  createOptions(options: Options): TransactionQuery {
-    const { placeHolders, vals } =
-      this.createOptionsPlaceholdersAndVals(options);
+  createOptions(options: Options, restaurantId: number): TransactionQuery {
     const { columns: itemsCols, tableName: menuItems } = DB.tables.menu_items;
-    //need to check how to insert only if menuItem has restaurantId = menuItemId
+    let placeHolders = "";
+    const values: (number | string)[] = [];
+    options.options.forEach((opt, i) => {
+      placeHolders += "SELECT ?, ? ";
+      if (i !== options.options.length - 1) placeHolders += "UNION ALL ";
+      values.push(options.menuItemId, opt);
+    });
     const query = `
     INSERT INTO ${tableName} (${menuItemId}, ${name})
-    SELECT 
-    ${menuItems}.${itemsCols.id}, 
-    ?
-    FROM ${menuItems} 
-    WHERE ${menuItems}.${itemsCols.id} = ? 
-    AND ${menuItems}.${itemsCols.restaurantId} = ?
+    ${placeHolders}
+    WHERE EXISTS (
+      SELECT ${itemsCols.id}
+      FROM ${menuItems}
+      WHERE ${itemsCols.id} = ?
+      AND ${itemsCols.restaurantId} = ?
+    )
     `;
-    const params: MixedArray = vals;
+    const params: MixedArray = [...values, options.menuItemId, restaurantId];
     return { query, params };
   }
-  //need to check how to delete based on restaurantId in menuitems table
-  //   private deleteOptions(
-  //     options: Options,
-  //     restaurantId: number
-  //   ): TransactionQuery {
-  //     const { columns: itemsCols, tableName: menuItems } = DB.tables.menu_items;
-  //     const query = `
-  //     DELETE FROM ${tableName}
-  //     JOIN ${menuItems}
-  //     ON ${tableName}.${menuItemId} = ${menuItems}.${itemsCols.id}
-  //     WHERE ${tableName}.${id} = ?
-  //     AND ${menuItems}.${itemsCols.restaurantId} = ?
-  //     `;
-  //     const params: MixedArray = [options.menuItemId, restaurantId];
-  //     return { params, query };
-  //   }
-  //   updateOptions(options: Options, restaurantId: number): TransactionQueries {
-  //     const deleteQuery = this.deleteOptions(options, restaurantId);
-  //     const insertQuery = this.createOptions(options);
-  //     return { deleteQuery, insertQuery };
-  //   }
+
+  deleteOption(optionId: number, restaurantId: number): TransactionQuery {
+    const { columns: itemsCols, tableName: menuItems } = DB.tables.menu_items;
+    const query = `
+    DELETE FROM ${tableName}
+    WHERE ${id} = ?
+    AND EXISTS (
+      SELECT 1 FROM ${menuItems}
+      WHERE ${tableName}.${menuItemId} = ${menuItems}.${itemsCols.id}
+      AND ${menuItems}.${itemsCols.restaurantId} = ?
+    )
+    `;
+    const params: MixedArray = [optionId, restaurantId];
+    return { params, query };
+  }
+
+  getOptionsByMenuItemId(menuItemId: number): TransactionQuery {
+    const query = `
+    SELECT * FROM ${tableName}
+    WHERE ${menuItemId} = ?
+    `;
+    const params: MixedArray = [menuItemId];
+    return { params, query };
+  }
 }
 
 export const menuItemOptionsQueries = new MenuItemOptionsQueries();

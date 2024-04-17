@@ -17,7 +17,7 @@ const UpdateMenuItemCategoryAssociation: React.FC<
 > = ({ menuItem }) => {
   const queryClient = useQueryClient();
   const [selectedCategories, setSelectedCategories] = useState<Category[]>(
-    menuItem.categories as Category[]
+    menuItem.categories
   );
   const { mutate, isPending } = useMutation({
     mutationFn: menuItemCategoryService.updateMenuItemCategoryRef,

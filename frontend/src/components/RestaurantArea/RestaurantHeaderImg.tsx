@@ -11,7 +11,7 @@ type RestaurantHeaderImgProps = {
 const RestaurantHeaderImg: React.FC<RestaurantHeaderImgProps> = ({
   restaurant,
 }) => {
-  const headerHeight = 500;
+  const headerHeight = 600;
   const image = generateCldResizedImage(
     restaurant.imgPublicId,
     "image",
@@ -23,7 +23,7 @@ const RestaurantHeaderImg: React.FC<RestaurantHeaderImgProps> = ({
   const logo = generateCldResizedImage(
     restaurant.logoPublicId,
     "logo",
-    thumbnail().width(120).height(120)
+    thumbnail().width(120).height(100)
   );
 
   return (
@@ -32,7 +32,6 @@ const RestaurantHeaderImg: React.FC<RestaurantHeaderImgProps> = ({
         cldImg={image}
         className="w-screen restaurant-header-img "
       />
-
       <div className="absolute inset-0 flex justify-center items-center">
         <div className="bg-opacity-50 bg-white px-20 p-2 flex flex-col gap-2 rounded items-center justify-center">
           <AdvancedImage cldImg={logo} className="restaurant-header-logo" />
