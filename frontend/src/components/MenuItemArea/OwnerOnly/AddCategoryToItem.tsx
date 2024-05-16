@@ -7,8 +7,8 @@ import Input from "../../Customs/Input";
 import Button from "../../Customs/Button";
 import Modal from "../../Customs/Modal";
 import { Category } from "../../../models/Category";
-import SelectedCategory from "./SelectedCategory";
 import HorizontalList from "../../Customs/HorizontalList";
+import HorizontalListItem from "../../Customs/HorizontalListItem";
 
 type AddCategoryToItemProps = {
   restaurantId: number;
@@ -53,8 +53,8 @@ const AddCategoryToItem: React.FC<AddCategoryToItemProps> = ({
       {!!selectedCategories.length && (
         <HorizontalList>
           {selectedCategories.map((c) => (
-            <SelectedCategory
-              category={c}
+            <HorizontalListItem
+              output={c.name}
               key={c.id}
               onClick={() =>
                 setSelectedCategories((prev) =>

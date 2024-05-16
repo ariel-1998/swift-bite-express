@@ -28,13 +28,6 @@ const UpdateMenuItemCategoryAssociation: React.FC<
         selectedCategories
       );
     },
-    onSuccess(status, _, context) {
-      updateMenuItemCache.updateMenuItemCategoryRef.onSuccess(
-        queryClient,
-        context,
-        status
-      );
-    },
     onError(error, _, context) {
       updateMenuItemCache.updateMenuItemCategoryRef.onError(
         error,

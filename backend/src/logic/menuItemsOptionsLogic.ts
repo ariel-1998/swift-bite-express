@@ -24,8 +24,7 @@ export async function createOptions(
       parsedBody,
       +restaurantId
     );
-    const getCreatedOptionsQuery =
-      menuItemOptionsQueries.getOptionsByMenuItemId(parsedBody.menuItemId);
+
     connection = await pool.getConnection();
     const [results] = await executeQuery<ResultSetHeader>(
       connection,
@@ -35,6 +34,8 @@ export async function createOptions(
     if (!results.affectedRows)
       throw new FunctionError("Could not add options to menu item", 500);
 
+    const getCreatedOptionsQuery =
+      menuItemOptionsQueries.getOptionsByMenuItemId(parsedBody.menuItemId);
     const [rows] = await executeQuery<MenuItemOption[]>(
       connection,
       getCreatedOptionsQuery,

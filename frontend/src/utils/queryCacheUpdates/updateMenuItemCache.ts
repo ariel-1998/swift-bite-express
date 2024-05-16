@@ -26,52 +26,51 @@ class UpdateMenuItemCache {
     );
   }
   //for createMenuItem.tsx
-  createMenuItem(queryClient: QueryClient, menuItem: MenuItemWOptions) {
+  createMenuItem(
+    queryClient: QueryClient,
+    menuItem: CategoriesNestedInMenuItem
+  ) {
+    //update single item cache
     const singleItemKey = queryKeys.menuItems.getMenuItemById(menuItem.id);
     queryClient.setQueryData<MenuItem>(singleItemKey, menuItem);
 
+    // update CategoriesNestedInMenuItem cahce
     const itemsKey = queryKeys.menuItems.getMenuItemsByRestaurantId(
       menuItem.restaurantId
     );
     queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
       if (!old) return;
-      const nestedItem: CategoriesNestedInMenuItem = {
-        ...menuItem,
-        categories: [],
-      };
-      return [...old, nestedItem];
+      return [...old, menuItem];
     });
-    return { ...menuItem, categories: [] };
+    // return { ...menuItem, categories: [] };
   }
 
-  createMenuItemCategoryRef(
-    queryClient: QueryClient,
-    status: number,
-    menuItem: CategoriesNestedInMenuItem,
-    categories: Category[]
-  ) {
-    const itemsKey = queryKeys.menuItems.getMenuItemsByRestaurantId(
-      menuItem.restaurantId
-    );
-    if (status === 207) {
-      queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
-      toastifyService.info(
-        "Only some of the categories were attached to the menu items"
-      );
-    }
-    queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
-      if (!old) return;
-      return old.map((mi) => {
-        if (mi.id === menuItem.id) {
-          return {
-            ...menuItem,
-            categories: [...categories],
-          } satisfies CategoriesNestedInMenuItem;
-        }
-        return mi;
-      });
-    });
-  }
+  // createMenuItemCategoryRef(
+  //   queryClient: QueryClient,
+  //   status: number,
+  //   restaurantId: number
+  // ) {
+  //   if (status === 207) {
+  //     const itemsKey =
+  //       queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId);
+  //     queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
+  //     toastifyService.info(
+  //       "Only some of the categories were attached to the menu items"
+  //     );
+  //   }
+  // queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
+  //   if (!old) return;
+  //   return old.map((mi) => {
+  //     if (mi.id === menuItem.id) {
+  //       return {
+  //         ...menuItem,
+  //         categories: [...categories],
+  //       } satisfies CategoriesNestedInMenuItem;
+  //     }
+  //     return mi;
+  //   });
+  // });
+  // }
 
   updateMenuItemApartFromImg = {
     onMutate(queryClient: QueryClient, menuItem: MenuItemWOptions) {
@@ -169,17 +168,6 @@ class UpdateMenuItemCache {
       return { oldData, queryKey };
     },
 
-    onSuccess(
-      queryClient: QueryClient,
-      context: ReturnType<typeof this.onMutate>,
-      status: stringOrNumber
-    ) {
-      const { queryKey } = context;
-      if (status === 207) {
-        queryClient.invalidateQueries({ exact: true, queryKey });
-        toastifyService.info("Only some of the categories were updated");
-      }
-    },
     onError<T extends ResponseError | FrontError>(
       error: T,
       context: ReturnType<typeof this.onMutate> | undefined,

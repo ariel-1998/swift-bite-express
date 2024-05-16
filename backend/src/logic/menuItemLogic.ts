@@ -49,6 +49,7 @@ export async function getMenuItemsByRestaurantId(
 ) {
   try {
     const { restaurantId } = req.params;
+    console.log(req.user);
     const isOwner = req.user?.role === Role.owner;
     const { params, query } = menuItemsQueries.getMenuItemsByRestaurantId(
       +restaurantId,

@@ -49,12 +49,12 @@ class MenuItemOptionsQueries {
     return { params, query };
   }
 
-  getOptionsByMenuItemId(menuItemId: number): TransactionQuery {
+  getOptionsByMenuItemId(itemId: number): TransactionQuery {
     const query = `
     SELECT * FROM ${tableName}
     WHERE ${menuItemId} = ?
     `;
-    const params: MixedArray = [menuItemId];
+    const params: MixedArray = [itemId];
     return { params, query };
   }
 }

@@ -14,6 +14,8 @@ import { menuItemCategoryService } from "../../../services/menuItemCategoryServi
 import { toastifyService } from "../../../services/toastifyService";
 import { updateMenuItemCache } from "../../../utils/queryCacheUpdates/updateMenuItemCache";
 import VerifySelectedCategoriesModal from "./VerifySelectedCategoriesModal";
+import AddOptionsToItem from "./OptionsArea/AddOptionsToItem";
+import { menuItemOptionsService } from "../../../services/menuItemOptionsService";
 
 type CreateMenuItemProps = {
   restaurantId: number;
@@ -21,6 +23,7 @@ type CreateMenuItemProps = {
 
 const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [options, setOptions] = useState<string[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const queryClient = useQueryClient();
   const {
@@ -36,6 +39,9 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
     mutationFn: menuItemService.createMenuItem,
   });
 
+  const { mutateAsync: optsMutate, isPending: optsPending } = useMutation({
+    mutationFn: menuItemOptionsService.createOptions,
+  });
   const { mutateAsync: refMutate, isPending: categoryPending } = useMutation({
     mutationFn: menuItemCategoryService.createMenuItemCategoryRef,
   });
@@ -43,24 +49,41 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
   const postData = async (data: MenuItemForm) => {
     if (!selectedCategories.length && !openModal) return setOpenModal(true);
     try {
+      //create menuItem
       const item = await mutateAsync({ ...data, restaurantId });
-      const nestetItem = updateMenuItemCache.createMenuItem(queryClient, item);
+      const menuItem = { categories: [], ...item };
+
+      // create options if added any
+      if (options.length) {
+        try {
+          console.log(options);
+          menuItem.options = await optsMutate({
+            menuItemId: menuItem.id,
+            options,
+            restaurantId,
+          });
+        } catch (error) {
+          toastifyService.error(error as Error);
+        }
+      }
+
       if (selectedCategories.length) {
         const categoryIds = selectedCategories.map((c) => c.id);
-        const statusCode = await refMutate({
-          categoryIds,
-          menuItemId: item.id,
-          restaurantId,
-        });
-        updateMenuItemCache.createMenuItemCategoryRef(
-          queryClient,
-          statusCode,
-          nestetItem,
-          selectedCategories
-        );
+        try {
+          await refMutate({
+            categoryIds,
+            menuItemId: menuItem.id,
+            restaurantId,
+          });
+        } catch (error) {
+          toastifyService.error(error as Error);
+        }
       }
+      updateMenuItemCache.createMenuItem(queryClient, menuItem);
+
       reset();
       setSelectedCategories([]);
+      setOptions([]);
       setOpenModal(false);
     } catch (error) {
       toastifyService.error(error as Error);
@@ -82,7 +105,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
       />
       <Input
         errMessage={errors.extrasAmount?.message}
-        label="Choose the number of additional options:"
+        label="Choose the number of Side Dish Options:"
         type="number"
         {...register("extrasAmount")}
       />
@@ -104,6 +127,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         type="number"
         {...register("price")}
       />
+      <AddOptionsToItem options={options} setOptions={setOptions} />
       <div className="flex flex-col">
         <label>Show sauces available at the restaurant:</label>
         <div className="flex items-center gap-1 ">
@@ -137,7 +161,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         type="submit"
         size={"formBtn"}
         variant={"primary"}
-        disabled={categoryPending || menuItemPending}
+        disabled={categoryPending || menuItemPending || optsPending}
       >
         Create
       </Button>

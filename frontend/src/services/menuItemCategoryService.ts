@@ -23,11 +23,11 @@ class MenuItemCategoryService {
     menuItemId,
     restaurantId,
   }: PostAssosiation) {
-    const { status } = await credentialsAxios.put(
+    await credentialsAxios.put(
       `${menuItemCategoryRoute}/restaurant/${restaurantId}/menu-item/${menuItemId}`,
       categoryIds
     );
-    return status;
+    // return status;
   }
 }
 

@@ -24,7 +24,7 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
   const { data, isLoading, isError } = useCustomQuery({
     queryKey: queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId),
     queryFn: () =>
-      menuItemService.getMenuItemByRestaurantId<true>(restaurantId),
+      menuItemService.getMenuItemByRestaurantId(restaurantId, true),
   });
 
   const cacheItemOnClick = (item: CategoriesNestedInMenuItem) => {

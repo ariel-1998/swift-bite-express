@@ -49,16 +49,26 @@ class MenuItemService {
     return data;
   }
 
-  async getMenuItemByRestaurantId<T extends boolean>(
-    restaurantId: MenuItem["restaurantId"]
+  async getMenuItemByRestaurantId(
+    restaurantId: MenuItem["restaurantId"],
+    isOwner: boolean
   ) {
-    //might not need param of isOwner
-    const { data } = await defaultAxios.get<
-      T extends true
-        ? CategoriesNestedInMenuItem[]
-        : MenuItemWCategoryAndOptions[]
-    >(`${menuItemRoute}/restaurant/${restaurantId}`);
-    return data;
+    const route = `${menuItemRoute}/restaurant/${restaurantId}`;
+    let returnedData:
+      | CategoriesNestedInMenuItem[]
+      | MenuItemWCategoryAndOptions[];
+    if (isOwner) {
+      const { data } = await credentialsAxios.get<CategoriesNestedInMenuItem[]>(
+        route
+      );
+      returnedData = data;
+    } else {
+      const { data } = await defaultAxios.get<MenuItemWCategoryAndOptions[]>(
+        route
+      );
+      returnedData = data;
+    }
+    return returnedData;
   }
 
   async updateMenuItemApartFromImg({

@@ -69,7 +69,6 @@ export async function updateMenuItemCategoryRef(
   try {
     const parsedData = menuItemCategoryTableSchema.parse(req.body);
     const { menuItemId, restaurantId } = req.params;
-    console.log("restaurantId", restaurantId);
     const { deleteQuery, insertQuery } =
       menuItemCategoryQueries.updateMenuItemCategoryRef({
         categoryIds: parsedData,

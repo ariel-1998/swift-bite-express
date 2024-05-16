@@ -20,7 +20,7 @@ const MenuItemCardList: React.FC<MenuItemCardListProps> = ({
   const { data, isLoading, isError } = useCustomQuery({
     queryKey: queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId),
     queryFn: () =>
-      menuItemService.getMenuItemByRestaurantId<false>(restaurantId),
+      menuItemService.getMenuItemByRestaurantId(restaurantId, false),
   });
   return (
     <div className="mx-2 sm:mx-4">
