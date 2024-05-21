@@ -14,8 +14,8 @@ import { menuItemCategoryService } from "../../../services/menuItemCategoryServi
 import { toastifyService } from "../../../services/toastifyService";
 import { updateMenuItemCache } from "../../../utils/queryCacheUpdates/updateMenuItemCache";
 import VerifySelectedCategoriesModal from "./VerifySelectedCategoriesModal";
-import AddOptionsToItem from "./OptionsArea/AddOptionsToItem";
-import { menuItemOptionsService } from "../../../services/menuItemOptionsService";
+import AddPreperationStyleToItem from "./PreperationStyleArea/AddPreperationStyleToItem";
+import { menuItemPreperationService } from "../../../services/menuItemPreparationService";
 
 type CreateMenuItemProps = {
   restaurantId: number;
@@ -23,7 +23,7 @@ type CreateMenuItemProps = {
 
 const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
   const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
-  const [options, setOptions] = useState<string[]>([]);
+  const [preparationStyles, setPreparationStyles] = useState<string[]>([]);
   const [openModal, setOpenModal] = useState(false);
   const queryClient = useQueryClient();
   const {
@@ -39,8 +39,8 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
     mutationFn: menuItemService.createMenuItem,
   });
 
-  const { mutateAsync: optsMutate, isPending: optsPending } = useMutation({
-    mutationFn: menuItemOptionsService.createOptions,
+  const { mutateAsync: stysMutate, isPending: styPending } = useMutation({
+    mutationFn: menuItemPreperationService.createPreparationStyles,
   });
   const { mutateAsync: refMutate, isPending: categoryPending } = useMutation({
     mutationFn: menuItemCategoryService.createMenuItemCategoryRef,
@@ -53,13 +53,12 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
       const item = await mutateAsync({ ...data, restaurantId });
       const menuItem = { categories: [], ...item };
 
-      // create options if added any
-      if (options.length) {
+      // create styles if added any
+      if (preparationStyles.length) {
         try {
-          console.log(options);
-          menuItem.options = await optsMutate({
+          menuItem.preparationStyles = await stysMutate({
             menuItemId: menuItem.id,
-            options,
+            preparationStyles,
             restaurantId,
           });
         } catch (error) {
@@ -83,7 +82,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
 
       reset();
       setSelectedCategories([]);
-      setOptions([]);
+      setPreparationStyles([]);
       setOpenModal(false);
     } catch (error) {
       toastifyService.error(error as Error);
@@ -127,7 +126,10 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         type="number"
         {...register("price")}
       />
-      <AddOptionsToItem options={options} setOptions={setOptions} />
+      <AddPreperationStyleToItem
+        styles={preparationStyles}
+        setStyles={setPreparationStyles}
+      />
       <div className="flex flex-col">
         <label>Show sauces available at the restaurant:</label>
         <div className="flex items-center gap-1 ">
@@ -161,7 +163,7 @@ const CreateMenuItem: React.FC<CreateMenuItemProps> = ({ restaurantId }) => {
         type="submit"
         size={"formBtn"}
         variant={"primary"}
-        disabled={categoryPending || menuItemPending || optsPending}
+        disabled={categoryPending || menuItemPending || styPending}
       >
         Create
       </Button>

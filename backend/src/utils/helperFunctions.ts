@@ -1,6 +1,6 @@
 import {
   CategoriesNestedInMenuItem,
-  MenuItemWCategoryAndOptions,
+  MenuItemWCategoryAndPreparationStyles,
 } from "../models/MenuItem";
 import {
   NestedRestaurantAndAddress,
@@ -56,7 +56,7 @@ export function rearrangeRestaurantAddressDataArray(
 
 export function rearrangeMenuItemsForOwner(
   //the items array is ordered by menuItemId
-  items: MenuItemWCategoryAndOptions[]
+  items: MenuItemWCategoryAndPreparationStyles[]
 ): CategoriesNestedInMenuItem[] {
   const rearrangedData: CategoriesNestedInMenuItem[] = [];
   let lastItem: CategoriesNestedInMenuItem | null = null;
@@ -70,7 +70,7 @@ export function rearrangeMenuItemsForOwner(
         extrasAmount: current.extrasAmount,
         imgPublicId: current.imgPublicId,
         name: current.name,
-        options: current.options,
+        preparationStyles: current.preparationStyles,
         price: current.price,
         restaurantId: current.restaurantId,
         showSouces: current.showSouces,

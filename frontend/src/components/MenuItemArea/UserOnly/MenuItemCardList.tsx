@@ -1,5 +1,5 @@
 import React from "react";
-import { MenuItemWCategoryAndOptions } from "../../../models/MenuItem";
+import { MenuItemWCategoryAndPreparationStyles } from "../../../models/MenuItem";
 import useCustomQuery from "../../../hooks/useCustomQuery";
 import { menuItemService } from "../../../services/menuItemService";
 import queryKeys from "../../../utils/queryKeys";
@@ -55,7 +55,11 @@ function CategoryCard({ category }: { category: Category | null }) {
   );
 }
 
-function MenuItemCard({ menuItem }: { menuItem: MenuItemWCategoryAndOptions }) {
+function MenuItemCard({
+  menuItem,
+}: {
+  menuItem: MenuItemWCategoryAndPreparationStyles;
+}) {
   const isSmaller = useScreenSize("lg");
   const imgSize = isSmaller ? 100 : 150;
   const img = generateCldResizedImage(

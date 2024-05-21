@@ -4,7 +4,7 @@ import { optionalImageSchema } from "./Restaurant";
 import { z } from "zod";
 import { Category } from "./Category";
 import { checkIfStringIsNum } from "./Address";
-import { MenuItemOption } from "./MenuItemOption";
+import { MenuItemPreparationStyle } from "./MenuItemPreparationStyle";
 
 export type MenuItem = {
   id: number;
@@ -17,14 +17,17 @@ export type MenuItem = {
   showSouces: SQLBoolean;
   imgPublicId?: string | null;
 };
-export type MenuItemWOptions = MenuItem & { options: MenuItemOption[] };
-
-export type MenuItemWCategoryAndOptions = MenuItemWOptions & {
-  category: Category | null;
+export type MenuItemWPreparationStyles = MenuItem & {
+  preparationStyles: MenuItemPreparationStyle[];
 };
 
+export type MenuItemWCategoryAndPreparationStyles =
+  MenuItemWPreparationStyles & {
+    category: Category | null;
+  };
+
 //for owners
-export type CategoriesNestedInMenuItem = MenuItemWOptions & {
+export type CategoriesNestedInMenuItem = MenuItemWPreparationStyles & {
   categories: Category[];
 };
 

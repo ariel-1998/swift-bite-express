@@ -1,21 +1,24 @@
 import { Router } from "express";
-import { createOptions, deleteOption } from "../logic/menuItemsOptionsLogic";
+import {
+  createStyles,
+  deleteStyle,
+} from "../logic/menuItemsPraparationStyleLogic";
 import {
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware,
 } from "../middleware/isOwnerRole";
 
-export const menuItemsOptionsRouter = Router();
+export const menuItemsPreparationStyleRouter = Router();
 
-menuItemsOptionsRouter.post(
+menuItemsPreparationStyleRouter.post(
   "/restaurant/:restaurantId",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
-  createOptions
+  createStyles
 );
-menuItemsOptionsRouter.delete(
-  "/:optionId/restaurant/:restaurantId",
+menuItemsPreparationStyleRouter.delete(
+  "/:styleId/restaurant/:restaurantId",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("params"),
-  deleteOption
+  deleteStyle
 );

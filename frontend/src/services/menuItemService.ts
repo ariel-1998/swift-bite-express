@@ -3,8 +3,8 @@ import {
   CategoriesNestedInMenuItem,
   MenuItem,
   MenuItemForm,
-  MenuItemWCategoryAndOptions,
-  MenuItemWOptions,
+  MenuItemWCategoryAndPreparationStyles,
+  MenuItemWPreparationStyles,
 } from "../models/MenuItem";
 
 const menuItemRoute = "/menu-item";
@@ -25,7 +25,7 @@ class MenuItemService {
     price,
     showSouces,
     drinksAmount,
-  }: PostItem): Promise<MenuItemWOptions> {
+  }: PostItem): Promise<MenuItemWPreparationStyles> {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("description", description || "");
@@ -35,15 +35,17 @@ class MenuItemService {
     if (image) formData.append("image", image[0]);
     formData.append("name", name);
     formData.append("showSouces", showSouces);
-    const { data } = await credentialsAxios.post<MenuItemWOptions>(
+    const { data } = await credentialsAxios.post<MenuItemWPreparationStyles>(
       menuItemRoute,
       formData
     );
     return data;
   }
 
-  async getMenuItemById(menuItemId: MenuItem["id"]): Promise<MenuItemWOptions> {
-    const { data } = await defaultAxios.get<MenuItemWOptions>(
+  async getMenuItemById(
+    menuItemId: MenuItem["id"]
+  ): Promise<MenuItemWPreparationStyles> {
+    const { data } = await defaultAxios.get<MenuItemWPreparationStyles>(
       `${menuItemRoute}/${menuItemId}`
     );
     return data;
@@ -51,24 +53,32 @@ class MenuItemService {
 
   async getMenuItemByRestaurantId(
     restaurantId: MenuItem["restaurantId"],
+    isOwner: true
+  ): Promise<CategoriesNestedInMenuItem[]>;
+
+  async getMenuItemByRestaurantId(
+    restaurantId: MenuItem["restaurantId"],
+    isOwner: false
+  ): Promise<MenuItemWCategoryAndPreparationStyles[]>;
+
+  async getMenuItemByRestaurantId(
+    restaurantId: MenuItem["restaurantId"],
     isOwner: boolean
-  ) {
+  ): Promise<
+    CategoriesNestedInMenuItem[] | MenuItemWCategoryAndPreparationStyles[]
+  > {
     const route = `${menuItemRoute}/restaurant/${restaurantId}`;
-    let returnedData:
-      | CategoriesNestedInMenuItem[]
-      | MenuItemWCategoryAndOptions[];
     if (isOwner) {
       const { data } = await credentialsAxios.get<CategoriesNestedInMenuItem[]>(
         route
       );
-      returnedData = data;
+      return data;
     } else {
-      const { data } = await defaultAxios.get<MenuItemWCategoryAndOptions[]>(
-        route
-      );
-      returnedData = data;
+      const { data } = await defaultAxios.get<
+        MenuItemWCategoryAndPreparationStyles[]
+      >(route);
+      return data;
     }
-    return returnedData;
   }
 
   async updateMenuItemApartFromImg({
@@ -82,11 +92,11 @@ class MenuItemService {
     id,
     restaurantId,
     image,
-  }: UpdateImage): Promise<MenuItemWOptions> {
+  }: UpdateImage): Promise<MenuItemWPreparationStyles> {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("image", image[0]);
-    const { data } = await credentialsAxios.put<MenuItemWOptions>(
+    const { data } = await credentialsAxios.put<MenuItemWPreparationStyles>(
       `${menuItemRoute}/${id}/image`,
       formData
     );

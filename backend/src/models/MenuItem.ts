@@ -6,7 +6,7 @@ import {
 } from "./Restaurant";
 import { SQLBoolean } from "./SQLBoolean";
 import { Category } from "./Category";
-import { MenuItemOption } from "./MenuItemOption";
+import { MenuItemPreparationStyle } from "./MenuItemPreparationStyle";
 
 export type MenuItem = {
   id: number;
@@ -20,13 +20,16 @@ export type MenuItem = {
   price: number;
 };
 
-export type MenuItemWOptions = MenuItem & { options: MenuItemOption[] };
-
-export type MenuItemWCategoryAndOptions = MenuItemWOptions & {
-  category: Category | null;
+export type MenuItemWPreparationStyles = MenuItem & {
+  preparationStyles: MenuItemPreparationStyle[];
 };
 
-export type CategoriesNestedInMenuItem = MenuItemWOptions & {
+export type MenuItemWCategoryAndPreparationStyles =
+  MenuItemWPreparationStyles & {
+    category: Category | null;
+  };
+
+export type CategoriesNestedInMenuItem = MenuItemWPreparationStyles & {
   categories: Category[];
 };
 

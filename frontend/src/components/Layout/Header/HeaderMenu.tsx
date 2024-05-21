@@ -6,7 +6,7 @@ import { FaHamburger } from "react-icons/fa";
 import { Role } from "../../../models/User";
 import ProtectedComp from "../../ProtectedComponent.tsx/ProtectedComp";
 
-//maybe add check of current page with use location and remove the link from the doc
+//maybe add check of current page with use location and remove the link from the list if im in the same page as the link points
 const HeaderMenu: React.FC = () => {
   const { user } = useUserInfo();
   const [open, setOpen] = useState(false);

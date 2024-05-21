@@ -2,7 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import {
   CategoriesNestedInMenuItem,
   MenuItem,
-  MenuItemWOptions,
+  MenuItemWPreparationStyles,
 } from "../../models/MenuItem";
 import queryKeys from "../queryKeys";
 import { Category } from "../../models/Category";
@@ -11,19 +11,18 @@ import {
   ResponseError,
   toastifyService,
 } from "../../services/toastifyService";
-import { stringOrNumber } from "@cloudinary/url-gen/types/types";
+import { MenuItemPreparationStyle } from "../../models/MenuItemPreparationStyle";
 
 class UpdateMenuItemCache {
   setSingleItemQueryDataOnClick(
     queryClient: QueryClient,
-    menuItem: MenuItemWOptions
+    menuItem: MenuItemWPreparationStyles
   ) {
     const queryKey = queryKeys.menuItems.getMenuItemById(menuItem.id);
-    // const data = queryClient.getQueryData<MenuItemWOptions>(queryKey);
-    // if (data) return;
-    queryClient.setQueryData<MenuItemWOptions>(queryKey, (old) =>
-      old ? menuItem : old
-    );
+    queryClient.setQueryData<MenuItemWPreparationStyles>(queryKey, (old) => {
+      if (old) return;
+      return menuItem;
+    });
   }
   //for createMenuItem.tsx
   createMenuItem(
@@ -42,42 +41,14 @@ class UpdateMenuItemCache {
       if (!old) return;
       return [...old, menuItem];
     });
-    // return { ...menuItem, categories: [] };
   }
 
-  // createMenuItemCategoryRef(
-  //   queryClient: QueryClient,
-  //   status: number,
-  //   restaurantId: number
-  // ) {
-  //   if (status === 207) {
-  //     const itemsKey =
-  //       queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId);
-  //     queryClient.invalidateQueries({ exact: true, queryKey: itemsKey });
-  //     toastifyService.info(
-  //       "Only some of the categories were attached to the menu items"
-  //     );
-  //   }
-  // queryClient.setQueryData<CategoriesNestedInMenuItem[]>(itemsKey, (old) => {
-  //   if (!old) return;
-  //   return old.map((mi) => {
-  //     if (mi.id === menuItem.id) {
-  //       return {
-  //         ...menuItem,
-  //         categories: [...categories],
-  //       } satisfies CategoriesNestedInMenuItem;
-  //     }
-  //     return mi;
-  //   });
-  // });
-  // }
-
   updateMenuItemApartFromImg = {
-    onMutate(queryClient: QueryClient, menuItem: MenuItemWOptions) {
+    onMutate(queryClient: QueryClient, menuItem: MenuItemWPreparationStyles) {
       const singleKey = queryKeys.menuItems.getMenuItemById(menuItem.id);
       const singleOldData =
-        queryClient.getQueryData<MenuItemWOptions>(singleKey);
-      queryClient.setQueryData<MenuItemWOptions>(singleKey, menuItem);
+        queryClient.getQueryData<MenuItemWPreparationStyles>(singleKey);
+      queryClient.setQueryData<MenuItemWPreparationStyles>(singleKey, menuItem);
 
       const arrKey = queryKeys.menuItems.getMenuItemsByRestaurantId(
         menuItem.restaurantId
@@ -105,7 +76,10 @@ class UpdateMenuItemCache {
 
       const singleKey = queryKeys.menuItems.getMenuItemById(menuItem.id);
       if (singleOldData) {
-        queryClient.setQueryData<MenuItemWOptions>(singleKey, singleOldData);
+        queryClient.setQueryData<MenuItemWPreparationStyles>(
+          singleKey,
+          singleOldData
+        );
       } else {
         queryClient.removeQueries({ exact: true, queryKey: singleKey });
       }
@@ -123,11 +97,14 @@ class UpdateMenuItemCache {
   };
 
   updateMenuItemImg = {
-    onSuccess(queryClient: QueryClient, menuItem: MenuItemWOptions) {
+    onSuccess(queryClient: QueryClient, menuItem: MenuItemWPreparationStyles) {
       const singleMenuItemKey = queryKeys.menuItems.getMenuItemById(
         menuItem.id
       );
-      queryClient.setQueryData<MenuItemWOptions>(singleMenuItemKey, menuItem);
+      queryClient.setQueryData<MenuItemWPreparationStyles>(
+        singleMenuItemKey,
+        menuItem
+      );
       const menuItemsKey = queryKeys.menuItems.getMenuItemsByRestaurantId(
         menuItem.restaurantId
       );
@@ -144,6 +121,7 @@ class UpdateMenuItemCache {
     },
   };
 
+  //updating only the menuitems array and not every single item there is no need for that
   updateMenuItemCategoryRef = {
     onMutate(
       queryClient: QueryClient,
@@ -180,6 +158,105 @@ class UpdateMenuItemCache {
       queryClient.setQueryData<CategoriesNestedInMenuItem[]>(queryKey, oldData);
     },
   };
-}
 
+  updateMenuItemPreparation = {
+    createPreparationStyles: {
+      onSucsess(
+        queryClient: QueryClient,
+        menuItemId: number,
+        restaurantId: number,
+        preparationStyles: MenuItemPreparationStyle[]
+      ) {
+        const singleItemKey = queryKeys.menuItems.getMenuItemById(menuItemId);
+        queryClient.setQueryData<MenuItemWPreparationStyles>(
+          singleItemKey,
+          (old) => {
+            if (!old) return;
+            return { ...old, preparationStyles };
+          }
+        );
+
+        const itemsArrKey =
+          queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId);
+        queryClient.setQueryData<CategoriesNestedInMenuItem[]>(
+          itemsArrKey,
+          (old) => {
+            if (!old) return;
+            return old.map((mi) => {
+              if (mi.id !== menuItemId) return mi;
+              return { ...mi, preparationStyles };
+            });
+          }
+        );
+      },
+    },
+    deletePreparationStyle: {
+      onMutate(
+        queryClient: QueryClient,
+        menuItemId: number,
+        restaurantId: number,
+        preparationStyleId: number
+      ) {
+        //update single menuItem cache and returning the old data incase of an error
+        const singleItemKey = queryKeys.menuItems.getMenuItemById(menuItemId);
+        const oldSingleItem =
+          queryClient.getQueryData<MenuItemWPreparationStyles>(singleItemKey);
+        queryClient.setQueryData<MenuItemWPreparationStyles>(
+          singleItemKey,
+          (old) => {
+            if (!old) return;
+            const newStyles = old.preparationStyles.filter(
+              (sty) => sty.id !== preparationStyleId
+            );
+            return { ...old, preparationStyles: newStyles };
+          }
+        );
+
+        //update menuItem list cache and storing the old data incase of an error
+        const itemsArrKey =
+          queryKeys.menuItems.getMenuItemsByRestaurantId(restaurantId);
+        const oldItemsArr =
+          queryClient.getQueryData<CategoriesNestedInMenuItem[]>(itemsArrKey);
+
+        queryClient.setQueryData<CategoriesNestedInMenuItem[]>(
+          itemsArrKey,
+          (old) => {
+            if (!old) return;
+            return old.map((mi) => {
+              if (mi.id !== menuItemId) return mi;
+              return {
+                ...mi,
+                preparationStyles: mi.preparationStyles.filter(
+                  (sty) => sty.id !== preparationStyleId
+                ),
+              };
+            });
+          }
+        );
+        //return the keys and old data incase of an error
+        return { singleItemKey, oldSingleItem, itemsArrKey, oldItemsArr };
+      },
+      onError<T extends ResponseError | FrontError>(
+        error: T,
+        context: ReturnType<typeof this.onMutate> | undefined,
+        queryClient: QueryClient
+      ) {
+        toastifyService.error(error);
+        if (!context) return;
+        const { itemsArrKey, oldItemsArr, oldSingleItem, singleItemKey } =
+          context;
+        //revert singleItem cache
+        queryClient.setQueryData<MenuItemWPreparationStyles>(
+          singleItemKey,
+          oldSingleItem
+        );
+        //revert itemsArr cache
+        queryClient.setQueryData<CategoriesNestedInMenuItem[]>(
+          itemsArrKey,
+          oldItemsArr
+        );
+      },
+    },
+  };
+}
 export const updateMenuItemCache = new UpdateMenuItemCache();

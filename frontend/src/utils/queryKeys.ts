@@ -37,10 +37,10 @@ class QueryKeys {
 
   menuItems = {
     getMenuItemById(menuItemId: number) {
-      return [menuItems, { menuItemId }]; //MenuItemWdOptions
+      return [menuItems, { menuItemId }]; //MenuItemWPreparationStyles
     },
     getMenuItemsByRestaurantId(restaurantId: number) {
-      //user = MenuItemWCategoryAndOptions[] |owner =  CategoriesNestedInMenuItem[]
+      //user = MenuItemWCategoryAndPreparationStyles[] |owner =  CategoriesNestedInMenuItem[]
       return [menuItems, { restaurantId }];
     },
   };

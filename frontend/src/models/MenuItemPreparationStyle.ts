@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export type MenuItemOption = {
+export type MenuItemPreparationStyle = {
   id: number;
   menuItemId: number;
   name: string;
 };
 
-export const optionSchema = z
+export const preparationStyleSchema = z
   .string({
     invalid_type_error: "Name must be a string",
     required_error: "Name is required",

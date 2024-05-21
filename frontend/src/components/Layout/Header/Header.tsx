@@ -36,6 +36,11 @@ const Header: React.FC = () => {
 
           <ProtectedComp condition={user?.role === Role.user || !user}>
             {!isSmaller && <CurrentAddress onClick={toggleAddressForm} />}
+            {/**
+             * isSmaller
+             * need to add location Icon that that will show the current Address with in a modal
+             * also show a button to open updateAddressForm component
+             * */}
           </ProtectedComp>
         </div>
       )}

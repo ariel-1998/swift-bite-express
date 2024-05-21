@@ -3,53 +3,55 @@ import Input from "../../../Customs/Input";
 import HorizontalList from "../../../Customs/HorizontalList";
 import HorizontalListItem from "../../../Customs/HorizontalListItem";
 import Button from "../../../Customs/Button";
-import { optionSchema } from "../../../../models/MenuItemOption";
+import { preparationStyleSchema } from "../../../../models/MenuItemPreparationStyle";
 import { ZodError } from "zod";
 import { FaCircleQuestion } from "react-icons/fa6";
 
-type AddOptionsToItemProps = {
-  setOptions: React.Dispatch<React.SetStateAction<string[]>>;
-  options: string[];
+type AddPreperationStyleToItemProps = {
+  setStyles: React.Dispatch<React.SetStateAction<string[]>>;
+  styles: string[];
+  label?: string;
 };
 
-const AddOptionsToItem: React.FC<AddOptionsToItemProps> = ({
-  setOptions,
-  options,
+const AddPreperationStyleToItem: React.FC<AddPreperationStyleToItemProps> = ({
+  setStyles,
+  styles,
+  label,
 }) => {
   const [optVal, setOptVal] = useState("");
   const [error, setError] = useState("");
 
-  function addOptionToList() {
+  function addStyleToList() {
     try {
-      optionSchema.parse(optVal);
+      preparationStyleSchema.parse(optVal);
       setError("");
-      setOptions((prev) => [...new Set([...prev, optVal])]);
+      setStyles((prev) => [...new Set([...prev, optVal])]);
       setOptVal("");
     } catch (error) {
       setError((error as ZodError).issues[0].message);
     }
   }
 
-  function removeOption(option: string) {
-    setOptions((prev) => prev.filter((opt) => opt !== option));
+  function removeStyle(style: string) {
+    setStyles((prev) => prev.filter((sty) => sty !== style));
   }
 
   const onClickEnter = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      addOptionToList();
+      addStyleToList();
     }
   };
 
   return (
     <div>
-      {!!options.length && (
+      {!!styles.length && (
         <HorizontalList>
-          {options.map((opt) => (
+          {styles.map((sty) => (
             <HorizontalListItem
-              key={opt}
-              output={opt}
-              onClick={() => removeOption(opt)}
+              key={sty}
+              output={sty}
+              onClick={() => removeStyle(sty)}
             />
           ))}
         </HorizontalList>
@@ -57,7 +59,7 @@ const AddOptionsToItem: React.FC<AddOptionsToItemProps> = ({
 
       <div className="flex flex-col">
         <div className="flex gap-2 items-center">
-          <label>Preparation Style Options:</label>
+          <label>{label || "Preparation Style Options:"}</label>
           <ExplanationDiv />
         </div>
         <div className="flex">
@@ -73,7 +75,7 @@ const AddOptionsToItem: React.FC<AddOptionsToItemProps> = ({
           <Button
             size={"default"}
             type="button"
-            onClick={addOptionToList}
+            onClick={addStyleToList}
             className="rounded-none rounded-r"
           >
             Add
@@ -85,7 +87,7 @@ const AddOptionsToItem: React.FC<AddOptionsToItemProps> = ({
   );
 };
 
-export default AddOptionsToItem;
+export default AddPreperationStyleToItem;
 
 function ExplanationDiv() {
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);

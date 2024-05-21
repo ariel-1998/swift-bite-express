@@ -1,24 +1,24 @@
 import { z } from "zod";
-import { menuItemOptionsSchema } from "../../../models/MenuItemOption";
+import { menuItemPreparationStyleSchema } from "../../../models/MenuItemPreparationStyle";
 import { DB } from "../tables";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 
-type Options = z.infer<typeof menuItemOptionsSchema>;
+type Styles = z.infer<typeof menuItemPreparationStyleSchema>;
 
 const {
   columns: { id, menuItemId, name },
   tableName,
-} = DB.tables.menu_item_options;
+} = DB.tables.menu_item_preparation_style;
 
-class MenuItemOptionsQueries {
-  createOptions(options: Options, restaurantId: number): TransactionQuery {
+class MenuItemPreparationStylesQueries {
+  createStyles(obj: Styles, restaurantId: number): TransactionQuery {
     const { columns: itemsCols, tableName: menuItems } = DB.tables.menu_items;
     let placeHolders = "";
     const values: (number | string)[] = [];
-    options.options.forEach((opt, i) => {
+    obj.preparationStyles.forEach((sty, i) => {
       placeHolders += "SELECT ?, ? ";
-      if (i !== options.options.length - 1) placeHolders += "UNION ALL ";
-      values.push(options.menuItemId, opt);
+      if (i !== obj.preparationStyles.length - 1) placeHolders += "UNION ALL ";
+      values.push(obj.menuItemId, sty);
     });
     const query = `
     INSERT INTO ${tableName} (${menuItemId}, ${name})
@@ -30,11 +30,11 @@ class MenuItemOptionsQueries {
       AND ${itemsCols.restaurantId} = ?
     )
     `;
-    const params: MixedArray = [...values, options.menuItemId, restaurantId];
+    const params: MixedArray = [...values, obj.menuItemId, restaurantId];
     return { query, params };
   }
 
-  deleteOption(optionId: number, restaurantId: number): TransactionQuery {
+  deleteStyle(styleId: number, restaurantId: number): TransactionQuery {
     const { columns: itemsCols, tableName: menuItems } = DB.tables.menu_items;
     const query = `
     DELETE FROM ${tableName}
@@ -45,11 +45,11 @@ class MenuItemOptionsQueries {
       AND ${menuItems}.${itemsCols.restaurantId} = ?
     )
     `;
-    const params: MixedArray = [optionId, restaurantId];
+    const params: MixedArray = [styleId, restaurantId];
     return { params, query };
   }
 
-  getOptionsByMenuItemId(itemId: number): TransactionQuery {
+  getStylesByMenuItemId(itemId: number): TransactionQuery {
     const query = `
     SELECT * FROM ${tableName}
     WHERE ${menuItemId} = ?
@@ -59,4 +59,5 @@ class MenuItemOptionsQueries {
   }
 }
 
-export const menuItemOptionsQueries = new MenuItemOptionsQueries();
+export const menuItemPreparationStylesQueries =
+  new MenuItemPreparationStylesQueries();

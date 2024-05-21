@@ -7,10 +7,10 @@ import { menuItemService } from "../../../../services/menuItemService";
 import { toastifyService } from "../../../../services/toastifyService";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 import LoadingButton from "../../../Customs/LoadingButton";
-import { MenuItemWOptions } from "../../../../models/MenuItem";
+import { MenuItemWPreparationStyles } from "../../../../models/MenuItem";
 
 type UpdateMenuItemImageProps = {
-  menuItem: MenuItemWOptions;
+  menuItem: MenuItemWPreparationStyles;
 };
 
 const UpdateMenuItemImage: React.FC<UpdateMenuItemImageProps> = ({

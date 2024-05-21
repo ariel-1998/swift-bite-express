@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   MenuItemForm,
-  MenuItemWOptions,
+  MenuItemWPreparationStyles,
   menuItemSchema,
 } from "../../../../models/MenuItem";
 import Input from "../../../Customs/Input";
@@ -15,7 +15,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateMenuItemCache";
 
 type UpdateMenuItemDetailsProps = {
-  item: MenuItemWOptions;
+  item: MenuItemWPreparationStyles;
 };
 
 const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
@@ -86,7 +86,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
       />
       <Input
         errMessage={errors.extrasAmount?.message}
-        label="Choose the number of additional options:"
+        label="Choose amount of side dishes for this meal:"
         type="number"
         {...register("extrasAmount")}
         defaultValue={item.extrasAmount?.toString()}

@@ -29,14 +29,15 @@ const RestaurantCard = forwardRef<HTMLAnchorElement, RestaurantCardProps>(
     return (
       <Link
         to={navigateOnClick}
-        ref={(e) => {
-          //handle both function ref and object ref
-          if (typeof ref === "function") {
-            ref(e);
-          } else if (ref) {
-            ref.current = e;
-          }
-        }}
+        ref={ref}
+        // ref={(e) => {
+        //   //handle both function ref and object ref
+        //   if (typeof ref === "function") {
+        //     ref(e);
+        //   } else if (ref) {
+        //     ref.current = e;
+        //   }
+        // }}
         className="bg-white rounded transition-shadow hover:shadow-md min-w-64 max-w-80 flex 
         overflow-hidden flex-col cursor-pointer grow h-fit pb-1"
       >

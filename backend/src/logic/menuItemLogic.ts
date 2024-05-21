@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import {
   MenuItem,
-  MenuItemWOptions,
-  MenuItemWCategoryAndOptions,
+  MenuItemWPreparationStyles,
+  MenuItemWCategoryAndPreparationStyles,
   menuItemSchema,
   CategoriesNestedInMenuItem,
 } from "../models/MenuItem";
@@ -23,13 +23,13 @@ import { PoolConnection } from "mysql2/promise";
 type MenuItemIdParams = { menuItemId: string };
 export async function getMenuItemById(
   req: Request<MenuItemIdParams>,
-  res: Response<MenuItemWOptions>,
+  res: Response<MenuItemWPreparationStyles>,
   next: NextFunction
 ) {
   try {
     const { menuItemId } = req.params;
     const { params, query } = menuItemsQueries.getMenuItemById(+menuItemId);
-    const [rows] = await executeSingleQuery<MenuItemWOptions[]>(
+    const [rows] = await executeSingleQuery<MenuItemWPreparationStyles[]>(
       query,
       params,
       "menu_items"
@@ -44,7 +44,9 @@ export async function getMenuItemById(
 
 export async function getMenuItemsByRestaurantId(
   req: Request<{ restaurantId: string }>,
-  res: Response<MenuItemWCategoryAndOptions[] | CategoriesNestedInMenuItem[]>,
+  res: Response<
+    MenuItemWCategoryAndPreparationStyles[] | CategoriesNestedInMenuItem[]
+  >,
   next: NextFunction
 ) {
   try {
@@ -55,13 +57,12 @@ export async function getMenuItemsByRestaurantId(
       +restaurantId,
       isOwner
     );
-    const [rows] = await executeSingleQuery<MenuItemWCategoryAndOptions[]>(
-      query,
-      params,
-      "menu_items"
-    );
-    let response: MenuItemWCategoryAndOptions[] | CategoriesNestedInMenuItem[] =
-      rows;
+    const [rows] = await executeSingleQuery<
+      MenuItemWCategoryAndPreparationStyles[]
+    >(query, params, "menu_items");
+    let response:
+      | MenuItemWCategoryAndPreparationStyles[]
+      | CategoriesNestedInMenuItem[] = rows;
     if (isOwner) response = rearrangeMenuItemsForOwner(response);
     res.status(200).json(response);
   } catch (error) {
@@ -73,7 +74,7 @@ type MenuItemWithoutId = Omit<MenuItem, "id">;
 type CreateMenuItemReq = Request<unknown, unknown, MenuItemWithoutId>;
 export async function createMenuItem(
   req: CreateMenuItemReq,
-  res: Response<MenuItemWOptions>,
+  res: Response<MenuItemWPreparationStyles>,
   next: NextFunction
 ) {
   let publicId: string | null = null;
@@ -98,7 +99,9 @@ export async function createMenuItem(
       params,
       "menu_items"
     );
-    res.status(201).json({ ...parsedData, id: results.insertId, options: [] });
+    res
+      .status(201)
+      .json({ ...parsedData, id: results.insertId, preparationStyles: [] });
   } catch (error) {
     // remove the image from Dcloudinary
     try {
@@ -118,7 +121,7 @@ type UpdateMenuItemImgReq = Request<
 >;
 export async function updateMenuItemImg(
   req: UpdateMenuItemImgReq,
-  res: Response<MenuItemWOptions>,
+  res: Response<MenuItemWPreparationStyles>,
   next: NextFunction
 ) {
   let connection: PoolConnection | undefined = undefined;
@@ -133,7 +136,7 @@ export async function updateMenuItemImg(
     imageSchema.parse(image);
     const getMenuItemQuery = menuItemsQueries.getMenuItemById(menuItemId);
     connection = await pool.getConnection();
-    const [items] = await executeQuery<MenuItemWOptions[]>(
+    const [items] = await executeQuery<MenuItemWPreparationStyles[]>(
       connection,
       getMenuItemQuery,
       "menu_items"

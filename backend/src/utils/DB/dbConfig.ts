@@ -36,7 +36,6 @@ export async function executeQuery<T>(
     );
     return data;
   } catch (error) {
-    console.log(error);
     const { code, message } = sqlErrorHandler(error, tableName);
     throw new FunctionError(message, code);
   }
@@ -92,6 +91,8 @@ function sqlErrorHandler(error: unknown, tableName: SQLTableNames | null) {
         return extras_table_errors(error.code, message, code);
       case "menu_items_category":
         return menu_items_category_table_errors(error.code, message, code);
+      //need to add menu_item_preparation_style case!!!!!!!
+      //also need to create errors table function for it (menu_item_preparation_style)
       case null: {
         return { message, code };
       }

@@ -63,7 +63,7 @@ const UpdateMenuItemCategoryAssociation: React.FC<
         variant={"primary"}
         disabled={isPending}
       >
-        Update
+        Apply changes
       </LoadingButton>
     </UpdateForm>
   );

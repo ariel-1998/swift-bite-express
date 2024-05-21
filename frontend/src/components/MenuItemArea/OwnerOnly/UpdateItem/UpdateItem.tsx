@@ -10,8 +10,15 @@ import { updateMenuItemCache } from "../../../../utils/queryCacheUpdates/updateM
 import { useQueryClient } from "@tanstack/react-query";
 import UpdateMenuItemCategoryAssociation from "./UpdateMenuItemCategoryAssociation";
 import Modal from "../../../Customs/Modal";
+import UpdatePreparationStyles from "../PreperationStyleArea/UpdatePreparationStyles";
 
-type UpdateType = "image" | "details" | "association" | null;
+type UpdateType =
+  | "image"
+  | "details"
+  | "association"
+  | "Preperation Styles"
+  | null;
+
 type UpdateItemProps = {
   restaurantId: number;
 };
@@ -35,7 +42,6 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
     <div>
       {isLoading && <div>Loading...</div>}
       {isError && <div>Error</div>}
-
       {data &&
         data.map((item) => (
           <OwnerMenuItemCard
@@ -44,7 +50,6 @@ const UpdateItem: React.FC<UpdateItemProps> = ({ restaurantId }) => {
             onClick={() => cacheItemOnClick(item)}
           />
         ))}
-
       {selectedItem && (
         <UpdateSelection
           menuItem={selectedItem}
@@ -81,6 +86,11 @@ function UpdateSelection({ menuItem, deselectItem }: UpdateSelectionProps) {
             setUpdateType={setUpdateType}
             activeForm={updateType}
           />
+          <Li
+            formName={"Preperation Styles"}
+            setUpdateType={setUpdateType}
+            activeForm={updateType}
+          />
         </ul>
         {updateType === "details" ? (
           <UpdateMenuItemDetails item={menuItem} />
@@ -88,6 +98,8 @@ function UpdateSelection({ menuItem, deselectItem }: UpdateSelectionProps) {
           <UpdateMenuItemImage menuItem={menuItem} />
         ) : updateType === "association" ? (
           <UpdateMenuItemCategoryAssociation menuItem={menuItem} />
+        ) : updateType === "Preperation Styles" ? (
+          <UpdatePreparationStyles menuItemId={menuItem.id} />
         ) : null}
       </div>
     </Modal>
