@@ -1,11 +1,12 @@
-import React, { KeyboardEvent, MouseEvent, useState } from "react";
+import React, { KeyboardEvent, useState } from "react";
 import Input from "../../../Customs/Input";
 import HorizontalList from "../../../Customs/HorizontalList";
 import HorizontalListItem from "../../../Customs/HorizontalListItem";
 import Button from "../../../Customs/Button";
 import { preparationStyleSchema } from "../../../../models/MenuItemPreparationStyle";
 import { ZodError } from "zod";
-import { FaCircleQuestion } from "react-icons/fa6";
+// import { FaCircleQuestion } from "react-icons/fa6";
+import ExplanationMark from "../../../Customs/ExplanationMark";
 
 type AddPreperationStyleToItemProps = {
   setStyles: React.Dispatch<React.SetStateAction<string[]>>;
@@ -60,7 +61,17 @@ const AddPreperationStyleToItem: React.FC<AddPreperationStyleToItemProps> = ({
       <div className="flex flex-col">
         <div className="flex gap-2 items-center">
           <label>{label || "Preparation Style Options:"}</label>
-          <ExplanationDiv />
+          <ExplanationMark>
+            <div>You can add different varients for menu item, example:</div>
+            <div className="font-semibold text-center">Chicken Wings</div>
+            <ul className="list-decimal m-0 list-inside">
+              <li>Barbecue Sauce</li>
+              <li>Garlic Sauce</li>
+              <li>Teriyaki Sauce</li>
+              <li>Honey Mustard Sauce</li>
+              <li>etc...</li>
+            </ul>
+          </ExplanationMark>
         </div>
         <div className="flex">
           <div className="w-full">
@@ -89,38 +100,38 @@ const AddPreperationStyleToItem: React.FC<AddPreperationStyleToItemProps> = ({
 
 export default AddPreperationStyleToItem;
 
-function ExplanationDiv() {
-  const [isExplanationOpen, setIsExplanationOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+// function ExplanationDiv() {
+//   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+//   const [position, setPosition] = useState({ x: 0, y: 0 });
 
-  const handelMouseEnter = (e: MouseEvent) => {
-    setIsExplanationOpen(true);
-    setPosition({ x: e.clientX, y: e.clientY });
-  };
-  const handelMouseLeave = () => setIsExplanationOpen(false);
+//   const handelMouseEnter = (e: MouseEvent) => {
+//     setIsExplanationOpen(true);
+//     setPosition({ x: e.clientX, y: e.clientY });
+//   };
+//   const handelMouseLeave = () => setIsExplanationOpen(false);
 
-  const leftPosition = Math.min(position.x, window.innerWidth - 300);
-  const topPosition = Math.min(position.y, window.innerHeight - 150);
-  return (
-    <div className="relative">
-      <i onMouseEnter={handelMouseEnter} onMouseLeave={handelMouseLeave}>
-        <FaCircleQuestion className="text-secondary-border " />
-      </i>
-      {isExplanationOpen && (
-        <div
-          className={`absolute bg-secondary-hover top-${topPosition} w-[250px] left-${leftPosition} text-sm p-2`}
-        >
-          <div>You can add different varients for menu item, example:</div>
-          <div className="font-semibold text-center">Chicken Wings</div>
-          <ul className="list-decimal m-0 list-inside">
-            <li>Barbecue Sauce</li>
-            <li>Garlic Sauce</li>
-            <li>Teriyaki Sauce</li>
-            <li>Honey Mustard Sauce</li>
-            <li>etc...</li>
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
+//   const leftPosition = Math.min(position.x, window.innerWidth - 300);
+//   const topPosition = Math.min(position.y, window.innerHeight - 150);
+//   return (
+//     <div className="relative">
+//       <i onMouseEnter={handelMouseEnter} onMouseLeave={handelMouseLeave}>
+//         <FaCircleQuestion className="text-secondary-border " />
+//       </i>
+//       {isExplanationOpen && (
+//         <div
+//           className={`absolute bg-secondary-hover top-${topPosition} w-[250px] left-${leftPosition} text-sm p-2`}
+//         >
+//           <div>You can add different varients for menu item, example:</div>
+//           <div className="font-semibold text-center">Chicken Wings</div>
+//           <ul className="list-decimal m-0 list-inside">
+//             <li>Barbecue Sauce</li>
+//             <li>Garlic Sauce</li>
+//             <li>Teriyaki Sauce</li>
+//             <li>Honey Mustard Sauce</li>
+//             <li>etc...</li>
+//           </ul>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }

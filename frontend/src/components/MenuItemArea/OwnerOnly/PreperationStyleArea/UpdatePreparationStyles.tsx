@@ -20,15 +20,12 @@ type UpdatePreparationStylesProps = {
 const UpdatePreparationStyles: React.FC<UpdatePreparationStylesProps> = ({
   menuItemId,
 }) => {
-  // const queryClient = useQueryClient();
-
   const { data: menuItem, isLoading } = useCustomQuery({
     queryKey: queryKeys.menuItems.getMenuItemById(menuItemId),
     queryFn: () => menuItemService.getMenuItemById(menuItemId),
     onError: () =>
       toastifyService.error({ message: "Menu Item was not found" }),
   });
-
   return (
     <div>
       <div>{isLoading && "Loading..."}</div>
@@ -41,11 +38,10 @@ const UpdatePreparationStyles: React.FC<UpdatePreparationStylesProps> = ({
 
 export default UpdatePreparationStyles;
 
-function RemovePreparationStyle({
-  menuItem,
-}: {
+type UpdateStylesProps = {
   menuItem: MenuItemWPreparationStyles;
-}) {
+};
+function RemovePreparationStyle({ menuItem }: UpdateStylesProps) {
   const queryClient = useQueryClient();
   const { mutate: deleteMutate } = useMutation({
     mutationFn: menuItemPreperationService.deletePreparationStyle,
@@ -96,11 +92,7 @@ function RemovePreparationStyle({
   );
 }
 
-function AddPreperationStyles({
-  menuItem,
-}: {
-  menuItem: MenuItemWPreparationStyles;
-}) {
+function AddPreperationStyles({ menuItem }: UpdateStylesProps) {
   const [styles, setStyles] = useState<string[]>([]);
   const queryClient = useQueryClient();
   const { isPending, mutate: addMutate } = useMutation({
