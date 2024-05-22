@@ -103,7 +103,7 @@ export async function createMenuItem(
       .status(201)
       .json({ ...parsedData, id: results.insertId, preparationStyles: [] });
   } catch (error) {
-    // remove the image from Dcloudinary
+    // remove the image from Cloudinary
     try {
       if (publicId) await cloudinary.deleteImage(publicId);
     } catch (error) {

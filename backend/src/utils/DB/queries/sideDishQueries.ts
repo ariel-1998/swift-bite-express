@@ -6,34 +6,27 @@ import { DB } from "../tables";
 type SideDishQuery = TurnUndefinedToNullInObj<SideDish>;
 //done
 const {
-  columns: { id, menuItemId, name, type, extraPrice, restaurantId },
+  columns: { id, name, type, extraPrice, restaurantId },
   tableName,
 } = DB.tables.side_dishes;
 
 class SideDishQueries {
-  getAllSideDishessByMenuItemId(itemId: number): TransactionQuery {
-    const query = `SELECT * FROM ${tableName} WHERE ${menuItemId} = ?`;
-    const params: MixedArray = [itemId];
+  getAllSideDishessByMenuItemId(restId: number): TransactionQuery {
+    const query = `SELECT * FROM ${tableName} WHERE ${restaurantId} = ?`;
+    const params: MixedArray = [restId];
     return { params, query };
   }
 
   createSideDish(sideDish: Omit<SideDishQuery, "id">): TransactionQuery {
-    const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
+    //check queries in this page
     const query = `
     INSERT INTO ${tableName}
-    (${menuItemId}, ${name}, ${type}, ${extraPrice}, ${restaurantId})
-    SELECT ?, ?, ?, ?, ?
-    FROM ${menuItems} 
-    WHERE ${menuItems}.${itemCols.id} = ?
-    AND ${menuItems}.${itemCols.restaurantId} = ? 
-    `;
+    (${name}, ${type}, ${extraPrice}, ${restaurantId})
+    VALUES (?,?,?,?)`;
     const params: MixedArray = [
-      sideDish.menuItemId,
       sideDish.name,
       sideDish.type,
       sideDish.extraPrice,
-      sideDish.restaurantId,
-      sideDish.menuItemId,
       sideDish.restaurantId,
     ];
     return { params, query };
@@ -46,29 +39,24 @@ class SideDishQueries {
         ${type} = ?,
         ${extraPrice} = ?
     WHERE ${id} = ?
-    AND ${menuItemId} = ?
     AND ${restaurantId} = ?`;
     const params: MixedArray = [
       sideDish.name,
       sideDish.type,
       sideDish.extraPrice,
       sideDish.id,
-      sideDish.menuItemId,
       sideDish.restaurantId,
     ];
     return { params, query };
   }
 
-  deleteSideDish(
-    ids: Pick<SideDish, "id" | "menuItemId" | "restaurantId">
-  ): TransactionQuery {
+  deleteSideDish(ids: Pick<SideDish, "id" | "restaurantId">): TransactionQuery {
     const query = `
     DELETE FROM ${tableName}
     WHERE ${id} = ?
-    AND ${menuItemId} = ?
     AND ${restaurantId} = ?
     `;
-    const params: MixedArray = [ids.id, ids.menuItemId, ids.restaurantId];
+    const params: MixedArray = [ids.id, ids.restaurantId];
     return { params, query };
   }
 }

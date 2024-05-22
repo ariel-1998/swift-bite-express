@@ -390,20 +390,20 @@ function side_dishes_table_errors(
   switch (errCode) {
     case "ER_DUP_ENTRY": {
       message =
-        "Duplicate Error: Extra name already exists for this menu item.";
+        "Side Dish with the same name already exists for this restaurant.";
       code = 409;
       break;
     }
 
     case "ER_ROW_NOT_FOUND": {
-      message = "Failed to complete operation, Extra not found.";
+      message = "Failed to complete operation, Side Dish not found.";
       code = 404;
       break;
     }
 
     case "ER_NO_REFERENCED_ROW": {
       message =
-        "Failed to complete operation, Invalid reference to the parent menu item or restaurant.";
+        "Failed to complete operation, Invalid reference to the restaurant.";
       code = 422;
       break;
     }

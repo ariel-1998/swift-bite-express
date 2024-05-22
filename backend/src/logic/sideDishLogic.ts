@@ -8,7 +8,7 @@ export function getAllExtrasByMenuItemId(
   next: NextFunction
 ) {}
 
-type CreateExtraBody = Omit<SideDish, "id" | "menuItemId">;
+type CreateExtraBody = Omit<SideDish, "id">;
 type CreateExtraReq = Request<DefaultParams, unknown, CreateExtraBody>;
 export function createExtra(
   req: CreateExtraReq,

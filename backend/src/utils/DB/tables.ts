@@ -127,7 +127,6 @@ DB.addTable("sauces", {
 
 DB.addTable("side_dishes", {
   id: "id",
-  menuItemId: "menuItemId",
   name: "name",
   type: "type",
   extraPrice: "extraPrice",
@@ -336,22 +335,19 @@ async function create_sauces_table(connection: PoolConnection) {
   await createTable(connection, query);
 }
 
-async function create_side_dises_table(connection: PoolConnection) {
+async function create_side_dishes_table(connection: PoolConnection) {
   const { tables } = DB;
   const { columns, tableName } = tables.side_dishes;
-  const { id, menuItemId, name, type, extraPrice, restaurantId } = columns;
-  const { columns: itemCols, tableName: menuItems } = tables.menu_items;
+  const { id, name, type, extraPrice, restaurantId } = columns;
   const { columns: restCols, tableName: restaurants } = tables.restaurants;
   const query = `
   CREATE TABLE IF NOT EXISTS ${tableName} (
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-  ${menuItemId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
   ${type} ENUM('drink', 'sideDish') NOT NULL,
   ${extraPrice} INT DEFAULT NULL,
   ${restaurantId} INT NOT NULL,
-  UNIQUE (${menuItemId}, ${name}),
-  FOREIGN KEY (${menuItemId}) REFERENCES ${menuItems}(${itemCols.id}) ON DELETE CASCADE,
+  UNIQUE (${restaurantId}, ${name}),
   FOREIGN KEY (${restaurantId}) REFERENCES ${restaurants}(${restCols.id}) ON DELETE CASCADE
   )`;
   await createTable(connection, query);
@@ -391,7 +387,7 @@ export async function createDBTables() {
     await create_menu_items_table(connection);
     await create_menu_item_preparation_style_table(connection);
     await create_sauces_table(connection);
-    await create_side_dises_table(connection);
+    await create_side_dishes_table(connection);
     await create_menu_items_category_table(connection);
     await connection.commit();
   } catch (error) {

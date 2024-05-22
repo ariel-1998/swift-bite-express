@@ -1,10 +1,8 @@
 import { z } from "zod";
 import { restaurantIdSchema } from "./Restaurant";
-import { menuItemIdSchema } from "./MenuItem";
 
 export type SideDish = {
   id: number;
-  menuItemId: number; //refers to MenuItem
   restaurantId: number; //refres to restaurant
   name: string;
   extraPrice: number | undefined | null;
@@ -12,7 +10,6 @@ export type SideDish = {
 };
 
 export const SideDishSchema = z.object({
-  menuItemId: menuItemIdSchema,
   restaurantId: restaurantIdSchema,
   name: z
     .string({
