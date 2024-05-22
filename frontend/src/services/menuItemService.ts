@@ -19,7 +19,7 @@ class MenuItemService {
   async createMenuItem({
     restaurantId,
     description,
-    extrasAmount,
+    optionalSideDishes,
     image,
     name,
     price,
@@ -29,7 +29,7 @@ class MenuItemService {
     const formData = new FormData();
     formData.append("restaurantId", restaurantId.toString());
     formData.append("description", description || "");
-    formData.append("extrasAmount", extrasAmount);
+    formData.append("optionalSideDishes", optionalSideDishes);
     formData.append("drinksAmount", drinksAmount);
     formData.append("price", price);
     if (image) formData.append("image", image[0]);

@@ -12,7 +12,7 @@ export type MenuItem = {
   name: string;
   price: number;
   description?: string | null;
-  extrasAmount?: number | null;
+  optionalSideDishes?: number | null;
   drinksAmount?: number | null;
   showSouces: SQLBoolean;
   imgPublicId?: string | null;
@@ -46,16 +46,16 @@ export const menuItemSchema = z.object({
     .max(500, "Description too long")
     .nullable()
     .optional(),
-  extrasAmount: z.string().refine((val) => {
+  optionalSideDishes: z.string().refine((val) => {
     if (isNaN(+val)) return false;
     if (+val < 0) return false;
     return true;
-  }, "Extra Amount Required to be a positive number"),
+  }, "Side Dishes Amount Required to be a positive number or 0"),
   drinksAmount: z.string().refine((val) => {
     if (isNaN(+val)) return false;
     if (+val < 0) return false;
     return true;
-  }, "Drinks Amount Required to be a positive number"),
+  }, "Drinks Amount Required to be a positive number or 0"),
   showSouces: z.nativeEnum(SQLBoolean, {
     errorMap: () => ({ message: "Show souces field is required" }),
   }),

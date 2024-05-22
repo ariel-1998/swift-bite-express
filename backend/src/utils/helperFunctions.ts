@@ -67,7 +67,7 @@ export function rearrangeMenuItemsForOwner(
         id: current.id,
         description: current.description,
         drinksAmount: current.drinksAmount,
-        extrasAmount: current.extrasAmount,
+        optionalSideDishes: current.optionalSideDishes,
         imgPublicId: current.imgPublicId,
         name: current.name,
         preparationStyles: current.preparationStyles,

@@ -87,8 +87,8 @@ function sqlErrorHandler(error: unknown, tableName: SQLTableNames | null) {
         return menu_items_table_errors(error.code, message, code);
       case "sauces":
         return sauces_table_errors(error.code, message, code);
-      case "extras":
-        return extras_table_errors(error.code, message, code);
+      case "side_dishes":
+        return side_dishes_table_errors(error.code, message, code);
       case "menu_items_category":
         return menu_items_category_table_errors(error.code, message, code);
       //need to add menu_item_preparation_style case!!!!!!!
@@ -379,7 +379,7 @@ function sauces_table_errors(
   }
   return { message, code };
 }
-function extras_table_errors(
+function side_dishes_table_errors(
   errCode: string,
   defaultMsg: string,
   defaultCode: number

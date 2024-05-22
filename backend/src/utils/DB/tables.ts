@@ -8,7 +8,7 @@ import { RestauransOwnerAddressTable } from "../../models/RestauransOwnerAddress
 import { MenuItem } from "../../models/MenuItem";
 import { CategorySchema } from "../../models/Category";
 import { MenuItemCategoryTable } from "../../models/MenuItemCategoryTable";
-import { Extra } from "../../models/Extra";
+import { SideDish } from "../../models/SideDish";
 import { Sauce } from "../../models/Sauce";
 import { MenuItemPreparationStyle } from "../../models/MenuItemPreparationStyle";
 
@@ -32,7 +32,7 @@ type Tables = {
   menu_items: SqlTable<Required<MenuItem>>;
   menu_item_preparation_style: SqlTable<Required<MenuItemPreparationStyle>>;
   sauces: SqlTable<Required<Sauce>>;
-  extras: SqlTable<Required<Extra>>;
+  side_dishes: SqlTable<Required<SideDish>>;
   menu_items_category: SqlTable<Required<MenuItemCategoryTable>>;
 };
 
@@ -106,7 +106,7 @@ DB.addTable("menu_items", {
   name: "name",
   description: "description",
   imgPublicId: "imgPublicId",
-  extrasAmount: "extrasAmount",
+  optionalSideDishes: "optionalSideDishes",
   drinksAmount: "drinksAmount",
   restaurantId: "restaurantId",
   showSouces: "showSouces",
@@ -125,7 +125,7 @@ DB.addTable("sauces", {
   name: "name",
 });
 
-DB.addTable("extras", {
+DB.addTable("side_dishes", {
   id: "id",
   menuItemId: "menuItemId",
   name: "name",
@@ -272,7 +272,7 @@ async function create_menu_items_table(connection: PoolConnection) {
     id,
     name,
     description,
-    extrasAmount,
+    optionalSideDishes,
     drinksAmount,
     imgPublicId,
     showSouces,
@@ -287,7 +287,7 @@ async function create_menu_items_table(connection: PoolConnection) {
   ${restaurantId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
   ${description} VARCHAR(500) DEFAULT NULL,
-  ${extrasAmount} INT DEFAULT NULL,
+  ${optionalSideDishes} INT DEFAULT NULL,
   ${drinksAmount} INT DEFAULT NULL,
   ${showSouces} TINYINT NOT NULL DEFAULT 0,
   ${imgPublicId} VARCHAR(500) DEFAULT NULL,
@@ -336,9 +336,9 @@ async function create_sauces_table(connection: PoolConnection) {
   await createTable(connection, query);
 }
 
-async function create_extras_table(connection: PoolConnection) {
+async function create_side_dises_table(connection: PoolConnection) {
   const { tables } = DB;
-  const { columns, tableName } = tables.extras;
+  const { columns, tableName } = tables.side_dishes;
   const { id, menuItemId, name, type, extraPrice, restaurantId } = columns;
   const { columns: itemCols, tableName: menuItems } = tables.menu_items;
   const { columns: restCols, tableName: restaurants } = tables.restaurants;
@@ -347,7 +347,7 @@ async function create_extras_table(connection: PoolConnection) {
   ${id} INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
   ${menuItemId} INT NOT NULL,
   ${name} VARCHAR(45) NOT NULL,
-  ${type} ENUM('drink', 'extra') NOT NULL,
+  ${type} ENUM('drink', 'sideDish') NOT NULL,
   ${extraPrice} INT DEFAULT NULL,
   ${restaurantId} INT NOT NULL,
   UNIQUE (${menuItemId}, ${name}),
@@ -391,7 +391,7 @@ export async function createDBTables() {
     await create_menu_items_table(connection);
     await create_menu_item_preparation_style_table(connection);
     await create_sauces_table(connection);
-    await create_extras_table(connection);
+    await create_side_dises_table(connection);
     await create_menu_items_category_table(connection);
     await connection.commit();
   } catch (error) {

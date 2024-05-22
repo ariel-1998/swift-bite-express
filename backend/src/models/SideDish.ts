@@ -2,16 +2,16 @@ import { z } from "zod";
 import { restaurantIdSchema } from "./Restaurant";
 import { menuItemIdSchema } from "./MenuItem";
 
-export type Extra = {
+export type SideDish = {
   id: number;
   menuItemId: number; //refers to MenuItem
   restaurantId: number; //refres to restaurant
   name: string;
   extraPrice: number | undefined | null;
-  type: "drink" | "extra";
+  type: "drink" | "sideDish";
 };
 
-export const extraSchema = z.object({
+export const SideDishSchema = z.object({
   menuItemId: menuItemIdSchema,
   restaurantId: restaurantIdSchema,
   name: z
@@ -47,4 +47,4 @@ export const extraSchema = z.object({
     }),
 });
 
-type ExtraSchema = z.infer<typeof extraSchema> & { id: number };
+// type ExtraSchema = z.infer<typeof SideDishSchema> & { id: number };

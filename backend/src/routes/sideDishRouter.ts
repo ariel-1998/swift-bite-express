@@ -8,27 +8,27 @@ import {
   createExtra,
   updateExtra,
   deleteExtra,
-} from "../logic/extraLogic";
+} from "../logic/sideDishLogic";
 
-export const extraRouter = Router();
+export const sideDishRouter = Router();
 //no middleware needed
-extraRouter.get("/", getAllExtrasByMenuItemId);
+sideDishRouter.get("/", getAllExtrasByMenuItemId);
 //verifyIsOwner and check if restaurantOwner middleware
-extraRouter.post(
+sideDishRouter.post(
   "/",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   createExtra
 );
 //verifyIsOwner and check if restaurantOwner middleware
-extraRouter.put(
+sideDishRouter.put(
   "/:id([0-9]+)",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),
   updateExtra
 );
 //verifyIsOwner and check if restaurantOwner middleware
-extraRouter.delete(
+sideDishRouter.delete(
   "/:id([0-9]+)",
   isOwnerRole,
   verifyOwnershipByRestaurantIdAndUserIdMiddleware("body"),

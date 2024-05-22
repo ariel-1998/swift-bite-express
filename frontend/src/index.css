@@ -18,3 +18,8 @@
   padding: 0;
   margin: 0;
 }
+
+.tooltip-content {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}

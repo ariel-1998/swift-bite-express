@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent, ReactNode } from "react";
+import React, { useState, MouseEvent, ReactNode, useRef } from "react";
 import { IconType } from "react-icons";
 import { FaCircleQuestion } from "react-icons/fa6";
 import { twMerge } from "tailwind-merge";
@@ -8,34 +8,32 @@ type ExplanationMarkProps = {
   children: ReactNode;
   className?: string;
   width?: number;
-  height?: number;
 };
 
 const ExplanationMark: React.FC<ExplanationMarkProps> = ({
   Icon,
   children,
   className,
-  height,
-  width,
+  width = 300,
 }) => {
   const [isExplanationOpen, setIsExplanationOpen] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
+  const explanationRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const handelMouseEnter = (e: MouseEvent) => {
     setIsExplanationOpen(true);
-    setPosition({ x: e.clientX, y: e.clientY });
+    if (!wrapperRef.current || !explanationRef.current) return;
+    const wrapperRect = wrapperRef.current?.getBoundingClientRect();
+    const y = e.pageY + wrapperRect.height;
+    const x = Math.min(e.clientX, window.innerWidth - width);
+    setPosition({ x, y });
   };
 
   const handelMouseLeave = () => setIsExplanationOpen(false);
 
-  const leftPosition = Math.min(position.x, window.innerWidth - (width || 300));
-  const topPosition = Math.min(
-    position.y,
-    window.innerHeight - (height || 150)
-  );
-
   return (
-    <div className="relative">
+    <div ref={wrapperRef}>
       <i onMouseEnter={handelMouseEnter} onMouseLeave={handelMouseLeave}>
         {Icon ? (
           <Icon />
@@ -44,16 +42,21 @@ const ExplanationMark: React.FC<ExplanationMarkProps> = ({
         )}
       </i>
 
-      {isExplanationOpen && (
-        <div
-          className={twMerge(
-            `absolute bg-secondary-hover top-${topPosition} w-[250px] left-${leftPosition} text-sm p-2`,
-            className
-          )}
-        >
-          {children}
-        </div>
-      )}
+      <div
+        ref={explanationRef}
+        className={twMerge(
+          `absolute bg-secondary w-[${width}px] rounded text-sm p-2 ${
+            isExplanationOpen ? "block" : "hidden"
+          }`,
+          className
+        )}
+        style={{
+          top: position.y,
+          left: position.x,
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 };

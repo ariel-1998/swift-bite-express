@@ -50,7 +50,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
 
   const submitForm = handleSubmit(
     ({
-      extrasAmount,
+      optionalSideDishes,
       price,
       drinksAmount,
       ...rest
@@ -58,7 +58,7 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
       mutate({
         drinksAmount: +drinksAmount,
         restaurantId: item.restaurantId,
-        extrasAmount: +extrasAmount,
+        optionalSideDishes: +optionalSideDishes,
         price: +price,
         id: item.id,
         ...rest,
@@ -85,11 +85,11 @@ const UpdateMenuItemDetails: React.FC<UpdateMenuItemDetailsProps> = ({
         disabled={isPending}
       />
       <Input
-        errMessage={errors.extrasAmount?.message}
-        label="Choose amount of side dishes for this meal:"
+        errMessage={errors.optionalSideDishes?.message}
+        label="Choose amount of Optional Side Dishes:"
         type="number"
-        {...register("extrasAmount")}
-        defaultValue={item.extrasAmount?.toString()}
+        {...register("optionalSideDishes")}
+        defaultValue={item.optionalSideDishes?.toString()}
         disabled={isPending}
       />
       <Input

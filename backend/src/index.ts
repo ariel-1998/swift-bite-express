@@ -15,7 +15,7 @@ import fileUpload from "express-fileupload";
 import { categoryRouter } from "./routes/categoryRouter";
 import { menuItemRouter } from "./routes/menuItemRouter";
 import { sauceRouter } from "./routes/sauceRouter";
-import { extraRouter } from "./routes/extraRouter";
+import { sideDishRouter } from "./routes/sideDishRouter";
 import { menuItemCategoryRouter } from "./routes/menuItemCategoryRouter";
 import { userRouter } from "./routes/userRouter";
 import { menuItemsPreparationStyleRouter } from "./routes/menuItemsPreparationStyleRouter";
@@ -44,7 +44,7 @@ app.use("/api/restaurant", restaurantRouter);
 app.use("/api/restaurant/:restaurantId([0-9]+)/sauce", sauceRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/menu-item", menuItemRouter);
-app.use("/api/menu-item/:menuItemId([0-9]+)/extra", extraRouter);
+app.use("/api/menu-item/:menuItemId([0-9]+)/extra", sideDishRouter);
 app.use("/api/menu-item-category", menuItemCategoryRouter);
 app.use("/api/menu-item-preparation-style", menuItemsPreparationStyleRouter);
 

@@ -1,23 +1,23 @@
-import { Extra } from "../../../models/Extra";
+import { SideDish } from "../../../models/SideDish";
 import { TurnUndefinedToNullInObj } from "../../helperFunctions";
 import { MixedArray, TransactionQuery } from "../dbConfig";
 import { DB } from "../tables";
 
-type ExtraQuery = TurnUndefinedToNullInObj<Extra>;
+type SideDishQuery = TurnUndefinedToNullInObj<SideDish>;
 //done
 const {
   columns: { id, menuItemId, name, type, extraPrice, restaurantId },
   tableName,
-} = DB.tables.extras;
+} = DB.tables.side_dishes;
 
-class ExtraQueries {
-  getAllExtrasByMenuItemId(itemId: number): TransactionQuery {
+class SideDishQueries {
+  getAllSideDishessByMenuItemId(itemId: number): TransactionQuery {
     const query = `SELECT * FROM ${tableName} WHERE ${menuItemId} = ?`;
     const params: MixedArray = [itemId];
     return { params, query };
   }
 
-  createExtra(extra: Omit<ExtraQuery, "id">): TransactionQuery {
+  createSideDish(sideDish: Omit<SideDishQuery, "id">): TransactionQuery {
     const { columns: itemCols, tableName: menuItems } = DB.tables.menu_items;
     const query = `
     INSERT INTO ${tableName}
@@ -28,18 +28,18 @@ class ExtraQueries {
     AND ${menuItems}.${itemCols.restaurantId} = ? 
     `;
     const params: MixedArray = [
-      extra.menuItemId,
-      extra.name,
-      extra.type,
-      extra.extraPrice,
-      extra.restaurantId,
-      extra.menuItemId,
-      extra.restaurantId,
+      sideDish.menuItemId,
+      sideDish.name,
+      sideDish.type,
+      sideDish.extraPrice,
+      sideDish.restaurantId,
+      sideDish.menuItemId,
+      sideDish.restaurantId,
     ];
     return { params, query };
   }
 
-  updateExtra(extra: ExtraQuery): TransactionQuery {
+  updateSideDish(sideDish: SideDishQuery): TransactionQuery {
     const query = `
     UPDATE ${tableName} 
     SET ${name} = ?,
@@ -49,18 +49,18 @@ class ExtraQueries {
     AND ${menuItemId} = ?
     AND ${restaurantId} = ?`;
     const params: MixedArray = [
-      extra.name,
-      extra.type,
-      extra.extraPrice,
-      extra.id,
-      extra.menuItemId,
-      extra.restaurantId,
+      sideDish.name,
+      sideDish.type,
+      sideDish.extraPrice,
+      sideDish.id,
+      sideDish.menuItemId,
+      sideDish.restaurantId,
     ];
     return { params, query };
   }
 
-  deleteExtra(
-    ids: Pick<Extra, "id" | "menuItemId" | "restaurantId">
+  deleteSideDish(
+    ids: Pick<SideDish, "id" | "menuItemId" | "restaurantId">
   ): TransactionQuery {
     const query = `
     DELETE FROM ${tableName}
@@ -73,4 +73,4 @@ class ExtraQueries {
   }
 }
 
-export const extraQueries = new ExtraQueries();
+export const sideDishQueries = new SideDishQueries();

@@ -13,11 +13,12 @@ export type MenuItem = {
   name: string;
   restaurantId: number; //refers to restaurants
   description: string | undefined | null;
-  extrasAmount: number | undefined | null;
+  optionalSideDishes: number | undefined | null;
   drinksAmount: number | undefined | null;
   showSouces: SQLBoolean;
   imgPublicId: string | undefined | null;
   price: number;
+  //optionalSideDishes
 };
 
 export type MenuItemWPreparationStyles = MenuItem & {
@@ -53,19 +54,23 @@ export const menuItemSchema = z.object({
     .nullable()
     .optional()
     .transform((val) => (!val?.trim() ? null : val.trim())),
-  extrasAmount: z
+  optionalSideDishes: z
     .union(
       [
-        z.number().min(0, "Extras Amount must be a positive number"),
+        z.number().min(0, "Side Dishes Amount must be a positive number or 0"),
         z
           .string()
           .refine(
             (val) => !isNaN(+val) && +val >= 0,
-            "Extras Amount must be 0 or more"
+            "Side Dishes Amount must be a positive number or 0"
           )
           .transform((arg) => +arg),
       ],
-      { errorMap: () => ({ message: "Extras Amount must be a number" }) }
+      {
+        errorMap: () => ({
+          message: "Side Dishes Amount must be a positive number or 0",
+        }),
+      }
     )
     .optional()
     .transform((arg) => arg ?? 0),
